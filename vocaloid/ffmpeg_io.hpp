@@ -311,18 +311,6 @@ namespace vocaloid {
 			}
 		};
 
-
-		static int check_sample_fmt(const AVCodec *codec, enum AVSampleFormat sample_fmt){
-			const enum AVSampleFormat *p = codec->sample_fmts;
-
-			while (*p != AV_SAMPLE_FMT_NONE) {
-				if (*p == sample_fmt)
-					return 1;
-				p++;
-			}
-			return 0;
-		}
-
 		class FFmpegFileWriter : public AudioFileWriter {
 		private:
 			AVFormatContext *ctx_;
@@ -337,7 +325,6 @@ namespace vocaloid {
 			uint64_t max_buffer_size_;
 			uint8_t *frame_buf_;
 			uint64_t frame_buffer_size_;
-			uint64_t enc_buffer_size_;
 
 			void PushPlanarData(const char* planar_bytes, uint64_t byte_length) {
 				if (max_buffer_size_ < buffer_size_ + byte_length) {
@@ -355,17 +342,12 @@ namespace vocaloid {
 			}
 
 			int Encode(const uint8_t** frame_data, uint64_t nb_samples) {
-				auto max_dst_nb_samples = av_rescale_rnd(frame_->nb_samples, codec_ctx_->sample_rate, codec_ctx_->sample_rate, AV_ROUND_UP);
-				auto dst_nb_samples = av_rescale_rnd(swr_get_delay(swr_ctx_, codec_ctx_->sample_rate) +
-					frame_->nb_samples, codec_ctx_->sample_rate, codec_ctx_->sample_rate, AV_ROUND_UP);
-				if (dst_nb_samples > max_dst_nb_samples) {
-					max_dst_nb_samples = dst_nb_samples;
-				}
-
-				auto samples = swr_convert(swr_ctx_, enc_frame_->data, dst_nb_samples,
+				auto samples = swr_convert(swr_ctx_, enc_frame_->data, frame_->nb_samples,
 					frame_data, nb_samples);
-				enc_frame_->nb_samples = dst_nb_samples;
-				codec_ctx_->frame_size = dst_nb_samples;
+				// Tell encode to use input frames' nb_sample to encode
+				// output frame
+				enc_frame_->nb_samples = frame_->nb_samples;
+				codec_ctx_->frame_size = frame_->nb_samples;
 
 				if (samples > 0) {
 					auto ret = EncodeFrame();
@@ -512,8 +494,6 @@ namespace vocaloid {
 				enc_frame_->channels = channels;
 				enc_frame_->channel_layout = av_get_default_channel_layout(channels);
 				enc_frame_->sample_rate = sample_rate;
-				enc_buffer_size_ = av_samples_get_buffer_size(nullptr, enc_frame_->channels, enc_frame_->nb_samples,
-					(AVSampleFormat)enc_frame_->format, 1);
 				av_frame_get_buffer(enc_frame_, 1);
 
 				enum AVSampleFormat in_sample_fmt = (AVSampleFormat)frame_->format;
@@ -582,7 +562,7 @@ namespace vocaloid {
 				av_packet_free(&packet_);
 				av_frame_free(&enc_frame_);
 				avio_close(ctx_->pb);
-				avformat_free_context(ctx_);
+				//avformat_free_context(ctx_);
 			}
 		};
 	}

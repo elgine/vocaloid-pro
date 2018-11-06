@@ -27,7 +27,7 @@ void TestWriter() {
 	}
 
 	auto writer = new FFmpegFileWriter();
-	writer->Open("output.m4a", sample_rate, bits, channels);
+	writer->Open("output.mp3", sample_rate, bits, channels);
 	writer->WriteData(bytes, byte_len);
 	writer->Flush();
 	writer->Close();
