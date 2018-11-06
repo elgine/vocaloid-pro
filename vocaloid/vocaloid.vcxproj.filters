@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\dsp">
+      <UniqueIdentifier>{93763a81-085c-4564-a761-25b6f95b3208}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\node">
+      <UniqueIdentifier>{66ae6e3b-d208-450d-baa9-e9c19d21344f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\io">
+      <UniqueIdentifier>{7e1df2f1-fbc7-44ad-bb45-51584d320852}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tone.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="wgn.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="convolution.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="fft.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="window.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="maths.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="file.h">
+      <Filter>头文件\io</Filter>
+    </ClInclude>
+    <ClInclude Include="wav.hpp">
+      <Filter>头文件\io</Filter>
+    </ClInclude>
+    <ClInclude Include="channel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="unit.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="file_reader_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="timeline.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="frame.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="source_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_context.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="destination_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="ffmpeg_io.hpp">
+      <Filter>头文件\io</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+Debug
+Release
+Bin
+build
+.vs
+**.VC.db
+**.VC.opendb
+**/Release
+**/Debug
+packages
