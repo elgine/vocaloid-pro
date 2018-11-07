@@ -15,7 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test_ffmpeg.cpp">
+    <ClInclude Include="alien.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="astronaut.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ffmpeg_io.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="robot1.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="robot2.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

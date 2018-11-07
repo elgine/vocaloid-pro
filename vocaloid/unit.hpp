@@ -16,6 +16,8 @@ namespace vocaloid {
 			bool enable_;
 			bool can_be_connected_;
 			bool can_connect_;
+
+			bool new_frame_;
 		public:
 			explicit Unit(bool can_be_connected = true, bool can_connect = true,
 				uint16_t channels = 2, uint64_t frame_size = 1024) :can_be_connected_(can_be_connected),

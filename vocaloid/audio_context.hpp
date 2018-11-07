@@ -8,6 +8,8 @@
 #include <atomic>
 #include "../utility/ticker.hpp"
 #include "destination_node.hpp"
+#include "player_node.hpp"
+#include "file_writer_node.hpp"
 using namespace std;
 namespace vocaloid {
 
@@ -34,6 +36,7 @@ namespace vocaloid {
 				while (state_ == AudioContextState::PLAYING) {
 					current_time_ = ticker_->GetCurTimestamp() + offset_start_;
 					dest_node_->Pull();
+					this_thread::sleep_for(chrono::milliseconds(MINUS_SLEEP_UNIT));
 				}
 			}
 
@@ -52,11 +55,11 @@ namespace vocaloid {
 			* @param channels
 			*/
 			void SetRecorderMode(const char* path, uint32_t sample_rate, uint16_t channels) {
-				/*auto recorder = new AudioRecorderNode(this);
+				auto recorder = new FileWriterNode(this);
 				recorder->SetPath(path);
 				recorder->SetSampleRate(sample_rate);
 				recorder->SetChannels(channels);
-				dest_node_ = recorder;*/
+				dest_node_ = recorder;
 			}
 
 			/**
@@ -66,9 +69,9 @@ namespace vocaloid {
 			* @param channels
 			*/
 			void SetPlayerMode(uint32_t sample_rate, uint16_t channels) {
-				/*dest_node_ = new AudioPlayerNode(this);
+				dest_node_ = new PlayerNode(this);
 				dest_node_->SetSampleRate(sample_rate);
-				dest_node_->SetChannels(channels);*/
+				dest_node_->SetChannels(channels);
 			}
 
 			/**

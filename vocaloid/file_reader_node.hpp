@@ -3,7 +3,7 @@
 #include "file.h"
 #include "source_node.hpp"
 #include "audio_context.hpp"
-#ifdef WIN
+#ifdef _WIN32 || _WIN64
 #include "ffmpeg_io.hpp"
 #else
 #include "wav.hpp"
@@ -22,13 +22,11 @@ namespace vocaloid {
 		public:
 			explicit FileReaderNode(AudioContext *ctx) :SourceNode(ctx) {
 				path_ = "undefined";
-#ifdef WIN
+#ifdef _WIN32 || _WIN64
 				reader_ = new io::FFmpegFileReader();
 #else
 				reader_ = new io::WAVReader();
 #endif
-
-				reader_ = nullptr;
 				resample_ratio_ = 1.0;
 				bits_ = 16;
 				require_buffer_size_ = require_float_size_ = 0;

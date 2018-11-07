@@ -1,7 +1,6 @@
 #include "../vocaloid/ffmpeg_io.hpp"
 #include "../vocaloid/maths.hpp"
-#include "../pcm_player/pcm_player.h"
-#pragma comment(lib, "pcm_player.lib")
+#include "../vocaloid/pcm_player.hpp"
 using namespace vocaloid;
 using namespace vocaloid::io;
 
@@ -43,14 +42,9 @@ void TestReader() {
 	auto bytes = new char[size];
 	while (!reader->IsEnd() || reader->CapableToRead(size)) {
 		auto act_size = reader->ReadData(bytes, size);
-		if(act_size > 0)player->Push(bytes, act_size);
+		if (act_size > 0)player->Push(bytes, act_size);
 	}
 	reader->Close();
 	player->Flush();
 	player->Close();
-}
-
-void main() {
-	//TestReader();
-	TestWriter();
 }

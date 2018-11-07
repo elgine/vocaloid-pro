@@ -129,23 +129,26 @@ namespace vocaloid {
 
 			void Loop() {
 				while (decoding_) {
-					unique_lock<mutex> lck(decode_mutex_);
-					while (!EnableToDecode())
-						can_decode_.wait(lck);
-					auto ret = av_read_frame(ctx_, packet_);
-					if (ret == AVERROR_EOF) {
-						packet_->data = nullptr;
-						packet_->size = 0;
-						Decode(packet_);
-						is_end_ = true;
-						break;
-					}
-					else {
-						if (packet_->stream_index == a_stream_index_) {
-							DecodePacket(packet_);
+					{
+						unique_lock<mutex> lck(decode_mutex_);
+						while (!EnableToDecode())
+							can_decode_.wait(lck);
+						auto ret = av_read_frame(ctx_, packet_);
+						if (ret == AVERROR_EOF) {
+							packet_->data = nullptr;
+							packet_->size = 0;
+							Decode(packet_);
+							is_end_ = true;
+							break;
 						}
+						else {
+							if (packet_->stream_index == a_stream_index_) {
+								DecodePacket(packet_);
+							}
+						}
+						av_packet_unref(packet_);
 					}
-					av_packet_unref(packet_);
+					this_thread::sleep_for(chrono::milliseconds(MINUS_SLEEP_UNIT));
 				}
 			}
 

@@ -81,5 +81,50 @@
     <ClInclude Include="ffmpeg_io.hpp">
       <Filter>头文件\io</Filter>
     </ClInclude>
+    <ClInclude Include="file_writer_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="player_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
+      <Filter>头文件\io</Filter>
+    </ClInclude>
+    <ClInclude Include="pcm_player.hpp">
+      <Filter>头文件\io</Filter>
+    </ClInclude>
+    <ClInclude Include="pitch_shift.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="biquad.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="biquad_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_param.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="convolution_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="delay_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="gain_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="oscillator_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="waveform.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="wave_shaper_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamic_compressor_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

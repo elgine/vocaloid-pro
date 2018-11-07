@@ -9,6 +9,10 @@ namespace vocaloid {
 		public:
 			static const uint16_t BITS_PER_SEC = 16;
 			explicit Node(AudioContext *ctx) :Unit(), context_(ctx) {}
+
+			uint64_t SuggestFrameSize() {
+				return frame_size_;
+			}	
 		};
 	}
 }

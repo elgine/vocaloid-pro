@@ -134,15 +134,28 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="audio_context.hpp" />
+    <ClInclude Include="audio_param.hpp" />
+    <ClInclude Include="biquad.hpp" />
+    <ClInclude Include="biquad_node.hpp" />
     <ClInclude Include="channel.h" />
     <ClInclude Include="convolution.hpp" />
+    <ClInclude Include="convolution_node.hpp" />
+    <ClInclude Include="delay_node.hpp" />
     <ClInclude Include="destination_node.hpp" />
+    <ClInclude Include="dynamic_compressor_node.hpp" />
     <ClInclude Include="ffmpeg_io.hpp" />
     <ClInclude Include="fft.hpp" />
     <ClInclude Include="file.h" />
     <ClInclude Include="file_reader_node.hpp" />
+    <ClInclude Include="file_writer_node.hpp" />
     <ClInclude Include="frame.hpp" />
+    <ClInclude Include="gain_node.hpp" />
     <ClInclude Include="node.hpp" />
+    <ClInclude Include="oscillator_node.hpp" />
+    <ClInclude Include="pcm_player.hpp" />
+    <ClInclude Include="pitch_shift.hpp" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="player_node.hpp" />
     <ClInclude Include="source_node.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="timeline.hpp" />
@@ -150,6 +163,8 @@
     <ClInclude Include="maths.hpp" />
     <ClInclude Include="unit.hpp" />
     <ClInclude Include="wav.hpp" />
+    <ClInclude Include="waveform.hpp" />
+    <ClInclude Include="wave_shaper_node.hpp" />
     <ClInclude Include="wgn.hpp" />
     <ClInclude Include="window.hpp" />
   </ItemGroup>

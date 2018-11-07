@@ -23,13 +23,13 @@ namespace vocaloid {
 		}
 
 		int64_t FindIndex(uint64_t timestamp, bool &accurate) {
-			int64_t start = 0, last = value_list.size() - 1, middle = 0;
-			int64_t delta = 0;
+			long long start = 0, last = (long long)value_list.size() - 1, middle = 0;
+			long long delta = 0;
 			accurate = false;
 			if (last < 0)return 0;
 			while (start <= last) {
 				middle = (last + start) / 2;
-				delta = timestamp - value_list[middle].timestamp;
+				delta = (long long)timestamp - (long long)value_list[middle].timestamp;
 				if (abs(delta) < 0.000001) {
 					accurate = true;
 					break;
