@@ -1,35 +1,17 @@
 #pragma once
 #include "stdafx.h"
-#include "node.hpp"
+#include "audio_context.hpp"
 namespace vocaloid {
 	namespace node {
-		class DestinationNode: public Node{
+		class DestinationNode: public AudioNode{
 		protected:
 			uint32_t sample_rate_ = 44100;
 		public:
-			explicit DestinationNode(AudioContext *ctx) :Node(ctx) {
+			explicit DestinationNode(AudioContext *ctx) :AudioNode(ctx, AudioProcessorType::OUTPUT) {
 				can_connect_ = false;
 			}
 
-			virtual int64_t PushToDestination() {
-				return 0;
-			}
-
-			int64_t Pull() {
-				PullInputs();
-				return PushToDestination();
-			}
-
 			virtual void Close() {}
-
-			virtual void SetSampleRate(uint32_t sample_rate) {
-				sample_rate_ = sample_rate;
-			}
-
-			uint32_t SampleRate() {
-				return sample_rate_;
-			}
-
 		};
 	}
 }

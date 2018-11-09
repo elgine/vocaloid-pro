@@ -1,17 +1,10 @@
 #pragma once
-#include "node.hpp"
+#include "audio_context.hpp"
 namespace vocaloid {
 	namespace node {
-		class SourceNode : public Node {
+		class SourceNode : public AudioNode {
 		public:
-			explicit SourceNode(AudioContext *ctx) :Node(ctx) {
-				can_be_connected_ = false;
-			}
-
-			void Pull(Frame *in) final {
-				in->Alloc(channels_, frame_size_);
-				Process(in);
-			}
+			explicit SourceNode(AudioContext *ctx) :AudioNode(ctx, AudioProcessorType::INPUT, false, true) {}
 		};
 	}
 }

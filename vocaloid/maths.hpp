@@ -2,6 +2,10 @@
 #include "stdafx.h"
 namespace vocaloid {
 
+	uint64_t CalculatePlayedTime(uint32_t sample_rate, uint64_t offset) {
+		return uint64_t((float)(offset) / float(sample_rate) * 1000.0f);
+	}
+
 	template<typename T>
 	T Clamp(T min, T max, T v) {
 		if (v < min)return min;

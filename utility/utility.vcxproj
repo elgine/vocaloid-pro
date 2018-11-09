@@ -130,7 +130,7 @@
     <ClInclude Include="buffer.hpp" />
     <ClInclude Include="emitter.hpp" />
     <ClInclude Include="path.hpp" />
-    <ClInclude Include="str_a_num.hpp" />
+    <ClInclude Include="str_num.hpp" />
     <ClInclude Include="thread_pool.hpp" />
     <ClInclude Include="ticker.hpp" />
   </ItemGroup>

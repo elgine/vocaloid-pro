@@ -24,18 +24,17 @@ namespace vocaloid {
 				offset_ = 0;
 			}
 
-			int64_t Process(Frame *in) override {
+			int64_t ProcessFrame() override {
 				// Resample
 				if (waveform_dirty_) {
-					uint32_t sample_rate = context_->GetSampleRate();
-					auto size = uint64_t(sample_rate / frequency_);
+					auto size = uint64_t(sample_rate_ / frequency_);
 					waveform_buffer_->Alloc(size);
 					waveform_buffer_->SetSize(size);
 					GenWaveform(type_, size, waveform_buffer_->Data());
 					waveform_dirty_ = false;
 				}
-				in->Alloc(channels_, frame_size_);
-				in->SetSize(frame_size_);
+				result_buffer_->Alloc(channels_, frame_size_);
+				result_buffer_->SetSize(frame_size_);
 				// Fill buffer
 				uint64_t size = 0;
 				uint64_t fill_size = 0;
@@ -43,7 +42,7 @@ namespace vocaloid {
 				while (size < frame_size_) {
 					fill_size = min(frame_size_ - size, buffer_size - offset_);
 					for (auto i = 0; i < channels_; i++)
-						in->Data()[i]->Set(waveform_buffer_->Data(), fill_size, offset_, size);
+						result_buffer_->Data()[i]->Set(waveform_buffer_->Data(), fill_size, offset_, size);
 					size += fill_size;
 					offset_ = (offset_ + fill_size) % buffer_size;
 				}

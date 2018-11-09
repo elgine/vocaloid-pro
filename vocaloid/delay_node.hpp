@@ -1,14 +1,12 @@
 #pragma once
 #include "stdafx.h"
 #include "maths.hpp"
-#include "node.hpp"
-#include "audio_param.hpp"
-#include "frame.hpp"
+#include "audio_frame.hpp"
 #include "audio_context.hpp"
 using namespace std;
 namespace vocaloid {
 	namespace node {
-		class DelayNode : public Node {
+		class DelayNode : public AudioNode {
 		private:
 			float max_delay_time_;
 			uint64_t max_delay_size_;
@@ -17,7 +15,7 @@ namespace vocaloid {
 		public:
 			AudioParam *delay_time_;
 
-			explicit DelayNode(AudioContext *ctx, float delay_time = 0, float max_delay_time = 1.0f) :Node(ctx), max_delay_time_(max_delay_time) {
+			explicit DelayNode(AudioContext *ctx, float delay_time = 0, float max_delay_time = 1.0f) :AudioNode(ctx), max_delay_time_(max_delay_time) {
 				delay_time_ = new AudioParam();
 				delay_time_->value_ = delay_time;
 				max_delay_size_ = 0;
@@ -25,9 +23,8 @@ namespace vocaloid {
 				buffers_ = new vector<float>[8];
 			}
 
-			void Initialize(uint64_t frame_size) override {
-				Node::Initialize(frame_size);
-				auto sample_rate = context_->GetSampleRate();
+			void Initialize(uint32_t sample_rate, uint64_t frame_size) override {
+				AudioNode::Initialize(sample_rate, frame_size);
 				max_delay_size_ = uint64_t((max_delay_time_ + 1) * sample_rate);
 				delay_time_->Initialize(sample_rate, frame_size);
 				for (auto i = 0; i < channels_; i++) {
@@ -35,12 +32,12 @@ namespace vocaloid {
 				}
 			}
 
-			int64_t Process(Frame *in) override {
-				delay_time_->ComputingValues();
+			int64_t ProcessFrame() override {
+				auto delay_buffer = delay_time_->Result()->Channel(0)->Data();
 				for (auto i = 0; i < frame_size_; i++) {
-					auto delay_time = delay_time_->ResultBuffer()->Data()[i];
+					auto delay_time = delay_buffer[i];
 					delay_time = Clamp(0.0f, max_delay_time_, delay_time);
-					auto delay_frames = delay_time * context_->GetSampleRate();
+					auto delay_frames = delay_time * sample_rate_;
 					auto read_position = write_index_ + max_delay_size_ - delay_frames;
 					if (read_position >= max_delay_size_) {
 						read_position -= max_delay_size_;
@@ -53,7 +50,7 @@ namespace vocaloid {
 						buffers_[j][write_index_] = input;
 						auto sample1 = buffers_[j][read_index1];
 						auto sample2 = buffers_[j][read_index2];
-						in->Channel(j)->Data()[i] = (1.0f - factor) * sample1 + factor * sample2;
+						result_buffer_->Channel(j)->Data()[i] = (1.0f - factor) * sample1 + factor * sample2;
 					}
 					write_index_ = (write_index_ + 1) % max_delay_size_;
 				}

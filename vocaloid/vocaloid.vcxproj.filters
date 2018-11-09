@@ -54,25 +54,10 @@
     <ClInclude Include="channel.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="unit.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
     <ClInclude Include="file_reader_node.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="node.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
-    <ClInclude Include="timeline.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
-    <ClInclude Include="frame.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
     <ClInclude Include="source_node.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
-    <ClInclude Include="audio_context.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
     <ClInclude Include="destination_node.hpp">
@@ -102,9 +87,6 @@
     <ClInclude Include="biquad_node.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="audio_param.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
     <ClInclude Include="convolution_node.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
@@ -124,6 +106,18 @@
       <Filter>头文件\node</Filter>
     </ClInclude>
     <ClInclude Include="dynamic_compressor_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="pitch_shifter.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_timeline.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_frame.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_context.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
   </ItemGroup>

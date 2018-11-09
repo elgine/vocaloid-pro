@@ -6,19 +6,19 @@
 using namespace std;
 namespace vocaloid {
 
-	struct TimelineValue {
+	struct AudioTimelineValue {
 		uint64_t timestamp;
 		float value;
 		INTERPOLATOR_TYPE interpolator;
 	};
 
-	class Timeline {
+	class AudioTimeline {
 	protected:
-		vector<TimelineValue> value_list;
+		vector<AudioTimelineValue> value_list;
 	public:
 		float value_;
 
-		explicit Timeline(float value = 0.0f) {
+		explicit AudioTimeline(float value = 0.0f) {
 			value_ = value;
 		}
 

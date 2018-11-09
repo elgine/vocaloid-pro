@@ -5,20 +5,21 @@
 #include "../utility/buffer.hpp"
 namespace vocaloid {
 	namespace node {
-		class Frame {
+		class AudioFrame {
 			typedef Buffer<float>* PBuffer;
 		private:
 			uint16_t channels_;
 			PBuffer *data_;
 		public:
 
-			explicit Frame(uint16_t channels = 2, uint64_t max_size = 1024) :channels_(0) {
+			explicit AudioFrame(uint16_t channels = 2, uint64_t max_size = 1024) :channels_(0) {
 				data_ = new PBuffer[8];
 				Alloc(channels, max_size);
 			}
 
-			void Copy(Frame *b) {
+			void Copy(AudioFrame *b) {
 				Alloc(b->Channels(), b->Size());
+				SetSize(b->Size());
 				for (auto i = 0; i < b->Channels(); i++) {
 					for (auto j = 0; j < b->Size(); j++) {
 						data_[i]->Data()[j] = b->Data()[i]->Data()[j];
@@ -26,7 +27,7 @@ namespace vocaloid {
 				}
 			}
 
-			void Add(Frame *b) {
+			void Add(AudioFrame *b) {
 				for (auto i = 0; i < min(channels_, b->Channels()); i++) {
 					data_[i]->Add(b->Channel(i), b->Size());
 				}
@@ -83,7 +84,7 @@ namespace vocaloid {
 				}
 			}
 
-			void Mix(Frame *in) {
+			void Mix(AudioFrame *in) {
 				uint16_t out_channels = channels_, in_channels = in->Channels();
 				uint64_t size = in->Size();
 				Alloc(channels_, size);

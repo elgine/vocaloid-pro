@@ -24,13 +24,13 @@
     <ClInclude Include="path.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="str_a_num.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="thread_pool.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ticker.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="str_num.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

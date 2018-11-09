@@ -2,9 +2,7 @@
 #include <math.h>
 #include <float.h>
 #include "../utility/buffer.hpp"
-#include "node.hpp"
 #include "audio_context.hpp"
-#include "audio_param.hpp"
 #include "maths.hpp"
 // From Chromium, DynamicsCompressorKernel.cpp
 namespace vocaloid {
@@ -12,7 +10,7 @@ namespace vocaloid {
 		#define DEFAULT_PREDELAY_FRAMES 256
 		#define MAX_PREDELAY_FRAMES 1024
 		#define MAX_PREDELAY_FRAMES_MASK 1
-		class DynamicsCompressorNode : public Node {
+		class DynamicsCompressorNode : public AudioNode {
 		private:
 			float m_knee_;
 			float m_ratio_;
@@ -31,7 +29,7 @@ namespace vocaloid {
 			float m_max_attack_compression_diff_db_;
 			float m_metering_gain_;
 			float m_metering_release_k_;
-			Frame *m_predelay_buffers_;
+			AudioFrame *m_predelay_buffers_;
 
 			float m_last_filter_stage_gain_;
 			float m_last_filter_stage_ratio_;
@@ -52,7 +50,7 @@ namespace vocaloid {
 			}
 
 			void SetPredelayTime(float predelay_time) {
-				auto predelay_frames = predelay_time * context_->GetSampleRate();
+				auto predelay_frames = predelay_time * sample_rate_;
 				if (predelay_frames > MAX_PREDELAY_FRAMES - 1)
 					predelay_frames = MAX_PREDELAY_FRAMES - 1;
 				if (m_last_predelay_frames_ != predelay_frames) {
@@ -101,11 +99,10 @@ namespace vocaloid {
 				return k;
 			}
 
-			void Process(Frame *in, float db_threshold, float db_knee, float ratio,
+			void Process(AudioFrame *in, float db_threshold, float db_knee, float ratio,
 				float attack, float release, float predelay, float db_post_gain,
 				float effect_blend, float release_zone1, float release_zone2,
 				float release_zone3, float release_zone4) {
-				auto sample_rate = context_->GetSampleRate();
 				float dry_mix = 1 - effect_blend;
 				float wet_mix = effect_blend;
 				float k = UpdateStaticCurve(db_threshold, db_knee, ratio);
@@ -117,12 +114,12 @@ namespace vocaloid {
 				float master_linear_gain = Db2Linear(db_post_gain) * full_range_makeup_gain;
 
 				attack = fmax(0.001f, attack);
-				float attack_frames = attack * sample_rate;
+				float attack_frames = attack * sample_rate_;
 
-				float release_frames = sample_rate * release;
+				float release_frames = sample_rate_ * release;
 
 				float sat_release = 0.0025;
-				float sat_release_frames = sat_release * sample_rate;
+				float sat_release_frames = sat_release * sample_rate_;
 
 				float y1 = release_frames * release_zone1;
 				float y2 = release_frames * release_zone2;
@@ -301,7 +298,7 @@ namespace vocaloid {
 				return 20.0f * log10f(v);
 			}
 
-			explicit DynamicsCompressorNode(AudioContext *ctx) :Node(ctx) {
+			explicit DynamicsCompressorNode(AudioContext *ctx) :AudioNode(ctx) {
 				m_last_predelay_frames_ = DEFAULT_PREDELAY_FRAMES;
 				m_predelay_read_index_ = 0;
 				m_predelay_write_index_ = DEFAULT_PREDELAY_FRAMES;
@@ -327,11 +324,11 @@ namespace vocaloid {
 				release_zone4_ = 0.98;
 				filter_stage_gain_ = 4.4;
 				filter_stage_ratio_ = 2;
-				filter_anchor_ = 30000.0f / context_->GetSampleRate();
+				filter_anchor_ = 30000.0f / sample_rate_;
 				post_gain_ = 0;
 				reduction_ = 0;
 				effect_blend_ = 1;
-				m_predelay_buffers_ = new Frame(channels_, frame_size_);
+				m_predelay_buffers_ = new AudioFrame(channels_, frame_size_);
 				Reset();
 			}
 
@@ -351,8 +348,8 @@ namespace vocaloid {
 				return m_knee_;
 			}
 
-			void Initialize(uint64_t frame_size) override {
-				Node::Initialize(frame_size);
+			void Initialize(uint32_t sample_rate, uint64_t frame_size) override {
+				AudioNode::Initialize(sample_rate, frame_size);
 				m_predelay_buffers_->Alloc(channels_, frame_size_);
 				Reset();
 			}
@@ -367,7 +364,7 @@ namespace vocaloid {
 				m_max_attack_compression_diff_db_ = -1;
 			}
 
-			int64_t Process(Frame *in) override {
+			int64_t ProcessFrame() override {
 				float filter_stage_gain = filter_stage_gain_;
 				float filter_stage_ratio = filter_stage_ratio_;
 				float anchor = filter_anchor_;
@@ -378,7 +375,7 @@ namespace vocaloid {
 					m_last_filter_stage_ratio_ = filter_stage_ratio;
 					m_last_anchor_ = anchor;
 				}
-				Process(in, threshold_, knee_, ratio_, attack_, release_, predelay_,
+				Process(result_buffer_, threshold_, knee_, ratio_, attack_, release_, predelay_,
 					post_gain_, effect_blend_, release_zone1_, release_zone2_, release_zone3_,
 					release_zone4_);
 				reduction_ = m_metering_gain_;
