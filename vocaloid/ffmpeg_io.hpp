@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <iostream>
 #include <condition_variable>
 #ifdef _WIN64
 extern "C"
@@ -65,7 +66,7 @@ namespace vocaloid {
 			AVFrame *frame_;
 			AVFrame *decode_frame_;
 			SwrContext *swr_ctx_;
-			uint16_t a_stream_index_;
+			int16_t a_stream_index_;
 
 			unique_ptr<thread> decode_thread_;
 			mutex decode_mutex_;
@@ -74,12 +75,12 @@ namespace vocaloid {
 			atomic<bool> decoding_;
 			bool has_begun_;
 
-			uint64_t frame_count_;
-			uint64_t output_frame_size_;
+			int64_t frame_count_;
+			int64_t output_frame_size_;
 			char *buffer_;
-			uint64_t buffer_size_;
+			int64_t buffer_size_;
 			// The max buffer size
-			uint64_t max_buffer_size_;
+			int64_t max_buffer_size_;
 
 			int Decode(AVPacket *packet) {
 				auto got_frame = 0;
@@ -92,7 +93,7 @@ namespace vocaloid {
 				return ret;
 			}
 
-			int Convert(const uint8_t** frame_data, uint64_t nb_samples) {
+			int Convert(const uint8_t** frame_data, int64_t nb_samples) {
 				auto samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples,
 					frame_data, nb_samples);
 				if (samples > 0) {
@@ -131,8 +132,12 @@ namespace vocaloid {
 				while (decoding_) {
 					{
 						unique_lock<mutex> lck(decode_mutex_);
-						while (!EnableToDecode())
+						while (!EnableToDecode()) {
+#ifdef _DEBUG
+							cout << "waiting for pick buffer" << endl;
+#endif
 							can_decode_.wait(lck);
+						}
 						auto ret = av_read_frame(ctx_, packet_);
 						if (ret == AVERROR_EOF) {
 							packet_->data = nullptr;
@@ -148,8 +153,10 @@ namespace vocaloid {
 						}
 						av_packet_unref(packet_);
 					}
-					this_thread::sleep_for(chrono::milliseconds(MINUS_SLEEP_UNIT));
 				}
+#ifdef _DEBUG
+				cout << "exist decoding thread" << endl;
+#endif
 			}
 
 			bool EnableToDecode() {
@@ -158,18 +165,30 @@ namespace vocaloid {
 
 		public:
 
-			FFmpegFileReader(uint64_t max_size = 16384 * 8) {
+			FFmpegFileReader(int64_t max_size = 16384 * 8) {
 				max_buffer_size_ = max_size;
 				buffer_ = new char[max_buffer_size_];
 			}
 
-			void Flush(char* data, uint64_t& length) override {
+			void SetMaxBufferSize(int64_t max_size) {
+				max_buffer_size_ = max_size;
+				delete[] buffer_;
+				buffer_ = new char[max_buffer_size_];
+			}
+
+			int64_t FileLength() override {
+				unique_lock<mutex> lck(decode_mutex_);
+				auto audio_stream = ctx_->streams[a_stream_index_];
+				return audio_stream->duration * av_q2d(audio_stream->time_base) * codec_ctx_->sample_rate * codec_ctx_->block_align;
+			}
+
+			void Flush(char* data, int64_t& length) override {
 				unique_lock<mutex> lck(decode_mutex_);
 				memcpy(data, buffer_, buffer_size_);
 				length = buffer_size_;
 			}
 
-			int64_t ReadData(char* data, uint64_t length) override {
+			int64_t ReadData(char* data, int64_t length) override {
 				if (!has_begun_) {
 					has_begun_ = true;
 					decoding_ = true;
@@ -178,12 +197,21 @@ namespace vocaloid {
 				}
 				else {
 					unique_lock<mutex> lck(decode_mutex_);
-					if (buffer_size_ < length)return 0;
+					if (buffer_size_ < length) {
+#ifdef _DEBUG
+						cout << "buffer size is too small: " << buffer_size_ << endl;
+#endif
+						return 0;
+					}
 					memcpy(data, buffer_, length);
-					uint64_t left = buffer_size_ - length;
-					memcpy(buffer_, buffer_ + length, left);
+					int64_t left = buffer_size_ - length;
+					if(left > 0)memcpy(buffer_, buffer_ + length, left);
 					buffer_size_ -= length;
-					can_decode_.notify_one();
+					if (EnableToDecode())
+						can_decode_.notify_all();
+#ifdef _DEBUG
+					cout << "Pick buffer" << endl;
+#endif
 					return length;
 				}
 			}
@@ -236,8 +264,8 @@ namespace vocaloid {
 				enum AVSampleFormat out_sample_fmt = AV_SAMPLE_FMT_S16;
 				auto in_sample_rate = codec_ctx_->sample_rate;
 				auto out_sample_rate = 44100;
-				uint64_t in_ch_layout = codec_ctx_->channel_layout > 0 ? codec_ctx_->channel_layout : av_get_default_channel_layout(codec_ctx_->channels);
-				uint64_t out_ch_layout = in_ch_layout;
+				int64_t in_ch_layout = codec_ctx_->channel_layout > 0 ? codec_ctx_->channel_layout : av_get_default_channel_layout(codec_ctx_->channels);
+				int64_t out_ch_layout = in_ch_layout;
 
 				swr_alloc_set_opts(swr_ctx_, out_ch_layout, out_sample_fmt, out_sample_rate, in_ch_layout, in_sample_fmt, in_sample_rate, 0, nullptr);
 				swr_init(swr_ctx_);
@@ -287,12 +315,12 @@ namespace vocaloid {
 				return is_end_;
 			}
 
-			bool CapableToRead(uint64_t len) {
+			bool CapableToRead(int64_t len) {
 				unique_lock<mutex> lck(decode_mutex_);
 				return buffer_size_ >= len;
 			}
 
-			uint64_t Seek(uint64_t time) override {
+			int64_t Seek(int64_t time) override {
 				unique_lock<mutex> lck(decode_mutex_);
 				auto durationPerFrame = float(codec_ctx_->frame_size * AV_TIME_BASE) / codec_ctx_->sample_rate;
 				av_seek_frame(ctx_, a_stream_index_, floor(time / durationPerFrame), AVSEEK_FLAG_ANY);
@@ -301,10 +329,10 @@ namespace vocaloid {
 
 			AudioFormat Format() override {
 				unique_lock<mutex> lck(decode_mutex_);
-				uint16_t bits = 16;
-				uint32_t sample_rate = decode_frame_->sample_rate;
-				uint16_t channels = decode_frame_->channels;
-				uint16_t block_align = bits / 8 * channels;
+				int16_t bits = 16;
+				int32_t sample_rate = decode_frame_->sample_rate;
+				int16_t channels = decode_frame_->channels;
+				int16_t block_align = bits / 8 * channels;
 				return{
 					sample_rate,
 					bits,
@@ -322,14 +350,14 @@ namespace vocaloid {
 			AVPacket *packet_;
 			AVFrame *frame_;
 			AVFrame *enc_frame_;
-			uint64_t frame_index_;
+			int64_t frame_index_;
 			char *buffer_;
-			uint64_t buffer_size_;
-			uint64_t max_buffer_size_;
+			int64_t buffer_size_;
+			int64_t max_buffer_size_;
 			uint8_t *frame_buf_;
-			uint64_t frame_buffer_size_;
+			int64_t frame_buffer_size_;
 
-			void PushPlanarData(const char* planar_bytes, uint64_t byte_length) {
+			void PushPlanarData(const char* planar_bytes, int64_t byte_length) {
 				if (max_buffer_size_ < buffer_size_ + byte_length) {
 					auto new_buffer = new char[buffer_size_ + byte_length];
 					memcpy(new_buffer, buffer_, buffer_size_);
@@ -344,7 +372,7 @@ namespace vocaloid {
 				buffer_size_ += byte_length;
 			}
 
-			int Encode(const uint8_t** frame_data, uint64_t nb_samples) {
+			int Encode(const uint8_t** frame_data, int64_t nb_samples) {
 				auto samples = swr_convert(swr_ctx_, enc_frame_->data, frame_->nb_samples,
 					frame_data, nb_samples);
 				// Tell encode to use input frames' nb_sample to encode
@@ -390,13 +418,13 @@ namespace vocaloid {
 
 		public:
 
-			FFmpegFileWriter(uint64_t init_size = 16384) {
+			FFmpegFileWriter(int64_t init_size = 16384) {
 				buffer_ = new char[init_size];
 				max_buffer_size_ = init_size;
 				buffer_size_ = 0;
 			}
 
-			int16_t Open(const char* output_path, uint32_t sample_rate, uint16_t bits, uint16_t channels) override {
+			int16_t Open(const char* output_path, int32_t sample_rate, int16_t bits, int16_t channels) override {
 				av_register_all();
 				auto ret = avformat_alloc_output_context2(&ctx_, nullptr, nullptr, output_path);
 				if (ret < 0) {
@@ -503,8 +531,8 @@ namespace vocaloid {
 				enum AVSampleFormat out_sample_fmt = (AVSampleFormat)enc_frame_->format;
 				auto in_sample_rate = frame_->sample_rate;
 				auto out_sample_rate = enc_frame_->sample_rate;
-				uint64_t in_ch_layout = frame_->channel_layout;
-				uint64_t out_ch_layout = enc_frame_->channel_layout;
+				int64_t in_ch_layout = frame_->channel_layout;
+				int64_t out_ch_layout = enc_frame_->channel_layout;
 
 				swr_ctx_ = swr_alloc_set_opts(nullptr, out_ch_layout, out_sample_fmt, out_sample_rate, in_ch_layout, in_sample_fmt, in_sample_rate, 0, nullptr);
 				ret = swr_init(swr_ctx_);
@@ -515,9 +543,9 @@ namespace vocaloid {
 				return 0;
 			}
 
-			int64_t WriteData(const char* bytes, uint64_t byte_length) override {
+			int64_t WriteData(const char* bytes, int64_t byte_length) override {
 				PushPlanarData(bytes, byte_length);
-				uint64_t pos = 0;
+				int64_t pos = 0;
 				int64_t len = 0;
 				auto ret = 0;
 				while (buffer_size_ >= frame_buffer_size_) {

@@ -13,5 +13,5 @@ using namespace std;
 #define M_PI 3.1415926
 #define M_PI_2 M_PI * 2
 
-#define MINUS_SLEEP_UNIT 10
+#define MINUS_SLEEP_UNIT 5
 #define BITS_PER_SEC 16

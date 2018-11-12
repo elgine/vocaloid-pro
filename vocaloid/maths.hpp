@@ -2,8 +2,8 @@
 #include "stdafx.h"
 namespace vocaloid {
 
-	uint64_t CalculatePlayedTime(uint32_t sample_rate, uint64_t offset) {
-		return uint64_t((float)(offset) / float(sample_rate) * 1000.0f);
+	int64_t CalculatePlayedTime(int32_t sample_rate, int64_t offset) {
+		return int64_t((float)(offset) / float(sample_rate) * 1000.0f);
 	}
 
 	template<typename T>
@@ -79,7 +79,7 @@ namespace vocaloid {
 
 	// Linear interpolator
 	template<typename T>
-	void LinearInterpolate(const vector<T> input, uint64_t input_len, vector<T> &output, uint64_t output_len) {
+	void LinearInterpolate(const vector<T> input, int64_t input_len, vector<T> &output, int64_t output_len) {
 		float ratio = (float)output_len / (input_len - 1);
 		int next_offset = 0, offset = 0;
 		for (int i = 0; i < input_len - 1; i++) {
@@ -95,7 +95,7 @@ namespace vocaloid {
 	}
 
 	template<typename T>
-	void ExponentialInterpolate(const vector<T> input, uint64_t input_len, vector<T> &output, uint64_t output_len) {
+	void ExponentialInterpolate(const vector<T> input, int64_t input_len, vector<T> &output, int64_t output_len) {
 		float ratio = (float)output_len / (input_len - 1);
 		int next_offset = 0, offset = 0;
 		for (int i = 0; i < input_len - 1; i++) {
@@ -112,7 +112,7 @@ namespace vocaloid {
 
 	// Cubic spline interpolator
 	template<typename T>
-	void CubicInterpolate(const vector<T> input, uint64_t input_len, vector<T> &output, uint64_t output_len) {
+	void CubicInterpolate(const vector<T> input, int64_t input_len, vector<T> &output, int64_t output_len) {
 		vector<float> D(input_len);
 		CalD(input, input_len, D);
 		float ratio = (float)output_len / (input_len - 1);
@@ -130,7 +130,7 @@ namespace vocaloid {
 	}
 
 	template<typename T>
-	void Interpolate(INTERPOLATOR_TYPE type, const vector<T> input, uint64_t input_len, vector<T> &output, uint64_t output_len) {
+	void Interpolate(INTERPOLATOR_TYPE type, const vector<T> input, int64_t input_len, vector<T> &output, int64_t output_len) {
 		switch (type) {
 		case INTERPOLATOR_TYPE::CUBIC:
 			CubicInterpolate(input, input_len, output, output_len);
@@ -145,8 +145,8 @@ namespace vocaloid {
 	}
 
 	template<typename T>
-	uint64_t Resample(vector<T> input, uint64_t input_len, INTERPOLATOR_TYPE interpolator, float ratio, vector<T>& output) {
-		auto output_len = uint64_t(input_len * ratio);
+	int64_t Resample(vector<T> input, int64_t input_len, INTERPOLATOR_TYPE interpolator, float ratio, vector<T>& output) {
+		auto output_len = int64_t(input_len * ratio);
 		if (ratio == 1.0f)output.assign(input.begin(), input.begin() + input_len);
 		else {
 			if (output.size() != output_len)

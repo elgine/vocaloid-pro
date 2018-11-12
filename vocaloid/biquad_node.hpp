@@ -24,9 +24,13 @@ namespace vocaloid {
 				detune_->value_ = 0;
 				Q_->value_ = 1;
 				gain_->value_ = 0;
+				RegisterAudioParam(frequency_);
+				RegisterAudioParam(detune_);
+				RegisterAudioParam(Q_);
+				RegisterAudioParam(gain_);
 			}
 
-			void Initialize(uint32_t sample_rate, uint64_t frame_size) override {
+			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				for (auto i = 0; i < channels_; i++) {
 					if(filters_[i] == nullptr || !filters_[i])

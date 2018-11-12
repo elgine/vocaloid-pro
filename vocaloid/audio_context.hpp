@@ -9,7 +9,7 @@
 namespace vocaloid {
 	
 	namespace node {
-		uint64_t PROCESSOR_UNIT_COUNTER = 0;
+		int64_t PROCESSOR_UNIT_COUNTER = 0;
 
 		enum AudioProcessorType {
 			NORMAL,
@@ -19,15 +19,15 @@ namespace vocaloid {
 
 		class AudioProcessorUnit {
 		protected:
-			uint64_t id_;
+			int64_t id_;
 			AudioProcessorType type_;
 			bool can_be_connected_;
 			bool can_connect_;
 			set<AudioProcessorUnit*> inputs_;
 
-			uint16_t channels_;
-			uint64_t frame_size_;
-			uint32_t sample_rate_;
+			int16_t channels_;
+			int64_t frame_size_;
+			int32_t sample_rate_;
 			AudioFrame *summing_buffer_;
 			AudioFrame *result_buffer_;
 
@@ -44,11 +44,12 @@ namespace vocaloid {
 				frame_size_ = 1024;
 				sample_rate_ = 44100;
 				channels_ = 2;
+				enable_ = true;
 				summing_buffer_ = new AudioFrame(channels_, frame_size_);
 				result_buffer_ = new AudioFrame(channels_, frame_size_);
 			}
 
-			virtual void Initialize(uint32_t sample_rate, uint64_t frame_size) {
+			virtual void Initialize(int32_t sample_rate, int64_t frame_size) {
 				sample_rate_ = sample_rate;
 				frame_size_ = frame_size;
 				summing_buffer_->Alloc(channels_, frame_size_);
@@ -57,7 +58,7 @@ namespace vocaloid {
 				result_buffer_->SetSize(frame_size_);
 			}
 
-			virtual void SetChannels(uint16_t c) {
+			virtual void SetChannels(int16_t c) {
 				channels_ = c;
 			}
 
@@ -66,13 +67,15 @@ namespace vocaloid {
 			}
 
 			void PullBuffers() {
-				summing_buffer_->Fill(0);
+				summing_buffer_->Fill(0.0f);
 				for (auto input : inputs_) {
 					summing_buffer_->Mix(input->Result());
 				}
 			}
 
 			virtual int64_t ProcessFrame() = 0;
+
+			virtual void Close() {}
 
 			int64_t Process() {
 				PullBuffers();
@@ -92,7 +95,7 @@ namespace vocaloid {
 				return inputs_;
 			}
 
-			uint64_t Id() {
+			int64_t Id() {
 				return id_;
 			}
 
@@ -109,17 +112,16 @@ namespace vocaloid {
 			}
 		};
 		
-		//template<typename T, typename std::enable_if<std::is_base_of<AudioProcessorUnit, T>::value>::type* = nullptr>
 		class AudioGraph{
 		protected:
-			map<uint64_t, AudioProcessorUnit*> nodes_;
-			map<uint64_t, set<uint64_t>> connections_;
+			map<int64_t, AudioProcessorUnit*> nodes_;
+			map<int64_t, set<int64_t>> connections_;
 		public:
 
 			explicit AudioGraph(){}
 
-			void Traverse(vector<uint64_t> &visited_nodes) {
-				queue<uint64_t> traverse_nodes;
+			void Traverse(vector<int64_t> &visited_nodes) {
+				queue<int64_t> traverse_nodes;
 				for (auto pair : nodes_) {
 					if (pair.second->Type() == AudioProcessorType::OUTPUT) {
 						traverse_nodes.push(pair.second->Id());
@@ -145,12 +147,12 @@ namespace vocaloid {
 				}
 			}
 
-			set<uint64_t> Children(uint64_t id) {
+			set<int64_t> Children(int64_t id) {
 				return connections_[id];
 			}
 
 			void AddNode(AudioProcessorUnit* node) {
-				nodes_.insert(pair<uint64_t, AudioProcessorUnit*>(node->Id(), node));
+				nodes_.insert(pair<int64_t, AudioProcessorUnit*>(node->Id(), node));
 			}
 
 			void RemoveNode(AudioProcessorUnit* node) {
@@ -184,11 +186,11 @@ namespace vocaloid {
 				to_node->DisconnectFrom(from_node);
 			}
 
-			AudioProcessorUnit* FindNode(uint64_t v_id) {
+			AudioProcessorUnit* FindNode(int64_t v_id) {
 				return nodes_[v_id];
 			}
 
-			set<uint64_t> FindConnection(uint64_t v_id) {
+			set<int64_t> FindConnection(int64_t v_id) {
 				return connections_[v_id];
 			}
 		};
@@ -200,7 +202,7 @@ namespace vocaloid {
 
 		class AudioParam: public AudioProcessorUnit, public AudioTimeline {
 		private:
-			uint64_t offset_;
+			int64_t offset_;
 		public:
 
 			explicit AudioParam() :AudioProcessorUnit(AudioProcessorType::NORMAL, true, true) {
@@ -208,13 +210,13 @@ namespace vocaloid {
 				channels_ = 1;
 			}
 
-			void SetChannels(uint16_t channels) final {}
+			void SetChannels(int16_t channels) final {}
 
-			void SetOffset(uint64_t offset) {
+			void SetOffset(int64_t offset) {
 				offset_ = offset;
 			}
 
-			void Offset(uint64_t len) {
+			void Offset(int64_t len) {
 				offset_ += len;
 			}
 
@@ -227,40 +229,26 @@ namespace vocaloid {
 			}
 		};
 
-		class AudioContext;
-		class AudioNode : public AudioProcessorUnit {
-		protected:
-			AudioContext *context_;
-		public:
-			explicit AudioNode(AudioContext *ctx,
-								AudioProcessorType type = AudioProcessorType::NORMAL,
-								bool can_be_connected = true,
-								bool can_connect = true) :
-								AudioProcessorUnit(type, can_be_connected, can_connect),
-								context_(ctx) {
-			}
-		};
-
 		enum AudioContextState {
 			STOPPED,
 			PLAYING
 		};
 
-		class AudioContext: public AudioGraph{
+		class AudioContext : public AudioGraph {
 		private:
 			atomic<AudioContextState> state_;
 			unique_ptr<thread> audio_render_thread_;
 			mutex audio_render_thread_mutex_;
-			vector<uint64_t> traversal_nodes_;
-			uint32_t sample_rate_;
-			atomic<uint64_t> frame_size_;
+			vector<int64_t> traversal_nodes_;
+			int32_t sample_rate_;
+			atomic<int64_t> frame_size_;
 
 			void Run() {
 				while (state_ == AudioContextState::PLAYING) {
 					{
 						unique_lock<mutex> lck(audio_render_thread_mutex_);
-						for (auto nid : traversal_nodes_) {
-							auto node = FindNode(nid);
+						for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
+							auto node = FindNode(*iter);
 							node->Process();
 						}
 					}
@@ -272,7 +260,7 @@ namespace vocaloid {
 
 			explicit AudioContext():state_(AudioContextState::STOPPED){
 				sample_rate_ = 44100;
-				frame_size_ = 8192;
+				frame_size_ = 75776;
 			}
 
 			void Prepare() {
@@ -293,12 +281,37 @@ namespace vocaloid {
 					audio_render_thread_->join();
 			}
 
-			void Dispose() {
+			void Close() {
 				Stop();
+				for (auto node : traversal_nodes_) {
+					FindNode(node)->Close();
+				}
 			}
 
-			uint32_t SampleRate() {
+			int32_t SampleRate() {
 				return sample_rate_;
+			}
+		};
+
+		class AudioNode : public AudioProcessorUnit {
+		protected:
+			AudioContext *context_;
+
+			void RegisterAudioParam(AudioParam *param) {
+				context_->Connect(param, this);
+			}
+		public:
+			explicit AudioNode(AudioContext *ctx,
+				AudioProcessorType type = AudioProcessorType::NORMAL,
+				bool can_be_connected = true,
+				bool can_connect = true) :
+				AudioProcessorUnit(type, can_be_connected, can_connect),
+				context_(ctx) {
+				context_->AddNode(this);
+			}
+
+			~AudioNode() {
+				context_->RemoveNode(this);
 			}
 		};
 	}

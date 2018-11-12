@@ -13,7 +13,7 @@ namespace vocaloid {
 			dsp::WAVEFORM_TYPE type_;
 			Buffer<float> *waveform_buffer_;
 			bool waveform_dirty_;
-			uint64_t offset_;
+			int64_t offset_;
 
 		public:
 			explicit OscillatorNode(AudioContext *ctx) :SourceNode(ctx) {
@@ -27,7 +27,7 @@ namespace vocaloid {
 			int64_t ProcessFrame() override {
 				// Resample
 				if (waveform_dirty_) {
-					auto size = uint64_t(sample_rate_ / frequency_);
+					auto size = int64_t(sample_rate_ / frequency_);
 					waveform_buffer_->Alloc(size);
 					waveform_buffer_->SetSize(size);
 					GenWaveform(type_, size, waveform_buffer_->Data());
@@ -36,9 +36,9 @@ namespace vocaloid {
 				result_buffer_->Alloc(channels_, frame_size_);
 				result_buffer_->SetSize(frame_size_);
 				// Fill buffer
-				uint64_t size = 0;
-				uint64_t fill_size = 0;
-				uint64_t buffer_size = waveform_buffer_->Size();
+				int64_t size = 0;
+				int64_t fill_size = 0;
+				int64_t buffer_size = waveform_buffer_->Size();
 				while (size < frame_size_) {
 					fill_size = min(frame_size_ - size, buffer_size - offset_);
 					for (auto i = 0; i < channels_; i++)

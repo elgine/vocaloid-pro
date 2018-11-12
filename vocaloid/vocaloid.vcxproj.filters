@@ -120,5 +120,8 @@
     <ClInclude Include="audio_context.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
+    <ClInclude Include="read_short_file.hpp">
+      <Filter>头文件\io</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -13,21 +13,21 @@ namespace vocaloid {
 		};
 
 		template<typename T>
-		void GenSine(vector<T> &wave, uint64_t n) {
+		void GenSine(vector<T> &wave, int64_t n) {
 			for (auto i = 0; i < n; i++) {
 				wave[i] = sin(2 * M_PI * i / n);
 			}
 		}
 
 		template<typename T>
-		void GenSquare(vector<T> &wave, uint64_t n) {
+		void GenSquare(vector<T> &wave, int64_t n) {
 			auto half = n / 2;
 			for (auto i = 0; i < half; i++)wave[i] = 1;
 			for (auto i = half; i < n; i++)wave[i] = -1;
 		}
 
 		template<typename T>
-		void GenTriangle(vector<T> &wave, uint64_t n) {
+		void GenTriangle(vector<T> &wave, int64_t n) {
 			auto half = n / 2;
 			auto step = half / 2;
 			for (auto i = 0; i < step; i++) {
@@ -42,7 +42,7 @@ namespace vocaloid {
 		}
 
 		template<typename T>
-		void GenSawTooth(vector<T> &wave, uint64_t n) {
+		void GenSawTooth(vector<T> &wave, int64_t n) {
 			auto half = n / 2;
 			for (auto i = 0; i < half; i++) {
 				wave[i] = float(i) / half;
@@ -53,7 +53,7 @@ namespace vocaloid {
 		}
 
 		template<typename T>
-		void GenWaveform(WAVEFORM_TYPE type, uint64_t n, vector<T> &wave) {
+		void GenWaveform(WAVEFORM_TYPE type, int64_t n, vector<T> &wave) {
 			switch (type) {
 			case WAVEFORM_TYPE::SAWTOOTH:
 				GenSawTooth(wave, n);

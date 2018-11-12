@@ -8,7 +8,7 @@ namespace vocaloid {
 			vector<int> reverse_table_;
 			vector<float> sin_table_;
 			vector<float> cos_table_;
-			uint64_t buffer_size_;
+			int64_t buffer_size_;
 		public:
 
 			vector<float> real_;
@@ -28,7 +28,7 @@ namespace vocaloid {
 				return float(a - (int)(a / b) * b + M_PI);
 			}
 
-			void Initialize(uint64_t buffer_size) {
+			void Initialize(int64_t buffer_size) {
 				buffer_size_ = buffer_size;
 				real_ = vector<float>(buffer_size_, 0);
 				imag_ = vector<float>(buffer_size_, 0);
@@ -51,12 +51,12 @@ namespace vocaloid {
 				}
 			}
 
-			uint64_t GetBufferSize() {
+			int64_t GetBufferSize() {
 				return buffer_size_;
 			}
 
 			// Do FFT
-			void Forward(const vector<float> buffer, uint64_t buffer_len) {
+			void Forward(const vector<float> buffer, int64_t buffer_len) {
 				float k = floorf(logf(buffer_size_) / 0.693f);
 				if (pow(2, k) != buffer_size_) {
 					throw "Invalid buffer size, must be a power of 2.";
@@ -112,7 +112,7 @@ namespace vocaloid {
 			}
 
 			// Do IFFT
-			void Inverse(vector<float> real, vector<float> imag, uint64_t len, vector<float> &output) {
+			void Inverse(vector<float> real, vector<float> imag, int64_t len, vector<float> &output) {
 				int half_size = 1, off, i;
 				float phase_shift_step_real, phase_shift_step_imag,
 					cur_phase_shift_real, cur_phase_shift_imag,

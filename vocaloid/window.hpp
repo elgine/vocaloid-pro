@@ -15,7 +15,7 @@ namespace vocaloid {
 		* Calculates rectangle window coefficients.
 		*/
 		template <typename T>
-		void Rectangle(uint64_t N, T amp, vector<T> &win) {
+		void Rectangle(int64_t N, T amp, vector<T> &win) {
 			for (int i = 0; i<(N + 1) / 2; ++i) {
 				win[i] = amp;
 				win[N - 1 - i] = win[i];
@@ -26,7 +26,7 @@ namespace vocaloid {
 		* Calculates bartlett window coefficients.
 		*/
 		template <typename T>
-		void Bartlett(uint64_t N, T amp, vector<T> &win) {
+		void Bartlett(int64_t N, T amp, vector<T> &win) {
 			for (int i = 0; i<(N + 1) / 2; ++i) {
 				win[i] = amp * 2 * i / (N - 1);
 				win[N - 1 - i] = win[i];
@@ -37,7 +37,7 @@ namespace vocaloid {
 		* Calculates hanning window coefficients.
 		*/
 		template <typename T>
-		void Hanning(uint64_t N, vector<T> &win) {
+		void Hanning(int64_t N, vector<T> &win) {
 			for (int i = 0; i < N; ++i) {
 				win[i] = 0.5f - 0.5f*cos(M_PI * 2 * i / N);
 			}
@@ -47,7 +47,7 @@ namespace vocaloid {
 		* Calculates hamming window coefficients.
 		*/
 		template <typename T>
-		void Hamming(uint64_t N, vector<T> &win) {
+		void Hamming(int64_t N, vector<T> &win) {
 			for (int i = 0; i < N; ++i) {
 				win[i] = 0.54 - 0.46*cos(M_PI * 2 * i / (N - 1.0));
 			}
@@ -57,7 +57,7 @@ namespace vocaloid {
 		* Calculates hamming window coefficients.
 		*/
 		template <typename T>
-		void Blackman(uint64_t N, T amp, vector<T> &win) {
+		void Blackman(int64_t N, T amp, vector<T> &win) {
 			for (int i = 0; i<(N + 1) / 2; ++i) {
 				win[i] = amp * T(0.42 - 0.50*cos(M_PI * 2 * i / (N - 1.0))
 					+ 0.08*cos(2 * M_PI * 2 * i / (N - 1.0)));
@@ -93,7 +93,7 @@ namespace vocaloid {
 		* Calculates kasier window coefficients.
 		*/
 		template <typename T>
-		void Kaiser(uint64_t N, float beta, vector<T> &win) {
+		void Kaiser(int64_t N, float beta, vector<T> &win) {
 			win.reserve(N + 1);
 			for (int i = 0; i <= N; i++) {
 				win[i] = BesselI0(beta * sqrt(1.0 - pow((i - N * 0.5) / (N * 0.5), 2.0))) / BesselI0(beta);
@@ -102,7 +102,7 @@ namespace vocaloid {
 
 
 		template<typename T>
-		void GenerateWin(WINDOW_TYPE type, uint64_t length, vector<T> &output, float extra = 1.0) {
+		void GenerateWin(WINDOW_TYPE type, int64_t length, vector<T> &output, float extra = 1.0) {
 			switch (type) {
 			case WINDOW_TYPE::HANNING:
 				Hanning(length, output);

@@ -35,8 +35,8 @@ namespace vocaloid {
 				}
 			}
 
-			void ShiftWindow(vector<float> &data, uint64_t len) {
-				uint64_t halfLen = len / 2;
+			void ShiftWindow(vector<float> &data, int64_t len) {
+				int64_t halfLen = len / 2;
 				if (len % 2 == 0) {
 					for (int i = 0; i < halfLen; i++) {
 						float tmp = data[i];
@@ -45,7 +45,7 @@ namespace vocaloid {
 					}
 				}
 				else {
-					uint64_t shiftAmt = halfLen,
+					int64_t shiftAmt = halfLen,
 						remaining = len,
 						curr = 0;
 					float save = data[curr];
@@ -61,7 +61,7 @@ namespace vocaloid {
 
 			void UpdateHopSize() {
 				stretch_ = pitch_ * tempo_;
-				hop_size_s_ = (uint64_t)roundf(hop_size_ * stretch_);
+				hop_size_s_ = (int64_t)roundf(hop_size_ * stretch_);
 				stretch_ = float(hop_size_s_) / hop_size_;
 			}
 
@@ -76,7 +76,7 @@ namespace vocaloid {
 				fft_ = new FFT();
 			}
 
-			void Initialize(uint64_t fft_size, float overlap, WINDOW_TYPE win = WINDOW_TYPE::HAMMING, float extra = 1.0f) {
+			void Initialize(int64_t fft_size, float overlap, WINDOW_TYPE win = WINDOW_TYPE::HAMMING, float extra = 1.0f) {
 				fft_->Initialize(fft_size);
 				win_.resize(fft_size);
 				GenerateWin(win, fft_size, win_, extra);
@@ -91,12 +91,12 @@ namespace vocaloid {
 				}
 			}
 
-			uint64_t Process(std::vector<float> in, uint64_t len, std::vector<float> &out) {
+			int64_t Process(std::vector<float> in, int64_t len, std::vector<float> &out) {
 				// Add to input data queue
 				for (int i = 0; i < len; i++) {
 					input_queue_.push_back(in[i]);
 				}
-				uint64_t fft_size = fft_->GetBufferSize();
+				int64_t fft_size = fft_->GetBufferSize();
 				vector<float> frame = vector<float>(fft_size);
 				while (input_queue_.size() >= fft_size) {
 					// Windowing
@@ -134,8 +134,8 @@ namespace vocaloid {
 				return PopFrame(out, len);
 			}
 
-			uint64_t PopFrame(vector<float> &frame, uint64_t len) {
-				auto frame_len = min((uint64_t)output_queue_.size(), len);
+			int64_t PopFrame(vector<float> &frame, int64_t len) {
+				auto frame_len = min((int64_t)output_queue_.size(), len);
 				if (frame_len < len)return 0;
 				vector<float> temp;
 				temp.assign(output_queue_.begin(), output_queue_.begin() + frame_len);

@@ -3,6 +3,8 @@ Release
 Bin
 build
 .vs
+**/*.mp3
+**/*.wav
 **.VC.db
 **.VC.opendb
 **/Release

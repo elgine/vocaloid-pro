@@ -9,9 +9,9 @@ namespace vocaloid {
 		class DelayNode : public AudioNode {
 		private:
 			float max_delay_time_;
-			uint64_t max_delay_size_;
+			int64_t max_delay_size_;
 			vector<float> *buffers_;
-			uint64_t write_index_;
+			int64_t write_index_;
 		public:
 			AudioParam *delay_time_;
 
@@ -21,11 +21,12 @@ namespace vocaloid {
 				max_delay_size_ = 0;
 				write_index_ = 0;
 				buffers_ = new vector<float>[8];
+				RegisterAudioParam(delay_time_);
 			}
 
-			void Initialize(uint32_t sample_rate, uint64_t frame_size) override {
+			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
-				max_delay_size_ = uint64_t((max_delay_time_ + 1) * sample_rate);
+				max_delay_size_ = int64_t((max_delay_time_ + 1) * sample_rate);
 				delay_time_->Initialize(sample_rate, frame_size);
 				for (auto i = 0; i < channels_; i++) {
 					buffers_[i].resize(max_delay_size_);

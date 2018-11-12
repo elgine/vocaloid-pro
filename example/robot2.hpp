@@ -7,12 +7,13 @@
 #include "../vocaloid/gain_node.hpp"
 #include "../vocaloid/delay_node.hpp"
 #include "../vocaloid/biquad_node.hpp"
+#include "../vocaloid/player_node.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
 
 void Run() {
 	auto context = new AudioContext();
-	context->SetPlayerMode(44100, 2);
+	auto player = new PlayerNode(context);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\cpp\\vocaloid\\samples\\speech.wav");
 	auto delay = new DelayNode(context, 0.01);
@@ -23,14 +24,15 @@ void Run() {
 	auto osc3 = new OscillatorNode(context);
 	osc3->SetFrequency(50);
 	auto gain = new GainNode(context, 0.004);
-	osc1->Connect(gain);
-	osc2->Connect(gain);
-	osc3->Connect(gain);
-	gain->Connect(delay->delay_time_);
-	source->Connect(delay);
-	delay->Connect(context->GetDestination());
 
-	context->Setup();
+	context->Connect(osc1, gain);
+	context->Connect(osc2, gain);
+	context->Connect(osc3, gain);
+	context->Connect(gain, delay->delay_time_);
+	context->Connect(source, delay);
+	context->Connect(delay, player);
+
+	context->Prepare();
 	context->Start();
 	getchar();
 	context->Stop();

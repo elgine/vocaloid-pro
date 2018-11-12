@@ -3,11 +3,14 @@
 #include "file.h"
 #include "source_node.hpp"
 #include "audio_context.hpp"
+#include "../utility/path.hpp"
+#include "maths.hpp"
 #ifdef _WIN32 || _WIN64
 #include "ffmpeg_io.hpp"
 #else
 #include "wav.hpp"
 #endif
+
 namespace vocaloid {
 	namespace node {
 		class FileReaderNode: public SourceNode {
@@ -16,9 +19,9 @@ namespace vocaloid {
 			io::AudioFileReader *reader_;
 		private:
 			float resample_ratio_;
-			uint64_t require_buffer_size_;
-			uint64_t require_float_size_;
-			uint16_t bits_;
+			int64_t require_buffer_size_;
+			int64_t require_float_size_;
+			int16_t bits_;
 		public:
 			explicit FileReaderNode(AudioContext *ctx) :SourceNode(ctx) {
 				path_ = "undefined";
@@ -33,10 +36,15 @@ namespace vocaloid {
 			}
 
 			void SetPath(const char* path) {
+#ifndef _WIN32 || _WIN64
+				if (GetExtension(path) != ".wav") {
+					throw "Don't support audio file except 'wav'";
+				}
+#endif
 				path_ = path;
 			}
 
-			void Initialize(uint32_t sample_rate, uint64_t frame_size) override {
+			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				SourceNode::Initialize(sample_rate, frame_size);
 				frame_size_ = frame_size;
 				reader_->Open(path_.c_str());
@@ -45,8 +53,7 @@ namespace vocaloid {
 				bits_ = format.bits;
 				if (format.sample_rate == 0)throw "The Sample rate of file is zero!";
 				resample_ratio_ = float(sample_rate) / format.sample_rate;
-				if (resample_ratio_ == 0)resample_ratio_ = 1.0f;
-				require_float_size_ = uint64_t(float(frame_size_) / resample_ratio_);
+				require_float_size_ = int64_t(float(frame_size_) / resample_ratio_);
 				require_buffer_size_ = require_float_size_ * format.block_align;
 			}
 

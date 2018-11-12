@@ -22,8 +22,8 @@ namespace vocaloid {
 			float m_knee_threshold_;
 			float m_y_knee_threshold_db_;
 			float m_last_predelay_frames_;
-			uint64_t m_predelay_read_index_;
-			uint64_t m_predelay_write_index_;
+			int64_t m_predelay_read_index_;
+			int64_t m_predelay_write_index_;
 			float m_detector_average_;
 			float m_compressor_gain_;
 			float m_max_attack_compression_diff_db_;
@@ -140,7 +140,7 @@ namespace vocaloid {
 				SetPredelayTime(predelay);
 				const int n_division_frames = 32;
 				const int n_divisions = frame_size_ / n_division_frames;
-				uint16_t frame_index = 0;
+				int16_t frame_index = 0;
 				for (auto i = 0; i < n_divisions; i++) {
 					// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 					// Calculate desired gain
@@ -348,7 +348,7 @@ namespace vocaloid {
 				return m_knee_;
 			}
 
-			void Initialize(uint32_t sample_rate, uint64_t frame_size) override {
+			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				m_predelay_buffers_->Alloc(channels_, frame_size_);
 				Reset();

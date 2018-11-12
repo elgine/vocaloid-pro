@@ -11,9 +11,10 @@ namespace vocaloid {
 			explicit GainNode(AudioContext *ctx, float v = 1.0f):AudioNode(ctx) {
 				gain_ = new AudioParam();
 				gain_->value_ = v;
+				RegisterAudioParam(gain_);
 			}
 
-			void Initialize(uint32_t sample_rate, uint64_t frame_size) override {
+			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				gain_->Initialize(sample_rate_, frame_size);
 			}

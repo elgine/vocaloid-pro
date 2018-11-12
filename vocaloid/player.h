@@ -4,7 +4,7 @@ namespace vocaloid {
 	namespace io {
 		class Player {
 		public:
-			virtual int Open(uint32_t sample_rate, uint16_t bits, uint16_t nChannels) = 0;
+			virtual int Open(int32_t sample_rate, int16_t bits, int16_t nChannels) = 0;
 			virtual int Push(const char* buf, size_t size) = 0;
 			virtual int Flush() = 0;
 			virtual void Close() = 0;

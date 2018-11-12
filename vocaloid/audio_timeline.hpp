@@ -7,7 +7,7 @@ using namespace std;
 namespace vocaloid {
 
 	struct AudioTimelineValue {
-		uint64_t timestamp;
+		int64_t timestamp;
 		float value;
 		INTERPOLATOR_TYPE interpolator;
 	};
@@ -22,7 +22,7 @@ namespace vocaloid {
 			value_ = value;
 		}
 
-		int64_t FindIndex(uint64_t timestamp, bool &accurate) {
+		int64_t FindIndex(int64_t timestamp, bool &accurate) {
 			long long start = 0, last = (long long)value_list.size() - 1, middle = 0;
 			long long delta = 0;
 			accurate = false;
@@ -47,29 +47,29 @@ namespace vocaloid {
 			return middle;
 		}
 
-		void SetValueAtTime(float v, uint64_t end_time) {
+		void SetValueAtTime(float v, int64_t end_time) {
 			bool accurate = false;
 			auto index = FindIndex(end_time, accurate);
 			value_list.insert(value_list.begin() + index, { end_time, v, INTERPOLATOR_TYPE::NONE });
 		}
 
-		void ExponentialRampToValueAtTime(float v, uint64_t end_time) {
+		void ExponentialRampToValueAtTime(float v, int64_t end_time) {
 			bool accurate = false;
 			auto index = FindIndex(end_time, accurate);
 			value_list.insert(value_list.begin() + index, { end_time, v, INTERPOLATOR_TYPE::EXPONENTIAL });
 		}
 
-		void LinearRampToValueAtTime(float v, uint64_t end_time) {
+		void LinearRampToValueAtTime(float v, int64_t end_time) {
 			bool accurate = false;
 			auto index = FindIndex(end_time, accurate);
 			value_list.insert(value_list.begin() + index, { end_time, v, INTERPOLATOR_TYPE::LINEAR });
 		}
 
-		float GetValueAtTime(uint64_t time) {
+		float GetValueAtTime(int64_t time) {
 			bool accurate = false;
 			int64_t index = FindIndex(time, accurate);
 			if (index - 1 < 0)return value_;
-			if (index >= value_list.size()) {
+			if (index >= (int64_t)value_list.size()) {
 				return value_list[value_list.size() - 1].value;
 			}
 			float v = value_;

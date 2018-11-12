@@ -7,9 +7,9 @@ namespace vocaloid {
 	namespace dsp {	
 		class Convolution{
 		private:
-			uint64_t kernel_size_;
-			uint64_t input_size_;
-			uint64_t fft_size_;
+			int64_t kernel_size_;
+			int64_t input_size_;
+			int64_t fft_size_;
 			vector<float> input_;
 			vector<float> buffer_;
 			FFT *kernel_;
@@ -27,12 +27,12 @@ namespace vocaloid {
 			}
 		public:
 
-			explicit Convolution(uint64_t input_size) :input_size_(input_size), kernel_size_(0), fft_size_(input_size) {
+			explicit Convolution(int64_t input_size) :input_size_(input_size), kernel_size_(0), fft_size_(input_size) {
 				kernel_ = new FFT();
 				main_ = new FFT();
 			}
 
-			void Initialize(vector<float> k, uint64_t kernel_len) {
+			void Initialize(vector<float> k, int64_t kernel_len) {
 				kernel_size_ = kernel_len;
 				fft_size_ = kernel_size_ + input_size_ - 1;
 				if ((fft_size_ & (fft_size_ - 1)) != 0) {
@@ -59,7 +59,7 @@ namespace vocaloid {
 				main_->Initialize(fft_size_);
 			}
 
-			uint64_t Process(vector<float> in, uint64_t len, vector<float> &out) {
+			int64_t Process(vector<float> in, int64_t len, vector<float> &out) {
 				// Zero padding right
 				for (int i = 0; i < fft_size_; i++) {
 					if (i >= len) {
@@ -92,11 +92,11 @@ namespace vocaloid {
 				return input_size_;
 			}
 
-			uint64_t FFTSize() {
+			int64_t FFTSize() {
 				return fft_size_;
 			}
 
-			uint64_t KernelSize() {
+			int64_t KernelSize() {
 				return kernel_size_;
 			}
 		};

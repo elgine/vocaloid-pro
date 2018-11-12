@@ -5,13 +5,11 @@ namespace vocaloid {
 	namespace node {
 		class DestinationNode: public AudioNode{
 		protected:
-			uint32_t sample_rate_ = 44100;
+			int32_t sample_rate_ = 44100;
 		public:
 			explicit DestinationNode(AudioContext *ctx) :AudioNode(ctx, AudioProcessorType::OUTPUT) {
 				can_connect_ = false;
 			}
-
-			virtual void Close() {}
 		};
 	}
 }

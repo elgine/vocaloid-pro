@@ -4,7 +4,7 @@
 #pragma comment(lib, "winmm.lib")
 namespace vocaloid {
 	namespace io {
-		#define MAX_BUFFER_SIZE (1024 * 8 * 16)
+		#define MAX_BUFFER_SIZE (1024 * 16 * 8)
 		//Simple audio player for playing pcm data
 		class PCMPlayer: public Player {
 		private:
@@ -54,7 +54,7 @@ namespace vocaloid {
 				CloseHandle(play_event_);
 			}
 
-			int Open(uint32_t nSamplesPerSec, uint16_t wBitsPerSample, uint16_t nChannels) {
+			int Open(int32_t nSamplesPerSec, int16_t wBitsPerSample, int16_t nChannels) {
 				WAVEFORMATEX wfx;
 				if (!caching_buf_ || !play_event_ || !wave_header_[0].lpData || !wave_header_[1].lpData) {
 					return -1;
