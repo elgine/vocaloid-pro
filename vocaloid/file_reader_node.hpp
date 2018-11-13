@@ -18,6 +18,7 @@ namespace vocaloid {
 			string path_;
 			io::AudioFileReader *reader_;
 		private:
+			char* temp_buffer_;
 			float resample_ratio_;
 			int64_t require_buffer_size_;
 			int64_t require_float_size_;
@@ -55,25 +56,27 @@ namespace vocaloid {
 				resample_ratio_ = float(sample_rate) / format.sample_rate;
 				require_float_size_ = int64_t(float(frame_size_) / resample_ratio_);
 				require_buffer_size_ = require_float_size_ * format.block_align;
+				AllocArray(require_buffer_size_, &temp_buffer_);
 			}
 
 			int64_t ProcessFrame() override {
-				if (reader_->IsEnd() || !enable_) {
-					result_buffer_->Fill(0.0f);
-					return frame_size_;
+				if (!enable_)return 0;
+				int64_t size = 0;
+				if (reader_->IsEnd() && !reader_->CapableToRead(require_buffer_size_)) {
+					reader_->Flush(temp_buffer_, size);
+					memset(temp_buffer_ + size, 0, require_buffer_size_ - size);
+				}else {
+					size = reader_->ReadData(temp_buffer_, require_buffer_size_);
 				}
-				char *bytes = new char[require_buffer_size_];
-				reader_->ReadData(bytes, require_buffer_size_);
+				if (size <= 0)return 0;
 				if (resample_ratio_ != 1.0) {
-					summing_buffer_->FromByteArray(bytes, require_buffer_size_, bits_, channels_);
+					summing_buffer_->FromByteArray(temp_buffer_, require_buffer_size_, bits_, channels_);
 					for (auto i = 0; i < channels_; i++) {
 						Resample(summing_buffer_->Channel(i)->Data(), require_float_size_, INTERPOLATOR_TYPE::LINEAR, resample_ratio_, result_buffer_->Channel(i)->Data());
 					}
 				}
 				else
-					result_buffer_->FromByteArray(bytes, require_buffer_size_, bits_, channels_);
-				delete[] bytes;
-				bytes = nullptr;
+					result_buffer_->FromByteArray(temp_buffer_, require_buffer_size_, bits_, channels_);
 				return frame_size_;
 			}
 		};

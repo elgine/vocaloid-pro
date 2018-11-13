@@ -10,7 +10,6 @@ namespace vocaloid {
 	
 	namespace node {
 		int64_t PROCESSOR_UNIT_COUNTER = 0;
-
 		enum AudioProcessorType {
 			NORMAL,
 			INPUT,
@@ -41,8 +40,8 @@ namespace vocaloid {
 										type_(type),
 										can_be_connected_(can_be_connected),
 										can_connect_(can_connect) {
-				frame_size_ = 1024;
-				sample_rate_ = 44100;
+				frame_size_ = DEFAULT_FRAME_SIZE;
+				sample_rate_ = DEFAULT_SAMPLE_RATE;
 				channels_ = 2;
 				enable_ = true;
 				summing_buffer_ = new AudioFrame(channels_, frame_size_);
@@ -67,6 +66,7 @@ namespace vocaloid {
 			}
 
 			void PullBuffers() {
+				result_buffer_->Fill(0.0f);
 				summing_buffer_->Fill(0.0f);
 				for (auto input : inputs_) {
 					summing_buffer_->Mix(input->Result());
@@ -76,6 +76,10 @@ namespace vocaloid {
 			virtual int64_t ProcessFrame() = 0;
 
 			virtual void Close() {}
+
+			virtual uint64_t SuggestFrameSize() {
+				return frame_size_;
+			}
 
 			int64_t Process() {
 				PullBuffers();
@@ -241,7 +245,7 @@ namespace vocaloid {
 			mutex audio_render_thread_mutex_;
 			vector<int64_t> traversal_nodes_;
 			int32_t sample_rate_;
-			atomic<int64_t> frame_size_;
+			uint64_t frame_size_;
 
 			void Run() {
 				while (state_ == AudioContextState::PLAYING) {
@@ -259,12 +263,17 @@ namespace vocaloid {
 		public:
 
 			explicit AudioContext():state_(AudioContextState::STOPPED){
-				sample_rate_ = 44100;
-				frame_size_ = 75776;
+				sample_rate_ = DEFAULT_SAMPLE_RATE;
+				frame_size_ = DEFAULT_FRAME_SIZE;
 			}
 
 			void Prepare() {
 				Traverse(traversal_nodes_);
+				auto frame_size = frame_size_;
+				for (auto node : traversal_nodes_) {
+					frame_size = max(FindNode(node)->SuggestFrameSize(), frame_size);
+				}
+				frame_size = min((uint64_t)MAX_FFT_SIZE, frame_size);
 				for (auto node : traversal_nodes_) {
 					FindNode(node)->Initialize(SampleRate(), frame_size_);
 				}

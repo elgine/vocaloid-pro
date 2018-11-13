@@ -85,7 +85,7 @@ namespace vocaloid {
 			int Decode(AVPacket *packet) {
 				auto got_frame = 0;
 				auto ret = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet);
-				if (got_frame) {
+				if (got_frame > 0) {
 					frame_count_++;
 					Convert((const uint8_t**)frame_->data, frame_->nb_samples);
 				}
@@ -165,7 +165,7 @@ namespace vocaloid {
 
 		public:
 
-			FFmpegFileReader(int64_t max_size = 16384 * 8) {
+			FFmpegFileReader(int64_t max_size = MAX_FFT_SIZE * 16) {
 				max_buffer_size_ = max_size;
 				buffer_ = new char[max_buffer_size_];
 			}

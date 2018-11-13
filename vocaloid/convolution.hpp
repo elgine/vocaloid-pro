@@ -10,8 +10,9 @@ namespace vocaloid {
 			int64_t kernel_size_;
 			int64_t input_size_;
 			int64_t fft_size_;
-			vector<float> input_;
-			vector<float> buffer_;
+			float* input_;
+			float* after_fft_;
+			float* buffer_;
 			FFT *kernel_;
 			FFT *main_;
 		protected:
@@ -27,46 +28,45 @@ namespace vocaloid {
 			}
 		public:
 
-			explicit Convolution(int64_t input_size) :input_size_(input_size), kernel_size_(0), fft_size_(input_size) {
+			explicit Convolution():kernel_size_(0), input_size_(0), fft_size_(0){
 				kernel_ = new FFT();
 				main_ = new FFT();
+				input_ = nullptr;
+				buffer_ = nullptr;
 			}
 
-			void Initialize(vector<float> k, int64_t kernel_len) {
+			void Initialize(uint64_t input_size, float* k, uint64_t kernel_len) {
+				input_size_ = input_size;
 				kernel_size_ = kernel_len;
 				fft_size_ = kernel_size_ + input_size_ - 1;
 				if ((fft_size_ & (fft_size_ - 1)) != 0) {
 					fft_size_ = NextPow2(fft_size_);
 				}
-				input_.reserve(fft_size_);
-				for (auto i = input_.size(); i < fft_size_; i++) {
-					input_.emplace_back(0);
-				}
-				buffer_.reserve(fft_size_);
-				for (auto i = buffer_.size(); i < fft_size_; i++) {
-					buffer_.emplace_back(0);
-				}
+				DeleteArray(&input_);
+				AllocArray(fft_size_, &input_);
 
-				vector<float> kernel(fft_size_, 0);
-				for (auto i = 0; i < kernel_len; i++) {
-					kernel[i] = k[i];
-				}
+				DeleteArray(&buffer_);
+				AllocArray(fft_size_, &buffer_);
 
 				kernel_->Dispose();
-				kernel_->Initialize(fft_size_);
+				kernel_->Initialize(fft_size_); 
+				float *kernel;
+				AllocArray(fft_size_, &kernel);
+				memcpy(kernel, k, kernel_len);
 				kernel_->Forward(kernel, fft_size_);
+				DeleteArray(&kernel);
 				main_->Dispose();
 				main_->Initialize(fft_size_);
 			}
 
-			int64_t Process(vector<float> in, int64_t len, vector<float> &out) {
-				// Zero padding right
+			uint64_t Process(float* in, uint64_t len, float *out) {
 				for (int i = 0; i < fft_size_; i++) {
-					if (i >= len) {
-						input_[i] = 0;
+					if (i >= input_size_) {
+						input_[i] = 0.0f;
 					}
-					else
+					else {
 						input_[i] = in[i];
+					}
 				}
 				// Forward fft
 				main_->Forward(input_, fft_size_);
@@ -78,7 +78,7 @@ namespace vocaloid {
 				for (int i = 0; i < fft_size_; i++) {
 					buffer_[i] += input_[i];
 					if (i < input_size_) {
-						out[i] = input_[i];
+						out[i] = buffer_[i];
 					}
 				}
 				// Move items left

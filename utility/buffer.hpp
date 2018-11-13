@@ -7,28 +7,27 @@ namespace vocaloid{
     template<typename T>
     class Buffer{
     protected:
-        vector<T> data_;
+        T *data_;
         uint64_t max_size_;
         uint64_t size_;
     public:
         explicit Buffer(){
             max_size_ = 0;
             size_ = 0;
+			data_ = nullptr;
         }
 
         explicit Buffer(uint64_t max_size){
-            max_size_ = 0;
-            size_ = 0;
+			max_size_ = 0;
+			size_ = 0;
+			data_ = nullptr;
             Alloc(max_size);
         }
 
-        explicit Buffer(vector<T> data, uint64_t len, uint64_t offset){
-            max_size_ = size_ = len;
-            Alloc(len);
-            Set(data, len, offset);
-        }
-
         explicit Buffer(T* data, uint64_t len, uint64_t offset){
+			max_size_ = 0;
+			size_ = 0;
+			data_ = nullptr;
             max_size_ = size_ = len;
             Alloc(len);
             Set(data, len, offset);
@@ -36,6 +35,8 @@ namespace vocaloid{
 
         ~Buffer(){
             Dispose();
+			delete[] data_;
+			data_ = nullptr;
         }
 
         void Fill(T v){
@@ -65,17 +66,6 @@ namespace vocaloid{
             size_ -= len;
         }
 
-        void Add(const vector<T> data, uint64_t len, uint64_t offset = 0){
-            uint64_t data_offset = size_;
-            if(max_size_ < size_ + len){
-                Alloc(size_ + len);
-            }
-            for(auto i = 0; i < len;i++){
-                data_[i + data_offset] = data[i + offset];
-            }
-            size_ += len;
-        }
-
         void Add(T *data, uint64_t len, uint64_t offset = 0){
             uint64_t data_offset = size_;
             if(max_size_ < size_ + len){
@@ -87,25 +77,14 @@ namespace vocaloid{
             size_ += len;
         }
 
-        void Add(Buffer<T> *data, uint64_t len, uint64_t offset = 0){
-            Add(data->Data(), len, offset);
-        }
-
-        void Pop(vector<T> &out, uint64_t len, uint64_t offset = 0){
+        void Pop(T *out, uint64_t len, uint64_t offset = 0){
             auto last = min(offset + len, size_);
-            out.assign(data_.begin() + offset, data_.begin() + last);
+			memcpy(out, data_ + offset, last - offset);
             Splice(len, offset);
         }
 
         void Pop(Buffer<T> *buf, uint64_t len, uint64_t offset = 0){
             Pop(buf->Data(), len, offset);
-        }
-
-        void Set(vector<T> data, uint64_t len, uint64_t offset = 0, uint64_t dst = 0){
-            Alloc(len);
-            for(auto i = 0;i < len;i++){
-                data_[i + dst] = data[i + offset];
-            }
         }
 
         void Set(const T* data, uint64_t len, uint64_t offset = 0, uint64_t dst = 0){
@@ -117,10 +96,13 @@ namespace vocaloid{
 
         void Alloc(uint64_t size){
             if(max_size_ < size){
-                data_.reserve(size);
-                for(auto i = max_size_;i < size;i++){
-                    data_.emplace_back(0);
-                }
+				T* new_data = nullptr;
+				AllocArray(size, &new_data);
+				if (data_ != nullptr) {
+					memcpy(new_data, data_, max_size_);
+					DeleteArray(&data_);
+				}
+				data_ = new_data;
                 max_size_ = size;
             }
         }
@@ -132,9 +114,6 @@ namespace vocaloid{
         }
 
         void Dispose(){
-            data_.clear();
-            // Free vector memory as <<Effective STL>> said
-            vector<float>(data_).swap(data_);
             max_size_ = size_ = 0;
         }
 
@@ -142,7 +121,7 @@ namespace vocaloid{
             return size_;
         }
 
-        vector<T>& Data(){
+        T* Data(){
             return data_;
         }
 

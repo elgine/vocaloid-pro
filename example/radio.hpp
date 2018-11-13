@@ -18,8 +18,7 @@ void Run() {
 	fut.get();
 	auto kernel = new AudioFrame();
 	kernel->FromBuffer(buffer, format->bits, format->channels);
-	auto mono = kernel->Channel(0)->Data();
-	convolution->kernel_.assign(mono.begin(), mono.end());
+	convolution->SetKernel(kernel->Channel(0)->Data(), kernel->Channel(0)->Size());
 
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");

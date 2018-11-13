@@ -54,7 +54,7 @@ namespace vocaloid {
 	}
 
 	template<typename T>
-	void CalD(const vector<T> y, int n, vector<T> &output) {
+	void CalD(const T* y, int n, vector<T> &output) {
 		vector<T> A(n, 1), C(n, 1), B(n, 4), D(n);
 		for (int i = 0; i < n; i++) {
 			if (i == 0)D[i] = 3 * (y[i + 1] - y[i]);
@@ -79,7 +79,7 @@ namespace vocaloid {
 
 	// Linear interpolator
 	template<typename T>
-	void LinearInterpolate(const vector<T> input, int64_t input_len, vector<T> &output, int64_t output_len) {
+	void LinearInterpolate(const T* input, int64_t input_len, T* output, int64_t output_len) {
 		float ratio = (float)output_len / (input_len - 1);
 		int next_offset = 0, offset = 0;
 		for (int i = 0; i < input_len - 1; i++) {
@@ -95,7 +95,7 @@ namespace vocaloid {
 	}
 
 	template<typename T>
-	void ExponentialInterpolate(const vector<T> input, int64_t input_len, vector<T> &output, int64_t output_len) {
+	void ExponentialInterpolate(const T* input, int64_t input_len, T* output, int64_t output_len) {
 		float ratio = (float)output_len / (input_len - 1);
 		int next_offset = 0, offset = 0;
 		for (int i = 0; i < input_len - 1; i++) {
@@ -112,7 +112,7 @@ namespace vocaloid {
 
 	// Cubic spline interpolator
 	template<typename T>
-	void CubicInterpolate(const vector<T> input, int64_t input_len, vector<T> &output, int64_t output_len) {
+	void CubicInterpolate(const T* input, int64_t input_len, T* output, int64_t output_len) {
 		vector<float> D(input_len);
 		CalD(input, input_len, D);
 		float ratio = (float)output_len / (input_len - 1);
@@ -130,7 +130,7 @@ namespace vocaloid {
 	}
 
 	template<typename T>
-	void Interpolate(INTERPOLATOR_TYPE type, const vector<T> input, int64_t input_len, vector<T> &output, int64_t output_len) {
+	void Interpolate(INTERPOLATOR_TYPE type, const T* input, int64_t input_len, T* output, int64_t output_len) {
 		switch (type) {
 		case INTERPOLATOR_TYPE::CUBIC:
 			CubicInterpolate(input, input_len, output, output_len);
@@ -145,15 +145,15 @@ namespace vocaloid {
 	}
 
 	template<typename T>
-	int64_t Resample(vector<T> input, int64_t input_len, INTERPOLATOR_TYPE interpolator, float ratio, vector<T>& output) {
+	int64_t Resample(T* input, int64_t input_len, INTERPOLATOR_TYPE interpolator, float ratio, T* output) {
 		auto output_len = int64_t(input_len * ratio);
-		if (ratio == 1.0f)output.assign(input.begin(), input.begin() + input_len);
+		if (ratio == 1.0f) {
+			memcpy(output, input, input_len);
+		}
 		else {
-			if (output.size() != output_len)
-				output.resize(output_len);
 			if (ratio < 1) {
 				for (int i = 0; i < output_len; i++) {
-					auto index = round(i / ratio);
+					auto index = (uint64_t)round(i / ratio);
 					output[i] = input[index >= input_len ? input_len - 1 : index];
 				}
 			}

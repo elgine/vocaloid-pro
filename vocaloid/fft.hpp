@@ -5,14 +5,16 @@ namespace vocaloid {
 		// Fast Fourier Transformation
 		class FFT {
 		protected:
-			vector<int> reverse_table_;
-			vector<float> sin_table_;
-			vector<float> cos_table_;
-			int64_t buffer_size_;
+			int* reverse_table_;
+			float* sin_table_;
+			float* cos_table_;
+			float* rev_real_;
+			float* rev_imag_;
+			uint64_t buffer_size_;
 		public:
 
-			vector<float> real_;
-			vector<float> imag_;
+			float* real_;
+			float* imag_;
 
 			static float CalculateMagnitude(float real, float imag) {
 				return sqrtf(powf(real, 2.0f) + powf(imag, 2.0f));
@@ -30,9 +32,11 @@ namespace vocaloid {
 
 			void Initialize(int64_t buffer_size) {
 				buffer_size_ = buffer_size;
-				real_ = vector<float>(buffer_size_, 0);
-				imag_ = vector<float>(buffer_size_, 0);
-				reverse_table_ = vector<int>(buffer_size_);
+				AllocArray(buffer_size_, &real_);
+				AllocArray(buffer_size_, &imag_);
+				AllocArray(buffer_size_, &rev_real_);
+				AllocArray(buffer_size_, &rev_imag_);
+				AllocArray(buffer_size_, &reverse_table_);
 				int limit = 1;
 				int bit = int(buffer_size_ >> 1);
 				int i;
@@ -43,8 +47,8 @@ namespace vocaloid {
 					limit = limit << 1;
 					bit = bit >> 1;
 				}
-				sin_table_ = vector<float>(buffer_size_);
-				cos_table_ = vector<float>(buffer_size_);
+				AllocArray(buffer_size_, &sin_table_);
+				AllocArray(buffer_size_, &cos_table_);
 				for (i = 0; i < buffer_size_; i++) {
 					sin_table_[i] = (float)sin(-M_PI / i);
 					cos_table_[i] = (float)cos(-M_PI / i);
@@ -56,7 +60,7 @@ namespace vocaloid {
 			}
 
 			// Do FFT
-			void Forward(const vector<float> buffer, int64_t buffer_len) {
+			void Forward(const float *buffer, int64_t buffer_len) {
 				float k = floorf(logf(buffer_size_) / 0.693f);
 				if (pow(2, k) != buffer_size_) {
 					throw "Invalid buffer size, must be a power of 2.";
@@ -104,7 +108,7 @@ namespace vocaloid {
 				}
 			}
 
-			void Inverse(vector<float> &output) {
+			void Inverse(float *output) {
 				Inverse(real_, imag_, buffer_size_, output);
 				for (int i = 0; i < buffer_size_; i++) {
 					output[i] /= buffer_size_;
@@ -112,24 +116,21 @@ namespace vocaloid {
 			}
 
 			// Do IFFT
-			void Inverse(vector<float> real, vector<float> imag, int64_t len, vector<float> &output) {
+			void Inverse(const float* real, const float* imag, int64_t len, float *output) {
 				int half_size = 1, off, i;
 				float phase_shift_step_real, phase_shift_step_imag,
 					cur_phase_shift_real, cur_phase_shift_imag,
 					tr, ti, tmp_real;
-				for (i = 0; i < buffer_size_; i++) {
+				/*for (i = 0; i < buffer_size_; i++) {
 					imag[i] *= -1.0f;
-				}
-
-				vector<float> rev_real = vector<float>(buffer_size_),
-					rev_imag = vector<float>(buffer_size_);
+				}*/
 
 				for (i = 0; i < buffer_size_; i++) {
-					rev_real[i] = real[reverse_table_[i]];
-					rev_imag[i] = imag[reverse_table_[i]];
+					rev_real_[i] = real[reverse_table_[i]];
+					rev_imag_[i] = imag[reverse_table_[i]] * -1.0f;
 				}
-				real = rev_real;
-				imag = rev_imag;
+				auto real_c = rev_real_;
+				auto imag_c = rev_imag_;
 
 				while (half_size < buffer_size_) {
 					phase_shift_step_real = cos_table_[half_size];
@@ -141,12 +142,12 @@ namespace vocaloid {
 						i = fft_step;
 						while (i < buffer_size_) {
 							off = i + half_size;
-							tr = (cur_phase_shift_real * real[off]) - (cur_phase_shift_imag * imag[off]);
-							ti = (cur_phase_shift_real * imag[off]) + (cur_phase_shift_imag * real[off]);
-							real[off] = real[i] - tr;
-							imag[off] = imag[i] - ti;
-							real[i] += tr;
-							imag[i] += ti;
+							tr = (cur_phase_shift_real * real_c[off]) - (cur_phase_shift_imag * imag_c[off]);
+							ti = (cur_phase_shift_real * imag_c[off]) + (cur_phase_shift_imag * real_c[off]);
+							real_c[off] = real_c[i] - tr;
+							imag_c[off] = imag_c[i] - ti;
+							real_c[i] += tr;
+							imag_c[i] += ti;
 							i += half_size << 1;
 						}
 						tmp_real = cur_phase_shift_real;
@@ -157,16 +158,16 @@ namespace vocaloid {
 				}
 
 				for (i = 0; i < buffer_size_; i++) {
-					output[i] = real[i];
+					output[i] = real_c[i];
 				}
 			}
 
 			void Dispose() {
-				real_.clear();
-				imag_.clear();
-				reverse_table_.clear();
-				sin_table_.clear();
-				cos_table_.clear();
+				DeleteArray(&real_);
+				DeleteArray(&imag_);
+				DeleteArray(&reverse_table_);
+				DeleteArray(&sin_table_);
+				DeleteArray(&cos_table_);
 			}
 		};
 	}

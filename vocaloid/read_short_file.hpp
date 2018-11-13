@@ -25,7 +25,7 @@ namespace vocaloid {
 
 			buffer->Alloc(reader->FileLength());
 
-			auto frame_size = 4096;
+			auto frame_size = DEFAULT_FRAME_SIZE;
 			int64_t size = 0;
 			int64_t sum = 0;
 			auto temp = new char[frame_size];
