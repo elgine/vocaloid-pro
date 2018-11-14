@@ -1,4 +1,5 @@
 #pragma once
+#ifdef _WIN32 || _WIN64
 #include "player.h"
 #include <windows.h>
 #pragma comment(lib, "winmm.lib")
@@ -129,3 +130,4 @@ namespace vocaloid {
 		};
 	}
 }
+#endif

@@ -6,7 +6,7 @@
 #include "../utility/path.hpp"
 namespace vocaloid {
 	namespace io {
-		int64_t ReadShortFile(const char* source, AudioFormat *format, Buffer<char> *buffer) {
+		int64_t ReadFileBuffer(const char* source, AudioFormat *format, Buffer<char> *buffer) {
 			AudioFileReader *reader = nullptr;
 #ifdef _WIN32 || _WIN64
 			reader = new FFmpegFileReader();
@@ -16,7 +16,8 @@ namespace vocaloid {
 			}
 			reader = new WAVReader();
 #endif
-			reader->Open(source);
+			auto ret = reader->Open(source);
+			if (ret < 0)return ret;
 			auto f = reader->Format();
 			format->sample_rate = f.sample_rate;
 			format->channels = f.channels;

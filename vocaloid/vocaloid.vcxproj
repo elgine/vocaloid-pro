@@ -159,7 +159,7 @@
     <ClInclude Include="pitch_shifter.hpp" />
     <ClInclude Include="player.h" />
     <ClInclude Include="player_node.hpp" />
-    <ClInclude Include="read_short_file.hpp" />
+    <ClInclude Include="read_file_buffer.hpp" />
     <ClInclude Include="source_node.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="audio_timeline.hpp" />

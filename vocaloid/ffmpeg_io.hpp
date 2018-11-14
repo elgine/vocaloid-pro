@@ -1,4 +1,5 @@
 #pragma once
+#ifdef _WIN32 || _WIN64
 #include "file.h"
 #include <memory>
 #include <thread>
@@ -598,3 +599,4 @@ namespace vocaloid {
 		};
 	}
 }
+#endif

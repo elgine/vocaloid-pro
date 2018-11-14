@@ -3,7 +3,7 @@
 #include "../vocaloid/convolution_node.hpp"
 #include "../vocaloid/file_reader_node.hpp"
 #include "../vocaloid/audio_context.hpp"
-#include "../vocaloid/read_short_file.hpp"
+#include "../vocaloid/read_file_buffer.hpp"
 #include <future>
 using namespace vocaloid;
 using namespace vocaloid::node;
@@ -14,7 +14,7 @@ void Run() {
 	auto convolution = new ConvolutionNode(context);
 	auto buffer = new Buffer<char>();
 	auto format = new AudioFormat();
-	auto fut = async(ReadShortFile, "G:\\Projects\\VSC++\\vocaloid\\samples\\radio.wav", format, buffer);
+	auto fut = async(ReadFileBuffer, "G:\\Projects\\VSC++\\vocaloid\\samples\\radio.wav", format, buffer);
 	fut.get();
 	auto kernel = new AudioFrame();
 	kernel->FromBuffer(buffer, format->bits, format->channels);

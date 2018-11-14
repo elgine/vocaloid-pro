@@ -120,7 +120,7 @@
     <ClInclude Include="audio_context.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="read_short_file.hpp">
+    <ClInclude Include="read_file_buffer.hpp">
       <Filter>头文件\io</Filter>
     </ClInclude>
   </ItemGroup>
