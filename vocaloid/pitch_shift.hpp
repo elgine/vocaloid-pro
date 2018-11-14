@@ -7,19 +7,22 @@ namespace vocaloid {
 		class PitchShift {
 		private:
 			FFT *fft_;
-			vector<float> win_;
-			vector<float> omega_;
-			vector<float> input_queue_;
-			vector<float> output_queue_;
-			vector<float> buffer_;
+			float* win_;
+			float* omega_;
+			Buffer<float>* input_queue_;
+			Buffer<float>* output_queue_;
+			float *out_;
+			float *buffer_;
+			float *prev_in_phase_;
+			float *prev_out_phase_;
+			float *frame_;
 			int64_t overlap_size_;
 			int64_t hop_size_;
 			int64_t hop_size_s_;
 			float stretch_;
 			float pitch_;
 			float tempo_;
-			vector<float> prev_in_phase_;
-			vector<float> prev_out_phase_;
+			
 
 			void Processing() {
 				for (int i = 0; i < fft_->GetBufferSize(); i++) {
@@ -35,7 +38,7 @@ namespace vocaloid {
 				}
 			}
 
-			void ShiftWindow(vector<float> &data, int64_t len) {
+			void ShiftWindow(float *data, int64_t len) {
 				int64_t halfLen = len / 2;
 				if (len % 2 == 0) {
 					for (int i = 0; i < halfLen; i++) {
@@ -74,52 +77,63 @@ namespace vocaloid {
 				pitch_(1.0f),
 				tempo_(1.0f) {
 				fft_ = new FFT();
+				input_queue_ = new Buffer<float>();
+				output_queue_ = new Buffer<float>();
 			}
 
 			void Initialize(int64_t fft_size, float overlap, WINDOW_TYPE win = WINDOW_TYPE::HAMMING, float extra = 1.0f) {
 				fft_->Initialize(fft_size);
-				win_.resize(fft_size);
+				DeleteArray(&out_);
+				AllocArray(fft_size, &out_);
+				DeleteArray(&frame_);
+				AllocArray(fft_size, &frame_);
+				DeleteArray(&win_);
+				AllocArray(fft_size, &win_);
 				GenerateWin(win, fft_size, win_, extra);
-				buffer_.resize(fft_size);
-				prev_in_phase_.resize(fft_size);
-				prev_out_phase_.resize(fft_size);
+				DeleteArray(&buffer_);
+				AllocArray(fft_size, &buffer_);
+				DeleteArray(&prev_in_phase_);
+				AllocArray(fft_size, &prev_in_phase_);
+				DeleteArray(&prev_out_phase_);
+				AllocArray(fft_size, &prev_out_phase_);
 				overlap_size_ = (int64_t)(fft_size * overlap);
 				hop_size_s_ = hop_size_ = fft_size - overlap_size_;
-				omega_.resize(fft_size);
+				DeleteArray(&omega_);
+				AllocArray(fft_size, &omega_);
 				for (int i = 0; i < fft_size; i++) {
 					omega_[i] = (float)(M_PI * 2.0f * hop_size_ * i / fft_size);
 				}
+
+				input_queue_->Alloc(fft_size);
+				output_queue_->Alloc(fft_size);
+				output_queue_->SetSize(hop_size_s_);
 			}
 
-			int64_t Process(std::vector<float> in, int64_t len, std::vector<float> &out) {
+			int64_t Process(float *in, int64_t len, float *out) {
 				// Add to input data queue
 				for (int i = 0; i < len; i++) {
-					input_queue_.push_back(in[i]);
+					input_queue_->Add(in, len);
 				}
 				int64_t fft_size = fft_->GetBufferSize();
-				vector<float> frame = vector<float>(fft_size);
-				while (input_queue_.size() >= fft_size) {
+				while (input_queue_->Size() >= fft_size) {
 					// Windowing
 					for (int i = 0; i < fft_size; i++) {
-						frame[i] = input_queue_[i] * win_[i];
+						frame_[i] = input_queue_->Data()[i] * win_[i];
 					}
-					ShiftWindow(frame, fft_size);
+					ShiftWindow(frame_, fft_size);
 					// Forward fft
-					fft_->Forward(frame, fft_size);
+					fft_->Forward(frame_, fft_size);
 					// Do processing
 					Processing();
 					// Do inverse fft
-					fft_->Inverse(frame);
-					ShiftWindow(frame, fft_size);
+					fft_->Inverse(frame_);
+					ShiftWindow(frame_, fft_size);
 
 					// Overlap add
 					for (int i = 0; i < fft_size; i++) {
-						buffer_[i] += frame[i] * win_[i];
-						if (i < hop_size_s_) {
-							// Push to output data queue
-							output_queue_.push_back(buffer_[i]);
-						}
+						buffer_[i] += frame_[i] * win_[i];
 					}
+					output_queue_->Add(buffer_, hop_size_s_);
 					// Move items left
 					for (int i = 0; i < fft_size; i++) {
 						if (i + hop_size_s_ >= fft_size) {
@@ -129,18 +143,16 @@ namespace vocaloid {
 							buffer_[i] = buffer_[i + hop_size_s_];
 					}
 					// Delete
-					input_queue_.erase(input_queue_.begin(), input_queue_.begin() + hop_size_);
+					input_queue_->Splice(hop_size_);
 				}
 				return PopFrame(out, len);
 			}
 
-			int64_t PopFrame(vector<float> &frame, int64_t len) {
-				auto frame_len = min((int64_t)output_queue_.size(), len);
+			int64_t PopFrame(float *frame, int64_t len) {
+				auto frame_len = min((int64_t)output_queue_->Size(), len);
 				if (frame_len < len)return 0;
-				vector<float> temp;
-				temp.assign(output_queue_.begin(), output_queue_.begin() + frame_len);
-				output_queue_.erase(output_queue_.begin(), output_queue_.begin() + frame_len);
-				return Resample(temp, frame_len, INTERPOLATOR_TYPE::LINEAR, 1.0f / pitch_, frame);
+				output_queue_->Pop(out_, frame_len);
+				return Resample(out_, frame_len, INTERPOLATOR_TYPE::LINEAR, 1.0f / pitch_, frame);
 			}
 
 			void SetPitch(float v) {
@@ -165,10 +177,13 @@ namespace vocaloid {
 
 			void Dispose() {
 				fft_->Dispose();
-				win_.clear();
-				buffer_.clear();
-				input_queue_.clear();
-				output_queue_.clear();
+				DeleteArray(&win_);
+				DeleteArray(&buffer_);
+				DeleteArray(&out_);
+				DeleteArray(&omega_);
+				DeleteArray(&frame_);
+				DeleteArray(&prev_in_phase_);
+				DeleteArray(&prev_out_phase_);
 			}
 		};
 	}

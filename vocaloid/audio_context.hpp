@@ -66,19 +66,19 @@ namespace vocaloid {
 			}
 
 			void PullBuffers() {
-				result_buffer_->Fill(0.0f);
-				summing_buffer_->Fill(0.0f);
+				summing_buffer_->Zero();
 				for (auto input : inputs_) {
 					summing_buffer_->Mix(input->Result());
 				}
+				result_buffer_->Copy(summing_buffer_);
 			}
 
 			virtual int64_t ProcessFrame() = 0;
 
 			virtual void Close() {}
 
-			virtual uint64_t SuggestFrameSize() {
-				return frame_size_;
+			virtual int64_t SuggestFrameSize() {
+				return DEFAULT_FRAME_SIZE;
 			}
 
 			int64_t Process() {
@@ -269,11 +269,11 @@ namespace vocaloid {
 
 			void Prepare() {
 				Traverse(traversal_nodes_);
-				auto frame_size = frame_size_;
+				int64_t frame_size = DEFAULT_FRAME_SIZE;
 				for (auto node : traversal_nodes_) {
 					frame_size = max(FindNode(node)->SuggestFrameSize(), frame_size);
 				}
-				frame_size = min((uint64_t)MAX_FFT_SIZE, frame_size);
+				frame_size_ = min((int64_t)MAX_FFT_SIZE, frame_size);
 				for (auto node : traversal_nodes_) {
 					FindNode(node)->Initialize(SampleRate(), frame_size_);
 				}

@@ -8,8 +8,8 @@ namespace vocaloid{
     class Buffer{
     protected:
         T *data_;
-        uint64_t max_size_;
-        uint64_t size_;
+        int64_t max_size_;
+        int64_t size_;
     public:
         explicit Buffer(){
             max_size_ = 0;
@@ -17,20 +17,11 @@ namespace vocaloid{
 			data_ = nullptr;
         }
 
-        explicit Buffer(uint64_t max_size){
+        explicit Buffer(int64_t max_size){
 			max_size_ = 0;
 			size_ = 0;
 			data_ = nullptr;
             Alloc(max_size);
-        }
-
-        explicit Buffer(T* data, uint64_t len, uint64_t offset){
-			max_size_ = 0;
-			size_ = 0;
-			data_ = nullptr;
-            max_size_ = size_ = len;
-            Alloc(len);
-            Set(data, len, offset);
         }
 
         ~Buffer(){
@@ -45,7 +36,7 @@ namespace vocaloid{
             }
         }
 
-        void Fill(T v, uint64_t length, uint64_t offset){
+        void Fill(T v, int64_t length, int64_t offset){
             if(max_size_ < length){
                 Alloc(length);
             }
@@ -55,46 +46,55 @@ namespace vocaloid{
             }
         }
 
-        void Splice(uint64_t len, uint64_t offset = 0){
-            for(auto i = offset;i < size_;i++){
-                if(i + len < size_){
-                    data_[i] = data_[i + len];
-                }else{
-                    data_[i] = 0.0f;
-                }
-            }
-            size_ -= len;
+        void Splice(int64_t len, int64_t offset = 0){
+			len = min(offset + len, size_) - offset;
+			for (auto i = offset; i < size_; i++) {
+				if (i + len < size_) {
+					data_[i] = data_[i + len];
+				}
+				else {
+					data_[i] = 0.0f;
+				}
+			}
+			size_ -= len;
         }
 
-        void Add(T *data, uint64_t len, uint64_t offset = 0){
-            uint64_t data_offset = size_;
+        void Add(T *data, int64_t len, int64_t offset = 0){
+            int64_t data_offset = size_;
             if(max_size_ < size_ + len){
                 Alloc(size_ + len);
             }
-            for(auto i = 0; i < len;i++){
-                data_[i + data_offset] = data[i + offset];
-            }
+			for (auto i = 0; i < len; i++) {
+				data_[i + data_offset] = data[i + offset];
+			}
             size_ += len;
         }
 
-        void Pop(T *out, uint64_t len, uint64_t offset = 0){
-            auto last = min(offset + len, size_);
-			memcpy(out, data_ + offset, last - offset);
+        void Pop(T *out, int64_t len, int64_t offset = 0){
+            len = min(offset + len, size_) - offset;
+			for (auto i = 0; i < len; i++) {
+				if (i + offset >= size_) {
+					data_[i] = 0;
+				}
+				else {
+					data_[i] = data_[i + offset];
+				}
+			}
             Splice(len, offset);
         }
 
-        void Pop(Buffer<T> *buf, uint64_t len, uint64_t offset = 0){
+        void Pop(Buffer<T> *buf, int64_t len, int64_t offset = 0){
             Pop(buf->Data(), len, offset);
         }
 
-        void Set(const T* data, uint64_t len, uint64_t offset = 0, uint64_t dst = 0){
-            Alloc(len);
-            for(auto i = 0;i < len;i++){
-                data_[i + dst] = data[i + offset];
-            }
+        void Set(const T* data, int64_t len, int64_t offset = 0, int64_t dst = 0){
+            Alloc(dst + len);
+			for (auto i = 0; i < len; i++) {
+				data_[i + dst] = data[i + offset];
+			}
         }
 
-        void Alloc(uint64_t size){
+        void Alloc(int64_t size){
             if(max_size_ < size){
 				T* new_data = nullptr;
 				AllocArray(size, &new_data);
@@ -107,7 +107,7 @@ namespace vocaloid{
             }
         }
 
-        void SetSize(uint64_t size){
+        void SetSize(int64_t size){
             if(size_ == size)return;
             if(size_ < size)Alloc(size);
             size_ = size;
@@ -117,7 +117,7 @@ namespace vocaloid{
             max_size_ = size_ = 0;
         }
 
-        uint64_t Size(){
+        int64_t Size(){
             return size_;
         }
 
@@ -125,7 +125,7 @@ namespace vocaloid{
             return data_;
         }
 
-        uint64_t MaxSize(){
+        int64_t MaxSize(){
             return max_size_;
         }
     };

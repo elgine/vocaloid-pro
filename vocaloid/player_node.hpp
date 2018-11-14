@@ -9,18 +9,23 @@ namespace vocaloid {
 		class PlayerNode : public DestinationNode {	
 		private:
 			io::Player *player_ = nullptr;
+			Buffer<char>* bytes_;
 		public:
 			explicit PlayerNode(AudioContext *ctx) :DestinationNode(ctx) {
 				player_ = nullptr;
 #ifdef _WIN32 || _WIN64
 				player_ = new io::PCMPlayer();
 #endif
+				bytes_ = new Buffer<char>();
 			}
 
 			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				DestinationNode::Initialize(sample_rate, frame_size);
 				if (player_ == nullptr)return;
 				player_->Open(sample_rate_, BITS_PER_SEC, channels_);
+				uint64_t size = frame_size * channels_ * BITS_PER_SEC / 8;
+				bytes_->Alloc(size);
+				bytes_->SetSize(size);
 			}
 
 			void Close() override {
@@ -31,13 +36,9 @@ namespace vocaloid {
 
 			int64_t ProcessFrame() override {
 				if (player_ == nullptr)return 0;
-				int64_t size = summing_buffer_->Size();
-				int64_t byte_len = size * summing_buffer_->Channels() * BITS_PER_SEC / 8;
-				auto bytes = new char[byte_len];
-				summing_buffer_->ToByteArray(BITS_PER_SEC, bytes, byte_len);
-				player_->Push(bytes, byte_len);
-				delete[] bytes;
-				bytes = nullptr;
+				int64_t size = 0;
+				summing_buffer_->ToByteArray(BITS_PER_SEC, bytes_->Data(), size);
+				player_->Push(bytes_->Data(), size);
 				return size;
 			}
 		};

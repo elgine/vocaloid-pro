@@ -68,7 +68,9 @@ namespace vocaloid {
 				}else {
 					size = reader_->ReadData(temp_buffer_, require_buffer_size_);
 				}
-				if (size <= 0)return 0;
+				if (size <= 0) {
+					return 0;
+				}
 				if (resample_ratio_ != 1.0) {
 					summing_buffer_->FromByteArray(temp_buffer_, require_buffer_size_, bits_, channels_);
 					for (auto i = 0; i < channels_; i++) {
@@ -77,6 +79,7 @@ namespace vocaloid {
 				}
 				else
 					result_buffer_->FromByteArray(temp_buffer_, require_buffer_size_, bits_, channels_);
+				result_buffer_->silence_ = false;
 				return frame_size_;
 			}
 		};

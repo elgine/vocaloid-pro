@@ -27,6 +27,12 @@ namespace vocaloid {
 						data_[i]->Data()[j] = b->Data()[i]->Data()[j];
 					}
 				}
+				silence_ = b->silence_;
+			}
+
+			void Zero() {
+				Fill(0.0f);
+				silence_ = true;
 			}
 
 			void Add(AudioFrame *b) {
@@ -93,6 +99,7 @@ namespace vocaloid {
 			}
 
 			void Mix(AudioFrame *in) {
+				silence_ = silence_ && in->silence_;
 				int16_t out_channels = channels_, in_channels = in->Channels();
 				int64_t size = in->Size();
 				Alloc(channels_, size);
