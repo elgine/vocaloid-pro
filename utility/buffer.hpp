@@ -48,6 +48,7 @@ namespace vocaloid{
 
         void Splice(int64_t len, int64_t offset = 0){
 			len = min(offset + len, size_) - offset;
+			if (len <= 0)return;
 			for (auto i = offset; i < size_; i++) {
 				if (i + len < size_) {
 					data_[i] = data_[i + len];
@@ -73,12 +74,7 @@ namespace vocaloid{
         void Pop(T *out, int64_t len, int64_t offset = 0){
             len = min(offset + len, size_) - offset;
 			for (auto i = 0; i < len; i++) {
-				if (i + offset >= size_) {
-					data_[i] = 0;
-				}
-				else {
-					data_[i] = data_[i + offset];
-				}
+				out[i] = data_[i + offset];
 			}
             Splice(len, offset);
         }

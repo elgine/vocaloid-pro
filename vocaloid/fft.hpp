@@ -5,12 +5,12 @@ namespace vocaloid {
 		// Fast Fourier Transformation
 		class FFT {
 		protected:
-			int* reverse_table_;
+			int64_t* reverse_table_;
 			float* sin_table_;
 			float* cos_table_;
 			float* rev_real_;
 			float* rev_imag_;
-			uint64_t buffer_size_;
+			int64_t buffer_size_;
 		public:
 
 			float* real_;
@@ -32,13 +32,18 @@ namespace vocaloid {
 
 			void Initialize(int64_t buffer_size) {
 				buffer_size_ = buffer_size;
+				DeleteArray(&real_);
 				AllocArray(buffer_size_, &real_);
+				DeleteArray(&imag_);
 				AllocArray(buffer_size_, &imag_);
+				DeleteArray(&rev_real_);
 				AllocArray(buffer_size_, &rev_real_);
+				DeleteArray(&rev_imag_);
 				AllocArray(buffer_size_, &rev_imag_);
+				DeleteArray(&reverse_table_);
 				AllocArray(buffer_size_, &reverse_table_);
-				int limit = 1;
-				int bit = int(buffer_size_ >> 1);
+				int64_t limit = 1;
+				auto bit = buffer_size_ >> 1;
 				int i;
 				while (limit < buffer_size_) {
 					for (i = 0; i < limit; i++) {

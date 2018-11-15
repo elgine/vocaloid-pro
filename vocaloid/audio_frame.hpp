@@ -13,7 +13,8 @@ namespace vocaloid {
 		public:
 			bool silence_;
 
-			explicit AudioFrame(int16_t channels = 2, int64_t max_size = 1024) :channels_(0) {
+			explicit AudioFrame(int16_t channels = 2, int64_t max_size = 1024) {
+				channels_ = 0;
 				data_ = new PBuffer[8]{nullptr};
 				silence_ = true;
 				Alloc(channels, max_size);
@@ -206,8 +207,9 @@ namespace vocaloid {
 
 			void Alloc(int16_t channels, int64_t size) {
 				if (channels_ < channels) {
-					for (auto i = channels_; i < channels; i++) {
-						data_[i] = new Buffer<float>(Size());
+					for (auto i = 0; i < channels; i++) {
+						if(data_[i] == nullptr)
+							data_[i] = new Buffer<float>(Size());
 					}
 				}
 				for (auto i = 0; i < max(channels_, channels); i++) {

@@ -31,7 +31,7 @@ namespace vocaloid {
 			}
 
 			int64_t SuggestFrameSize() override {
-				return kernel_len_;
+				return NextPow2(kernel_len_);
 			}
 		};
 	}

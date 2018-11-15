@@ -86,7 +86,7 @@ namespace vocaloid {
 			int Decode(AVPacket *packet) {
 				auto got_frame = 0;
 				auto ret = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet);
-				if (got_frame > 0) {
+				if (got_frame > 0 && frame_->nb_samples == codec_ctx_->frame_size) {
 					frame_count_++;
 					Convert((const uint8_t**)frame_->data, frame_->nb_samples);
 				}
@@ -120,9 +120,10 @@ namespace vocaloid {
 			// called again with the remainder of the packet data.
 			// Also, some decoders might over-read the packet.
 			void DecodePacket(AVPacket *packet) {
-				auto decoded = packet->size;
+				auto decoded = 0;
 				while (packet->size > 0) {
 					decoded = Decode(packet);
+					if (decoded < 0)break;
 					decoded = FFMIN(decoded, packet->size);
 					packet->data += decoded;
 					packet->size -= decoded;
@@ -147,7 +148,7 @@ namespace vocaloid {
 							is_end_ = true;
 							break;
 						}
-						else {
+						else if(ret >= 0){
 							if (packet_->stream_index == a_stream_index_) {
 								DecodePacket(packet_);
 							}
@@ -204,10 +205,19 @@ namespace vocaloid {
 #endif
 						return 0;
 					}
-					memcpy(data, buffer_, length);
-					int64_t left = buffer_size_ - length;
-					if(left > 0)memcpy(buffer_, buffer_ + length, left);
-					buffer_size_ -= length;
+
+					try {
+						memcpy(data, buffer_, length);
+						buffer_size_ -= length;
+						if (buffer_size_ < 0)
+							buffer_size_ = 0;
+						if (buffer_size_ > 0)
+							memcpy(buffer_, buffer_ + length, buffer_size_);
+					}
+					catch (exception e) {
+						cout << e.what() << endl;
+					}
+					
 					if (EnableToDecode())
 						can_decode_.notify_all();
 #ifdef _DEBUG
@@ -219,16 +229,19 @@ namespace vocaloid {
 
 			int16_t Open(const char *input_path) override {
 				int16_t ret = 0;
+				char* err_msg = new char[512];
 				av_register_all();
 				ctx_ = avformat_alloc_context();
 				ret = avformat_open_input(&ctx_, input_path, NULL, NULL);
 				if (ret < 0) {
+					av_strerror(ret, err_msg, 512);
 					// TODO: Log error
 					return ret;
 				}
 				ret = avformat_find_stream_info(ctx_, NULL);
 				if (ret < 0) {
 					// TODO: Log error
+					av_strerror(ret, err_msg, 512);
 					return ret;
 				}
 
@@ -254,9 +267,11 @@ namespace vocaloid {
 					return -1;
 				}
 
-				if (avcodec_open2(codec_ctx_, codec, nullptr) < 0) {
+				ret = avcodec_open2(codec_ctx_, codec, nullptr);
+				if (ret < 0) {
 					// TODO: Log error
 					// Can't open decoder
+					av_strerror(ret, err_msg, 512);
 					return -1;
 				}
 
@@ -299,10 +314,14 @@ namespace vocaloid {
 				return ret;
 			}
 
-			void Close() override {
+			void Stop() override {
 				decoding_ = false;
 				if (decode_thread_->joinable())
 					decode_thread_->join();
+			}
+
+			void Close() override {
+				Stop();
 				av_packet_free(&packet_);
 				av_frame_free(&frame_);
 				av_frame_free(&decode_frame_);

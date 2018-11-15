@@ -48,15 +48,21 @@ namespace vocaloid {
 			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				SourceNode::Initialize(sample_rate, frame_size);
 				frame_size_ = frame_size;
-				reader_->Open(path_.c_str());
+				auto ret = reader_->Open(path_.c_str());
+				if (ret < 0)throw "Can't read this file";
 				auto format = reader_->Format();
 				channels_ = format.channels;
 				bits_ = format.bits;
+				cout << "Audio file channels: " << channels_ << endl;
 				if (format.sample_rate == 0)throw "The Sample rate of file is zero!";
 				resample_ratio_ = float(sample_rate) / format.sample_rate;
 				require_float_size_ = int64_t(float(frame_size_) / resample_ratio_);
 				require_buffer_size_ = require_float_size_ * format.block_align;
 				AllocArray(require_buffer_size_, &temp_buffer_);
+			}
+
+			void PullBuffers() {
+				AudioNode::PullBuffers();
 			}
 
 			int64_t ProcessFrame() override {
@@ -81,6 +87,14 @@ namespace vocaloid {
 					result_buffer_->FromByteArray(temp_buffer_, require_buffer_size_, bits_, channels_);
 				result_buffer_->silence_ = false;
 				return frame_size_;
+			}
+
+			void Stop() override {
+				reader_->Stop();
+			}
+
+			void Close() override {
+				reader_->Close();
 			}
 		};
 	}

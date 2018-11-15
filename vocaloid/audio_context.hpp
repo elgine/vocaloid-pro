@@ -3,6 +3,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <iostream>
 #include "audio_frame.hpp"
 #include "audio_timeline.hpp"
 
@@ -76,6 +77,8 @@ namespace vocaloid {
 			virtual int64_t ProcessFrame() = 0;
 
 			virtual void Close() {}
+
+			virtual void Stop() {}
 
 			virtual int64_t SuggestFrameSize() {
 				return DEFAULT_FRAME_SIZE;
@@ -251,9 +254,14 @@ namespace vocaloid {
 				while (state_ == AudioContextState::PLAYING) {
 					{
 						unique_lock<mutex> lck(audio_render_thread_mutex_);
-						for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
-							auto node = FindNode(*iter);
-							node->Process();
+						try {
+							for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
+								auto node = FindNode(*iter);
+								node->Process();
+							}
+						}
+						catch (exception e) {
+							cout << e.what() << endl;
 						}
 					}
 					this_thread::sleep_for(chrono::milliseconds(MINUS_SLEEP_UNIT));
@@ -285,6 +293,9 @@ namespace vocaloid {
 			}
 
 			void Stop() {
+				for (auto node : traversal_nodes_) {
+					FindNode(node)->Stop();
+				}
 				state_ = AudioContextState::STOPPED;
 				if (audio_render_thread_->joinable())
 					audio_render_thread_->join();

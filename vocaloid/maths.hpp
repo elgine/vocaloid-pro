@@ -145,10 +145,35 @@ namespace vocaloid {
 	}
 
 	template<typename T>
+	int64_t Resample(T* input, int64_t input_len, INTERPOLATOR_TYPE interpolator, int64_t output_len, T* output) {
+		float ratio = float(output_len) / input_len;
+		for (int i = 0; i< output_len; ++i) {
+			float j = i / ratio;
+			int j1 = (int)floor(j);
+			int j2 = (int)ceil(j);
+			if (j1 >= input_len) {
+				j1 = input_len - 1;
+			}
+			if (j2 >= input_len) {
+				j2 = input_len - 1;
+			}
+
+			if (j1 < 0)j1 = 0;
+			if (j2 < 0)j2 = 0;
+
+			float w = j - j1;
+			output[i] = input[j1] * w + input[j2] * (1 - w);
+		}
+		return output_len;
+	}
+
+	template<typename T>
 	int64_t Resample(T* input, int64_t input_len, INTERPOLATOR_TYPE interpolator, float ratio, T* output) {
 		auto output_len = int64_t(input_len * ratio);
 		if (ratio == 1.0f) {
-			memcpy(output, input, input_len);
+			for (int i = 0; i < input_len;i++) {
+				output[i] = input[i];
+			}
 		}
 		else {
 			if (ratio < 1) {

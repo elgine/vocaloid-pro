@@ -166,6 +166,7 @@
     <ClInclude Include="radio.hpp" />
     <ClInclude Include="robot1.hpp" />
     <ClInclude Include="robot2.hpp" />
+    <ClInclude Include="pitch.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

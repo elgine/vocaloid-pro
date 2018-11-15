@@ -195,6 +195,10 @@ namespace vocaloid {
 				return byte_length;
 			}
 
+			void Stop() override {
+				
+			}
+
 			void Flush(char *bytes, int64_t &byte_length) override {
 				byte_length = header_.size2 - pos_;
 				in_.read(bytes, byte_length);
