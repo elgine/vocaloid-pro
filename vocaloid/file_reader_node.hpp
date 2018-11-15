@@ -34,6 +34,7 @@ namespace vocaloid {
 				resample_ratio_ = 1.0;
 				bits_ = 16;
 				require_buffer_size_ = require_float_size_ = 0;
+				temp_buffer_ = nullptr;
 			}
 
 			void SetPath(const char* path) {
@@ -58,6 +59,7 @@ namespace vocaloid {
 				resample_ratio_ = float(sample_rate) / format.sample_rate;
 				require_float_size_ = int64_t(float(frame_size_) / resample_ratio_);
 				require_buffer_size_ = require_float_size_ * format.block_align;
+				DeleteArray(&temp_buffer_);
 				AllocArray(require_buffer_size_, &temp_buffer_);
 			}
 

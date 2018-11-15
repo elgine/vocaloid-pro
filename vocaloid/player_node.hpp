@@ -24,7 +24,7 @@ namespace vocaloid {
 				if (player_ == nullptr)return;
 				player_->Open(sample_rate_, BITS_PER_SEC, channels_);
 				cout << "Audio player channels: " << channels_ << endl;
-				uint64_t size = frame_size * channels_ * BITS_PER_SEC / 8;
+				int64_t size = frame_size * channels_ * BITS_PER_SEC / 8;
 				bytes_->Alloc(size);
 				bytes_->SetSize(size);
 			}

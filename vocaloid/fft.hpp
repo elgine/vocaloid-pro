@@ -30,6 +30,16 @@ namespace vocaloid {
 				return float(a - (int)(a / b) * b + M_PI);
 			}
 
+			FFT() {
+				real_ = nullptr;
+				imag_ = nullptr;
+				reverse_table_ = nullptr;
+				rev_real_ = nullptr;
+				rev_imag_ = nullptr;
+				sin_table_ = nullptr;
+				cos_table_ = nullptr;
+			}
+
 			void Initialize(int64_t buffer_size) {
 				buffer_size_ = buffer_size;
 				DeleteArray(&real_);
@@ -52,7 +62,9 @@ namespace vocaloid {
 					limit = limit << 1;
 					bit = bit >> 1;
 				}
+				DeleteArray(&sin_table_);
 				AllocArray(buffer_size_, &sin_table_);
+				DeleteArray(&cos_table_);
 				AllocArray(buffer_size_, &cos_table_);
 				for (i = 0; i < buffer_size_; i++) {
 					sin_table_[i] = (float)sin(-M_PI / i);

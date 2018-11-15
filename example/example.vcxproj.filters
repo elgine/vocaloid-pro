@@ -36,6 +36,9 @@
     <ClInclude Include="pitch.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="pitch2.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

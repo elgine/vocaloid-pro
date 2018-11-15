@@ -145,7 +145,7 @@ namespace vocaloid {
 	}
 
 	template<typename T>
-	int64_t Resample(T* input, int64_t input_len, INTERPOLATOR_TYPE interpolator, int64_t output_len, T* output) {
+	int64_t Resample(T* input, int64_t input_len, int64_t output_len, T* output) {
 		float ratio = float(output_len) / input_len;
 		for (int i = 0; i< output_len; ++i) {
 			float j = i / ratio;
@@ -178,7 +178,7 @@ namespace vocaloid {
 		else {
 			if (ratio < 1) {
 				for (int i = 0; i < output_len; i++) {
-					auto index = (uint64_t)round(i / ratio);
+					auto index = (int64_t)round(i / ratio);
 					output[i] = input[index >= input_len ? input_len - 1 : index];
 				}
 			}

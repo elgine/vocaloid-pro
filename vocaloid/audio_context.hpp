@@ -248,7 +248,7 @@ namespace vocaloid {
 			mutex audio_render_thread_mutex_;
 			vector<int64_t> traversal_nodes_;
 			int32_t sample_rate_;
-			uint64_t frame_size_;
+			int64_t frame_size_;
 
 			void Run() {
 				while (state_ == AudioContextState::PLAYING) {
@@ -303,9 +303,9 @@ namespace vocaloid {
 
 			void Close() {
 				Stop();
-				for (auto node : traversal_nodes_) {
+				/*for (auto node : traversal_nodes_) {
 					FindNode(node)->Close();
-				}
+				}*/
 			}
 
 			int32_t SampleRate() {

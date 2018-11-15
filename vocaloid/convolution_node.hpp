@@ -7,7 +7,7 @@ namespace vocaloid {
 		private:
 			dsp::Convolution *convolver_;
 			float *kernel_;
-			uint64_t kernel_len_;
+			int64_t kernel_len_;
 		public:
 
 			explicit ConvolutionNode(AudioContext *ctx) :AudioNode(ctx) {
@@ -19,7 +19,7 @@ namespace vocaloid {
 				convolver_->Initialize(frame_size, channels_, kernel_, kernel_len_);
 			}
 
-			void SetKernel(float *k, uint64_t kernel_len) {
+			void SetKernel(float *k, int64_t kernel_len) {
 				kernel_ = k;
 				kernel_len_ = kernel_len;
 			}

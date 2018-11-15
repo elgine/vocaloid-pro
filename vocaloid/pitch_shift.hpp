@@ -166,7 +166,7 @@ namespace vocaloid {
 				auto frame_len = min((int64_t)output_queue_->Size(), int64_t(len * stretch_));
 				if (frame_len < len)return 0;
 				output_queue_->Pop(out_, frame_len);
-				return Resample(out_, frame_len, INTERPOLATOR_TYPE::CUBIC, len, frame);
+				return Resample(out_, frame_len, len, frame);
 			}
 
 			void SetPitch(float v) {

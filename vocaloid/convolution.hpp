@@ -28,7 +28,7 @@ namespace vocaloid {
 				output_ = new Buffer<float>*[8]{ nullptr };
 			}
 
-			void Initialize(uint64_t input_size, uint16_t channels, float* k, uint64_t kernel_len) {
+			void Initialize(int64_t input_size, uint16_t channels, float* k, int64_t kernel_len) {
 				input_size_ = input_size;
 				kernel_size_ = kernel_len;
 				fft_size_ = kernel_size_ + input_size_ - 1;
@@ -58,7 +58,7 @@ namespace vocaloid {
 				main_->Initialize(fft_size_);
 			}
 
-			uint64_t Process(Buffer<float> **in, uint64_t len, Buffer<float> **out) {
+			int64_t Process(Buffer<float> **in, int64_t len, Buffer<float> **out) {
 				for (auto channel = 0; channel < channels_; channel++) {
 					input_[channel]->Fill(0);
 					input_[channel]->Set(in[channel]->Data(), len);

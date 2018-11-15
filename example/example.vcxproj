@@ -163,6 +163,7 @@
     <ClInclude Include="alien.hpp" />
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="ffmpeg_io.hpp" />
+    <ClInclude Include="pitch2.hpp" />
     <ClInclude Include="radio.hpp" />
     <ClInclude Include="robot1.hpp" />
     <ClInclude Include="robot2.hpp" />
