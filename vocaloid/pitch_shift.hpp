@@ -12,7 +12,7 @@ namespace vocaloid {
 			float* omega_;
 			Buffer<float>* input_queue_;
 			Buffer<float>* output_queue_;
-			float *out_;
+			Buffer<float> *out_;
 			float *buffer_;
 			float *prev_in_phase_;
 			float *prev_out_phase_;
@@ -80,7 +80,7 @@ namespace vocaloid {
 				fft_ = new FFT();
 				input_queue_ = new Buffer<float>();
 				output_queue_ = new Buffer<float>();
-				out_ = nullptr;
+				out_ = new Buffer<float>();
 				frame_ = nullptr;
 				win_ = nullptr;
 				buffer_ = nullptr;
@@ -91,8 +91,6 @@ namespace vocaloid {
 
 			void Initialize(int64_t fft_size, float overlap, WINDOW_TYPE win = WINDOW_TYPE::HAMMING, float extra = 1.0f) {
 				fft_->Initialize(fft_size);
-				DeleteArray(&out_);
-				AllocArray(fft_size, &out_);
 
 				DeleteArray(&frame_);
 				AllocArray(fft_size, &frame_);
@@ -165,8 +163,10 @@ namespace vocaloid {
 			int64_t PopFrame(float *frame, int64_t len) {
 				auto frame_len = min((int64_t)output_queue_->Size(), int64_t(len * stretch_));
 				if (frame_len < len)return 0;
+				out_->Alloc(frame_len);
+				out_->SetSize(frame_len);
 				output_queue_->Pop(out_, frame_len);
-				return Resample(out_, frame_len, len, frame);
+				return Resample(out_->Data(), frame_len, len, frame);
 			}
 
 			void SetPitch(float v) {

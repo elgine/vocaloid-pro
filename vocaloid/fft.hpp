@@ -183,6 +183,8 @@ namespace vocaloid {
 				DeleteArray(&real_);
 				DeleteArray(&imag_);
 				DeleteArray(&reverse_table_);
+				DeleteArray(&rev_imag_);
+				DeleteArray(&rev_real_);
 				DeleteArray(&sin_table_);
 				DeleteArray(&cos_table_);
 			}

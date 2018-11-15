@@ -26,8 +26,7 @@ namespace vocaloid{
 
         ~Buffer(){
             Dispose();
-			delete[] data_;
-			data_ = nullptr;
+			DeleteArray(&data_);
         }
 
         void Fill(T v){

@@ -134,7 +134,7 @@ namespace vocaloid {
 				while (decoding_) {
 					{
 						unique_lock<mutex> lck(decode_mutex_);
-						while (!EnableToDecode()) {
+						while (!EnableToDecode() && decoding_) {
 #ifdef _DEBUG
 							cout << "waiting for pick buffer" << endl;
 #endif
@@ -316,6 +316,7 @@ namespace vocaloid {
 
 			void Stop() override {
 				decoding_ = false;
+				can_decode_.notify_all();
 				if (decode_thread_->joinable())
 					decode_thread_->join();
 			}

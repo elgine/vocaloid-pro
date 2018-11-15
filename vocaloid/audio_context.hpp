@@ -293,19 +293,19 @@ namespace vocaloid {
 			}
 
 			void Stop() {
-				for (auto node : traversal_nodes_) {
-					FindNode(node)->Stop();
-				}
 				state_ = AudioContextState::STOPPED;
 				if (audio_render_thread_->joinable())
 					audio_render_thread_->join();
+				for (auto node : traversal_nodes_) {
+					FindNode(node)->Stop();
+				}
 			}
 
 			void Close() {
 				Stop();
-				/*for (auto node : traversal_nodes_) {
+				for (auto node : traversal_nodes_) {
 					FindNode(node)->Close();
-				}*/
+				}
 			}
 
 			int32_t SampleRate() {

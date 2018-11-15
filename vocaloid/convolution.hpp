@@ -49,7 +49,7 @@ namespace vocaloid {
 
 				kernel_->Dispose();
 				kernel_->Initialize(fft_size_); 
-				float *kernel;
+				float *kernel = nullptr;
 				AllocArray(fft_size_, &kernel);
 				memcpy(kernel, k, kernel_len);
 				kernel_->Forward(kernel, fft_size_);
