@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "maths.hpp"
 namespace vocaloid {
 	namespace dsp {
 		// Fast Fourier Transformation
@@ -38,6 +39,7 @@ namespace vocaloid {
 				rev_imag_ = nullptr;
 				sin_table_ = nullptr;
 				cos_table_ = nullptr;
+				buffer_size_ = 1024;
 			}
 
 			void Initialize(int64_t buffer_size) {
@@ -57,7 +59,10 @@ namespace vocaloid {
 				int i;
 				while (limit < buffer_size_) {
 					for (i = 0; i < limit; i++) {
-						reverse_table_[i + limit] = reverse_table_[i] + bit;
+						reverse_table_[i + limit] = Clamp((int64_t)0, buffer_size_ - 1, reverse_table_[i] + bit);
+						if (reverse_table_[i + limit] >= buffer_size_) {
+							throw "Exception of reverse table";
+						}
 					}
 					limit = limit << 1;
 					bit = bit >> 1;
@@ -91,6 +96,7 @@ namespace vocaloid {
 					tr, ti, tmp_real;
 				int i, half_size = 1, off;
 				for (i = 0; i < buffer_size_; i++) {
+					if (reverse_table_[i] >= buffer_size_)throw "Reverse table index too big";
 					real_[i] = buffer[reverse_table_[i]];
 					imag_[i] = 0.0f;
 				}

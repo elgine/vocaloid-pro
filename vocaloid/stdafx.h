@@ -25,17 +25,6 @@ void AllocArray(int64_t len, T** arr) {
 }
 
 template<typename T>
-void RellocArray(int64_t new_len, T** arr, int64_t old_len) {
-	T* new_arr = nullptr;
-	AllocArray(new_len, &new_arr);
-	if (*arr != nullptr) {
-		memcpy(new_arr, *arr, old_len);
-	}
-	DeleteArray(arr);
-	*arr = new_arr;
-}
-
-template<typename T>
 void DeleteArray(T **arr) {
 	if (*arr != nullptr) {
 		delete[](*arr);

@@ -294,15 +294,14 @@ namespace vocaloid {
 
 			void Stop() {
 				state_ = AudioContextState::STOPPED;
-				if (audio_render_thread_->joinable())
-					audio_render_thread_->join();
 				for (auto node : traversal_nodes_) {
 					FindNode(node)->Stop();
 				}
+				if (audio_render_thread_->joinable())
+					audio_render_thread_->join();
 			}
 
 			void Close() {
-				Stop();
 				for (auto node : traversal_nodes_) {
 					FindNode(node)->Close();
 				}

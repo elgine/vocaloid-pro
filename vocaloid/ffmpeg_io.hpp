@@ -83,22 +83,24 @@ namespace vocaloid {
 			// The max buffer size
 			int64_t max_buffer_size_;
 
-			int Decode(AVPacket *packet) {
+			int Decode(AVPacket *packet, unique_lock<mutex> &lck) {
 				auto got_frame = 0;
 				auto ret = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet);
 				if (got_frame > 0 && frame_->nb_samples == codec_ctx_->frame_size) {
 					frame_count_++;
-					Convert((const uint8_t**)frame_->data, frame_->nb_samples);
+					Convert((const uint8_t**)frame_->data, frame_->nb_samples, lck);
 				}
-				FlushConvertor();
+				FlushConvertor(lck);
 				return ret;
 			}
 
-			int Convert(const uint8_t** frame_data, int64_t nb_samples) {
+			int Convert(const uint8_t** frame_data, int64_t nb_samples, unique_lock<mutex> &lck) {
 				auto samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples,
 					frame_data, nb_samples);
 				if (samples > 0) {
-					memcpy(buffer_ + buffer_size_, decode_frame_->data[0], output_frame_size_);
+					while (!EnableToDecode())
+						can_decode_.wait(lck);
+					memcpy(buffer_ + buffer_size_, decode_frame_->data[0], samples * 4);
 					buffer_size_ += output_frame_size_;
 				}
 				return samples;
@@ -108,10 +110,10 @@ namespace vocaloid {
 			// larger than output size, it would cache in it's inner
 			// buffer queue. So, use swr_get_out_samples to get the 
 			// queue size, if it's capable for output, pop buffer and loop.
-			void FlushConvertor() {
+			void FlushConvertor(unique_lock<mutex> &lck) {
 				int fifo_size = swr_get_out_samples(swr_ctx_, 0);
 				while (fifo_size >= decode_frame_->nb_samples) {
-					auto samples = Convert(nullptr, 0);
+					auto samples = Convert(nullptr, 0, lck);
 					fifo_size -= samples;
 				}
 			}
@@ -119,21 +121,27 @@ namespace vocaloid {
 			// Some audio decoders decode only part of the packet, and have to be
 			// called again with the remainder of the packet data.
 			// Also, some decoders might over-read the packet.
-			void DecodePacket(AVPacket *packet) {
+			void DecodePacket(AVPacket *packet, unique_lock<mutex> &lck) {
 				auto decoded = 0;
 				while (packet->size > 0) {
-					decoded = Decode(packet);
+					decoded = Decode(packet, lck);
 					if (decoded < 0)break;
 					decoded = FFMIN(decoded, packet->size);
-					packet->data += decoded;
-					packet->size -= decoded;
+					if (packet->size - decoded >= 0) {
+						packet->data += decoded;
+						packet->size -= decoded;
+					}
+					else {
+						break;
+					}
 				}
 			}
 
 			void Loop() {
-				while (decoding_) {
+				while (true) {
 					{
 						unique_lock<mutex> lck(decode_mutex_);
+						if (!decoding_)break;
 						while (!EnableToDecode() && decoding_) {
 #ifdef _DEBUG
 							cout << "waiting for pick buffer" << endl;
@@ -144,13 +152,13 @@ namespace vocaloid {
 						if (ret == AVERROR_EOF) {
 							packet_->data = nullptr;
 							packet_->size = 0;
-							Decode(packet_);
+							Decode(packet_, lck);
 							is_end_ = true;
 							break;
 						}
 						else if(ret >= 0){
 							if (packet_->stream_index == a_stream_index_) {
-								DecodePacket(packet_);
+								DecodePacket(packet_, lck);
 							}
 						}
 						av_packet_unref(packet_);
@@ -159,6 +167,7 @@ namespace vocaloid {
 #ifdef _DEBUG
 				cout << "exist decoding thread" << endl;
 #endif
+				return;
 			}
 
 			bool EnableToDecode() {
@@ -174,7 +183,7 @@ namespace vocaloid {
 
 			void SetMaxBufferSize(int64_t max_size) {
 				max_buffer_size_ = max_size;
-				delete[] buffer_;
+				DeleteArray(&buffer_);
 				buffer_ = new char[max_buffer_size_];
 			}
 
@@ -318,14 +327,16 @@ namespace vocaloid {
 			}
 
 			void Stop() override {
-				decoding_ = false;
-				can_decode_.notify_all();
+				{
+					unique_lock<mutex> lck(decode_mutex_);
+					decoding_ = false;
+					can_decode_.notify_all();
+				}
 				if (decode_thread_->joinable())
 					decode_thread_->join();
 			}
 
 			void Close() override {
-				Stop();
 				av_packet_free(&packet_);
 				av_frame_free(&frame_);
 				av_frame_free(&decode_frame_);
@@ -386,7 +397,7 @@ namespace vocaloid {
 					auto new_buffer = new char[buffer_size_ + byte_length];
 					memcpy(new_buffer, buffer_, buffer_size_);
 					memcpy(new_buffer + buffer_size_, planar_bytes, byte_length);
-					delete[] buffer_;
+					DeleteArray(&buffer_);
 					buffer_ = new_buffer;
 					max_buffer_size_ = buffer_size_ + byte_length;
 				}
