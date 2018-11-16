@@ -275,6 +275,9 @@ namespace vocaloid {
 					return -1;
 				}
 
+				if (codec_ctx_->frame_size <= 0)
+					codec_ctx_->frame_size = 1024;
+
 				swr_ctx_ = swr_alloc();
 				enum AVSampleFormat in_sample_fmt = codec_ctx_->sample_fmt;
 				enum AVSampleFormat out_sample_fmt = AV_SAMPLE_FMT_S16;
