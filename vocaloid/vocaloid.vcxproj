@@ -140,6 +140,7 @@
     <ClInclude Include="audio_context.hpp" />
     <ClInclude Include="biquad.hpp" />
     <ClInclude Include="biquad_node.hpp" />
+    <ClInclude Include="buffer_node.hpp" />
     <ClInclude Include="channel.h" />
     <ClInclude Include="convolution.hpp" />
     <ClInclude Include="convolution_node.hpp" />

@@ -84,7 +84,7 @@ namespace vocaloid {
 				return DEFAULT_FRAME_SIZE;
 			}
 
-			int64_t Process() {
+			virtual int64_t Process() {
 				PullBuffers();
 				return ProcessFrame();
 			}
@@ -212,7 +212,7 @@ namespace vocaloid {
 			int64_t offset_;
 		public:
 
-			explicit AudioParam() :AudioProcessorUnit(AudioProcessorType::NORMAL, true, true) {
+			explicit AudioParam() :AudioProcessorUnit(AudioProcessorType::NORMAL, true, true),AudioTimeline(){
 				offset_ = 0;
 				channels_ = 1;
 			}

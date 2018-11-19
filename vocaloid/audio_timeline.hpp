@@ -47,6 +47,12 @@ namespace vocaloid {
 			return middle;
 		}
 
+		void SetTargetAtTime(float v, int64_t start_time, int64_t time_constant) {
+			SetValueAtTime(v, start_time);
+			float end = v == 0.0 ? 1.0 : 0.0;
+			ExponentialRampToValueAtTime(end, start_time + time_constant);
+		}
+
 		void SetValueAtTime(float v, int64_t end_time) {
 			bool accurate = false;
 			auto index = FindIndex(end_time, accurate);

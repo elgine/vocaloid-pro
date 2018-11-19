@@ -25,7 +25,6 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() override {
-				// Resample
 				if (waveform_dirty_) {
 					auto size = int64_t(sample_rate_ / frequency_);
 					waveform_buffer_->Alloc(size);

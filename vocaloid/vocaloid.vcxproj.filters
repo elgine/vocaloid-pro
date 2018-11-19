@@ -123,5 +123,8 @@
     <ClInclude Include="read_file_buffer.hpp">
       <Filter>头文件\io</Filter>
     </ClInclude>
+    <ClInclude Include="buffer_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

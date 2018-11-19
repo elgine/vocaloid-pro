@@ -23,7 +23,14 @@ namespace vocaloid {
 			int64_t require_buffer_size_;
 			int64_t require_float_size_;
 			int16_t bits_;
+
+			int64_t start_point_;
+			int64_t offset_point_;
+			int64_t duration_point_;
 		public:
+
+			bool loop_;
+
 			explicit FileReaderNode(AudioContext *ctx) :SourceNode(ctx) {
 				path_ = "undefined";
 #ifdef _WIN32 || _WIN64
@@ -35,6 +42,11 @@ namespace vocaloid {
 				bits_ = 16;
 				require_buffer_size_ = require_float_size_ = 0;
 				temp_buffer_ = nullptr;
+
+				loop_ = false;
+				start_point_ = 0;
+				offset_point_ = 0;
+				duration_point_ = 0;
 			}
 
 			void SetPath(const char* path) {
@@ -46,6 +58,16 @@ namespace vocaloid {
 				path_ = path;
 			}
 
+
+			// TODO: Loop and play in segments...
+			void Start(int64_t when, int64_t offset = 0, int64_t duration = 0) {
+				SourceNode::Start();
+				auto sample_rate = context_->SampleRate();
+				start_point_ = sample_rate * when * 0.001f;
+				offset_point_ = sample_rate * offset * 0.001f;
+				duration_point_ = sample_rate * duration * 0.001f;
+			}
+
 			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				SourceNode::Initialize(sample_rate, frame_size);
 				frame_size_ = frame_size;
@@ -54,17 +76,18 @@ namespace vocaloid {
 				auto format = reader_->Format();
 				channels_ = format.channels;
 				bits_ = format.bits;
+#ifndef _WIN32 || _WIN64
 				cout << "Audio file channels: " << channels_ << endl;
+#endif
 				if (format.sample_rate == 0)throw "The Sample rate of file is zero!";
 				resample_ratio_ = float(sample_rate) / format.sample_rate;
 				require_float_size_ = int64_t(float(frame_size_) / resample_ratio_);
 				require_buffer_size_ = require_float_size_ * format.block_align;
 				DeleteArray(&temp_buffer_);
 				AllocArray(require_buffer_size_, &temp_buffer_);
-			}
 
-			void PullBuffers() {
-				AudioNode::PullBuffers();
+				if (duration_point_ <= 0)
+					duration_point_ = reader_->FileLength() / BITS_PER_SEC / channels_;
 			}
 
 			int64_t ProcessFrame() override {
