@@ -10,6 +10,7 @@ Vocaloid is an audio simple processing library in C/C++, follow W3C Web Audio AP
 - FFmpeg shared version (Copy to '/build' directory)
 
 ## Feature
+- Pure C++ 11
 - Light, No other dependencies
 - Audio Graph Processing
 - Integrate FFmpeg in decoding and encoding (Support most format in windows, only .wav in other platforms)
