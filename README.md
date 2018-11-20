@@ -1,5 +1,5 @@
 # vocaloid
-Vocaloid is an audio simple processing library in C/C++, followed W3C Web Audio API Specification.
+Vocaloid is an audio simple processing library in C/C++, follow W3C Web Audio API Specification.
 
 ## Web Audio API Specification
 [Web Audio API Specification](https://webaudio.github.io/web-audio-api/)
