@@ -48,27 +48,41 @@ namespace vocaloid {
 		}
 
 		void SetTargetAtTime(float v, int64_t start_time, int64_t time_constant) {
-			SetValueAtTime(v, start_time);
-			float end = v == 0.0 ? 1.0 : 0.0;
-			ExponentialRampToValueAtTime(end, start_time + time_constant);
+			ExponentialRampToValueAtTime(v, start_time + time_constant);
 		}
 
 		void SetValueAtTime(float v, int64_t end_time) {
 			bool accurate = false;
 			auto index = FindIndex(end_time, accurate);
-			value_list.insert(value_list.begin() + index, { end_time, v, INTERPOLATOR_TYPE::NONE });
+			if (accurate) {
+				value_list[index].value = v;
+				value_list[index].interpolator = INTERPOLATOR_TYPE::NONE;
+			}else
+				value_list.insert(value_list.begin() + index, { end_time, v, INTERPOLATOR_TYPE::NONE });
 		}
 
 		void ExponentialRampToValueAtTime(float v, int64_t end_time) {
 			bool accurate = false;
 			auto index = FindIndex(end_time, accurate);
-			value_list.insert(value_list.begin() + index, { end_time, v, INTERPOLATOR_TYPE::EXPONENTIAL });
+			if (accurate) {
+				value_list[index].value = v;
+				value_list[index].interpolator = INTERPOLATOR_TYPE::EXPONENTIAL;
+			}
+			else {
+				value_list.insert(value_list.begin() + index, { end_time, v, INTERPOLATOR_TYPE::EXPONENTIAL });
+			}
 		}
 
 		void LinearRampToValueAtTime(float v, int64_t end_time) {
 			bool accurate = false;
 			auto index = FindIndex(end_time, accurate);
-			value_list.insert(value_list.begin() + index, { end_time, v, INTERPOLATOR_TYPE::LINEAR });
+			if (accurate) {
+				value_list[index].value = v;
+				value_list[index].interpolator = INTERPOLATOR_TYPE::LINEAR;
+			}
+			else {
+				value_list.insert(value_list.begin() + index, { end_time, v, INTERPOLATOR_TYPE::LINEAR });
+			}
 		}
 
 		float GetValueAtTime(int64_t time) {

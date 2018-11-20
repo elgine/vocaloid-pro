@@ -38,7 +38,8 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() override {
-				if (!loop_ && played_point_ - start_point_ >= duration_point_)return 0;
+				if (!loop_ && played_point_ - start_point_ >= duration_point_)
+					return 0;
 				if (!began_) {
 					if (played_began_ < start_point_) {
 						played_began_ += frame_size_;

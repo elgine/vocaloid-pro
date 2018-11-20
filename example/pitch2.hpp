@@ -9,7 +9,7 @@ void Run() {
 	auto compressor = new DynamicsCompressorNode(context);
 	auto player = new PlayerNode(context);
 	auto source = new FileReaderNode(context);
-	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\ugly.mp3");
+	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\actor.mp3");
 
 	context->Connect(source, jungle->input_);
 	context->Connect(jungle->output_, compressor);

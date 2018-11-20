@@ -168,6 +168,7 @@
     <ClInclude Include="robot1.hpp" />
     <ClInclude Include="robot2.hpp" />
     <ClInclude Include="pitch.hpp" />
+    <ClInclude Include="test_jungle.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="jungle.hpp" />

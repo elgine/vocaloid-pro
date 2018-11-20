@@ -14,7 +14,8 @@ namespace vocaloid {
 		enum AudioProcessorType {
 			NORMAL,
 			INPUT,
-			OUTPUT
+			OUTPUT,
+			PARAM
 		};
 
 		class AudioProcessorUnit {
@@ -69,7 +70,8 @@ namespace vocaloid {
 			void PullBuffers() {
 				summing_buffer_->Zero();
 				for (auto input : inputs_) {
-					summing_buffer_->Mix(input->Result());
+					if(input->type_ != AudioProcessorType::PARAM)
+						summing_buffer_->Mix(input->Result());
 				}
 				result_buffer_->Copy(summing_buffer_);
 			}
@@ -79,6 +81,8 @@ namespace vocaloid {
 			virtual void Close() {}
 
 			virtual void Stop() {}
+
+			virtual void Reset() {}
 
 			virtual int64_t SuggestFrameSize() {
 				return DEFAULT_FRAME_SIZE;
@@ -212,7 +216,7 @@ namespace vocaloid {
 			int64_t offset_;
 		public:
 
-			explicit AudioParam() :AudioProcessorUnit(AudioProcessorType::NORMAL, true, true),AudioTimeline(){
+			explicit AudioParam() :AudioProcessorUnit(AudioProcessorType::PARAM, true, true),AudioTimeline(){
 				offset_ = 0;
 				channels_ = 1;
 			}
@@ -293,15 +297,16 @@ namespace vocaloid {
 			}
 
 			void Stop() {
-				state_ = AudioContextState::STOPPED;
 				for (auto node : traversal_nodes_) {
 					FindNode(node)->Stop();
 				}
+				state_ = AudioContextState::STOPPED;
 				if (audio_render_thread_->joinable())
 					audio_render_thread_->join();
 			}
 
 			void Close() {
+				Stop();
 				for (auto node : traversal_nodes_) {
 					FindNode(node)->Close();
 				}

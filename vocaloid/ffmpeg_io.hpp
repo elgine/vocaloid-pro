@@ -144,7 +144,7 @@ namespace vocaloid {
 						if (!decoding_)break;
 						while (!EnableToDecode() && decoding_) {
 #ifdef _DEBUG
-							cout << "waiting for pick buffer" << endl;
+							//cout << "waiting for pick buffer" << endl;
 #endif
 							can_decode_.wait(lck);
 						}
@@ -165,7 +165,7 @@ namespace vocaloid {
 					}
 				}
 #ifdef _DEBUG
-				cout << "exist decoding thread" << endl;
+				//cout << "exist decoding thread" << endl;
 #endif
 				return;
 			}
@@ -210,7 +210,7 @@ namespace vocaloid {
 					unique_lock<mutex> lck(decode_mutex_);
 					if (buffer_size_ < length) {
 #ifdef _DEBUG
-						cout << "buffer size is too small: " << buffer_size_ << endl;
+						//cout << "buffer size is too small: " << buffer_size_ << endl;
 #endif
 						return 0;
 					}
@@ -230,7 +230,7 @@ namespace vocaloid {
 					if (EnableToDecode())
 						can_decode_.notify_all();
 #ifdef _DEBUG
-					cout << "Pick buffer" << endl;
+					//cout << "Pick buffer" << endl;
 #endif
 					return length;
 				}

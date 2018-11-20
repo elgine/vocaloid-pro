@@ -9,24 +9,24 @@ using namespace vocaloid;
 using namespace vocaloid::node;
 
 AudioFrame* CreateFadeBuffer(AudioContext *ctx, float active_time, float fade_time) {
-	auto length1 = ctx->SampleRate() * active_time;
-	auto length2 = (active_time - 2 * fade_time) * ctx->SampleRate();
-	auto length = length1 + length2;
+	int64_t length1 = ctx->SampleRate() * active_time;
+	int64_t length2 = (active_time - 2 * fade_time) * ctx->SampleRate();
+	int64_t length = length1 + length2;
 	auto buffer = new AudioFrame(1, length);
 	buffer->SetSize(length);
 	auto p = buffer->Channel(0);
 
-	auto fade_length = fade_time * ctx->SampleRate();
-	auto fade_index1 = fade_length;
-	auto fade_index2 = length1 - fade_length;
+	int64_t fade_length = fade_time * ctx->SampleRate();
+	int64_t fade_index1 = fade_length;
+	int64_t fade_index2 = length1 - fade_length;
 
 	for (auto i = 0; i < length1; i++) {
 		float value = 0;
 		if (i < fade_index1) {
-			value = sqrtf(i / fade_length);
+			value = sqrtf(float(i) / fade_length);
 		}
 		else if (i >= fade_index2) {
-			value = sqrtf(1 - (i - fade_index2)/fade_length);
+			value = sqrtf(1.0f - (float(i) - fade_index2)/fade_length);
 		}else {
 			value = 1.0f;
 		}
@@ -34,30 +34,30 @@ AudioFrame* CreateFadeBuffer(AudioContext *ctx, float active_time, float fade_ti
 	}
 
 	for (auto i = length1; i < length; i++) {
-		p->Data()[(int)i] = 0;
+		p->Data()[i] = 0;
 	}
 	return buffer;
 }
 
 AudioFrame* CreateDelayTimeBuffer(AudioContext *ctx, float active_time, float fade_time, bool shift_up) {
-	auto length1 = active_time * ctx->SampleRate();
-	auto length2 = (active_time - 2 * fade_time) * ctx->SampleRate();
-	auto length = length1 + length2;
+	int64_t length1 = active_time * ctx->SampleRate();
+	int64_t length2 = (active_time - 2 * fade_time) * ctx->SampleRate();
+	int64_t length = length1 + length2;
 	auto buffer = new AudioFrame(1, length);
 	buffer->SetSize(length);
 	auto p = buffer->Channel(0);
 
 	for (auto i = 0; i < length1; i++) {
 		if (shift_up) {
-			p->Data()[i] = (length1 - i) / length;
+			p->Data()[i] = float(length1 - i) / length;
 		}
 		else {
-			p->Data()[i] = i / length1;
+			p->Data()[i] = float(i) / length1;
 		}
 	}
 
 	for (auto i = length1; i < length; i++) {
-		p->Data()[(int)i] = 0;
+		p->Data()[i] = 0;
 	}
 	return buffer;
 }
@@ -89,7 +89,8 @@ public:
 	GainNode *mix2_;
 
 
-	Jungle(AudioContext *ctx, float delay_time = 0.1, float fade_time = 0.05, float buffer_time = 0.1) {
+ 	Jungle(AudioContext *ctx, float delay_time = 0.1, float fade_time = 0.05, float buffer_time = 0.1) {
+		previous_pitch_ = -1;
 
 		input_ = new GainNode(ctx);
 		output_ = new GainNode(ctx);
@@ -180,25 +181,23 @@ public:
 		delay2_ = delay2;
 
 		SetDelay(delay_time);
-
-		previous_pitch_ = -1;
 	}
 
 	void SetDelay(float delay_time) {
-		mod_gain1_->gain_->SetTargetAtTime(0.5 * delay_time * 1000, 0, 0.01 * 1000);
-		mod_gain2_->gain_->SetTargetAtTime(0.5 * delay_time * 1000, 0, 0.01 * 1000);
+		mod_gain1_->gain_->SetTargetAtTime(0.5 * delay_time, 0, 0.01 * 1000);
+		mod_gain2_->gain_->SetTargetAtTime(0.5 * delay_time, 0, 0.01 * 1000);
 	}
 
 	void SetPitchOffset(float mul) {
 		if (mul > 0) {
 			mod1_gain_->gain_->value_ = 0;
 			mod2_gain_->gain_->value_ = 0;
-			mod3_gain_->gain_->value_ = 1;
-			mod4_gain_->gain_->value_ = 1;
+			mod3_gain_->gain_->value_ = 1.0f;
+			mod4_gain_->gain_->value_ = 1.0f;
 		}
 		else {
-			mod1_gain_->gain_->value_ = 1;
-			mod2_gain_->gain_->value_ = 1;
+			mod1_gain_->gain_->value_ = 1.0f;
+			mod2_gain_->gain_->value_ = 1.0f;
 			mod3_gain_->gain_->value_ = 0;
 			mod4_gain_->gain_->value_ = 0;
 		}
