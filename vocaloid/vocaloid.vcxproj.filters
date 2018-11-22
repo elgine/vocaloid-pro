@@ -22,6 +22,9 @@
     <Filter Include="头文件\io">
       <UniqueIdentifier>{7e1df2f1-fbc7-44ad-bb45-51584d320852}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\effect">
+      <UniqueIdentifier>{a7fa3c0a-ae7f-46a0-ab7a-da91774b8c5c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -125,6 +128,18 @@
     </ClInclude>
     <ClInclude Include="buffer_node.hpp">
       <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="echo.hpp">
+      <Filter>头文件\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="wah_wah.hpp">
+      <Filter>头文件\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="equalizer.hpp">
+      <Filter>头文件\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="effect.hpp">
+      <Filter>头文件\effect</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

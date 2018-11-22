@@ -5,7 +5,7 @@ namespace vocaloid {
 
 		class BufferNode : public SourceNode {	
 		private:
-			AudioFrame *buf_;
+			AudioChannel *buf_;
 			int64_t played_began_;
 			bool began_;
 			int64_t start_point_;
@@ -17,7 +17,7 @@ namespace vocaloid {
 			bool loop_;
 
 			explicit BufferNode(AudioContext *ctx):SourceNode(ctx) {
-				buf_ = new AudioFrame();
+				buf_ = new AudioChannel();
 				loop_ = false;
 				start_point_ = 0;
 				offset_point_ = 0;
@@ -27,7 +27,7 @@ namespace vocaloid {
 				began_ = false;
 			}
 
-			void SetBuffer(AudioFrame *b) {
+			void SetBuffer(AudioChannel *b) {
 				buf_->Copy(b);
 			}
 

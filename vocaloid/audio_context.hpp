@@ -4,7 +4,7 @@
 #include <mutex>
 #include <atomic>
 #include <iostream>
-#include "audio_frame.hpp"
+#include "audio_channel.hpp"
 #include "audio_timeline.hpp"
 
 namespace vocaloid {
@@ -15,24 +15,50 @@ namespace vocaloid {
 			NORMAL,
 			INPUT,
 			OUTPUT,
-			PARAM
+			PARAM,
+			SPLITTER,
+			MERGER
 		};
 
+		struct AudioPort {
+			Channel from_channel;
+			Channel to_channel;
+		};
+
+		class AudioGraph;
 		class AudioProcessorUnit {
+		friend class AudioGraph;
 		protected:
 			int64_t id_;
 			AudioProcessorType type_;
 			bool can_be_connected_;
 			bool can_connect_;
 			set<AudioProcessorUnit*> inputs_;
+			map<int64_t, AudioPort> input_ports_;
 
 			int16_t channels_;
 			int64_t frame_size_;
 			int32_t sample_rate_;
-			AudioFrame *summing_buffer_;
-			AudioFrame *result_buffer_;
+			AudioChannel *summing_buffer_;
+			AudioChannel *result_buffer_;
 
 			bool enable_;
+
+			virtual void ConnectFrom(AudioProcessorUnit* input, Channel from, Channel to) {
+				if (can_be_connected_) {
+					inputs_.insert(input);
+					input_ports_[input->id_] = {from, to};
+				}
+			}
+
+			virtual void DisconnectFrom(AudioProcessorUnit* input) {
+				inputs_.erase(input);
+				input_ports_.erase(input->id_);
+			}
+
+			AudioChannel* GetResult() {
+				return result_buffer_;
+			}
 		public:
 
 			explicit AudioProcessorUnit(AudioProcessorType type,
@@ -46,8 +72,8 @@ namespace vocaloid {
 				sample_rate_ = DEFAULT_SAMPLE_RATE;
 				channels_ = 2;
 				enable_ = true;
-				summing_buffer_ = new AudioFrame(channels_, frame_size_);
-				result_buffer_ = new AudioFrame(channels_, frame_size_);
+				summing_buffer_ = new AudioChannel(channels_, frame_size_);
+				result_buffer_ = new AudioChannel(channels_, frame_size_);
 			}
 
 			virtual void Initialize(int32_t sample_rate, int64_t frame_size) {
@@ -63,15 +89,29 @@ namespace vocaloid {
 				channels_ = c;
 			}
 
-			AudioFrame* Result() {
-				return result_buffer_;
-			}
-
-			void PullBuffers() {
+			virtual void PullBuffers() {
 				summing_buffer_->Zero();
 				for (auto input : inputs_) {
-					if(input->type_ != AudioProcessorType::PARAM)
-						summing_buffer_->Mix(input->Result());
+					if (input->type_ != AudioProcessorType::PARAM) {
+						if (input->type_ == AudioProcessorType::SPLITTER) {
+							auto input_buf = input->GetResult()->Channel(input_ports_[input->id_].from_channel)->Data();
+							auto output_buf = summing_buffer_->Channel(0)->Data();
+							for (auto i = 0; i < frame_size_; i++) {
+								output_buf[i] += input_buf[i];
+							}
+						}
+						else if (input->type_ == AudioProcessorType::MERGER) {
+							auto input_buf = input->GetResult()->Channel(0)->Data();
+							auto output_buf = summing_buffer_->Channel(input_ports_[input->id_].to_channel)->Data();
+							for (auto i = 0; i < frame_size_; i++) {
+								output_buf[i] += input_buf[i];
+							}
+						}
+						else {
+							summing_buffer_->Mix(input->GetResult());
+						}
+
+					}
 				}
 				result_buffer_->Copy(summing_buffer_);
 			}
@@ -91,15 +131,6 @@ namespace vocaloid {
 			virtual int64_t Process() {
 				PullBuffers();
 				return ProcessFrame();
-			}
-
-			void ConnectFrom(AudioProcessorUnit* input) {
-				if (can_be_connected_)
-					inputs_.insert(input);
-			}
-
-			void DisconnectFrom(AudioProcessorUnit* input) {
-				inputs_.erase(input);
 			}
 
 			set<AudioProcessorUnit*> Inputs() {
@@ -122,7 +153,7 @@ namespace vocaloid {
 				return can_connect_;
 			}
 		};
-		
+
 		class AudioGraph{
 		protected:
 			map<int64_t, AudioProcessorUnit*> nodes_;
@@ -174,7 +205,7 @@ namespace vocaloid {
 				}
 			}
 
-			void Connect(AudioProcessorUnit *from_node, AudioProcessorUnit *to_node) {
+			void Connect(AudioProcessorUnit *from_node, AudioProcessorUnit *to_node, Channel from_channel = Channel::ALL, Channel to_channel = Channel::ALL) {
 				if (!from_node->CanConnect() || !to_node->CanBeConnected())return;
 				if (nodes_.find(from_node->Id()) == nodes_.end())
 					AddNode(from_node);
@@ -186,10 +217,10 @@ namespace vocaloid {
 					connections_[from] = {};
 				};
 				connections_[from].insert(to);
-				to_node->ConnectFrom(from_node);
+				to_node->ConnectFrom(from_node, from_channel, to_channel);
 			}
 
-			void Disconnect(AudioProcessorUnit *from_node, AudioProcessorUnit *to_node) {
+			void Disconnect(AudioProcessorUnit *from_node, AudioProcessorUnit *to_node, Channel from_channel = Channel::ALL, Channel to_channel = Channel::ALL) {
 				auto from = from_node->Id();
 				auto to = to_node->Id();
 				if(connections_.find(from) != connections_.end())

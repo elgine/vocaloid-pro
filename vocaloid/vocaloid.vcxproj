@@ -69,25 +69,25 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party/ffmpeg/x86/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party\rapidjson;$(SolutionDir)third_party\rapidjson$(SolutionDir)third_party/ffmpeg/x86/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <ReferencePath>$(SolutionDir)third_party/ffmpeg/x86/lib;$(VC_ReferencesPath_x86);</ReferencePath>
     <LibraryPath>$(SolutionDir)third_party/ffmpeg/x86/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party/ffmpeg/x86/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party\rapidjson;$(SolutionDir)third_party\rapidjson$(SolutionDir)third_party/ffmpeg/x86/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <ReferencePath>$(SolutionDir)third_party/ffmpeg/x86/lib;$(VC_ReferencesPath_x86);</ReferencePath>
     <LibraryPath>$(SolutionDir)third_party/ffmpeg/x86/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party/ffmpeg/x64/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party\rapidjson;$(SolutionDir)third_party\rapidjson$(SolutionDir)third_party/ffmpeg/x64/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <ReferencePath>$(SolutionDir)third_party/ffmpeg/x64/lib;$(VC_ReferencesPath_x64);</ReferencePath>
     <LibraryPath>$(SolutionDir)third_party/ffmpeg/x64/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party/ffmpeg/x64/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party\rapidjson;$(SolutionDir)third_party\rapidjson$(SolutionDir)third_party/ffmpeg/x64/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <ReferencePath>$(SolutionDir)third_party/ffmpeg/x64/lib;$(VC_ReferencesPath_x64);</ReferencePath>
     <LibraryPath>$(SolutionDir)third_party/ffmpeg/x64/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <TargetExt>.lib</TargetExt>
@@ -147,6 +147,9 @@
     <ClInclude Include="delay_node.hpp" />
     <ClInclude Include="destination_node.hpp" />
     <ClInclude Include="dynamic_compressor_node.hpp" />
+    <ClInclude Include="echo.hpp" />
+    <ClInclude Include="effect.hpp" />
+    <ClInclude Include="equalizer.hpp" />
     <ClInclude Include="ffmpeg_io.hpp" />
     <ClInclude Include="fft.hpp" />
     <ClInclude Include="file.h" />
@@ -166,6 +169,7 @@
     <ClInclude Include="audio_timeline.hpp" />
     <ClInclude Include="tone.hpp" />
     <ClInclude Include="maths.hpp" />
+    <ClInclude Include="wah_wah.hpp" />
     <ClInclude Include="wav.hpp" />
     <ClInclude Include="waveform.hpp" />
     <ClInclude Include="wave_shaper_node.hpp" />

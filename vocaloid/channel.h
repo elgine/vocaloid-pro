@@ -12,6 +12,7 @@ namespace vocaloid{
 		SURROUND_LEFT,
 		SURROUND_RIGHT,
 		CENTER,
-		LFE
+		LFE,
+		ALL
 	};
 }

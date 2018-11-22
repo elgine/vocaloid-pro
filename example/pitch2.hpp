@@ -9,11 +9,11 @@ void Run() {
 	auto compressor = new DynamicsCompressorNode(context);
 	auto player = new PlayerNode(context);
 	auto source = new FileReaderNode(context);
-	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\actor.mp3");
+	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\meet.mp3");
 
 	context->Connect(source, jungle->input_);
 	context->Connect(jungle->output_, compressor);
-	jungle->SetPitchOffset(0.3);
+	jungle->SetPitchOffset(0.34);
 	context->Connect(compressor, player);
 
 	source->Start(0);

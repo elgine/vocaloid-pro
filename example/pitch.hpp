@@ -14,7 +14,7 @@ void Run() {
 	auto pitch_shifter = new PitchShifter(context);
 	pitch_shifter->pitch_ = 1.22f;
 	auto source = new FileReaderNode(context);
-	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\ugly.mp3");
+	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\taotai.mp3");
 
 	context->Connect(source, pitch_shifter);
 	context->Connect(pitch_shifter, player);

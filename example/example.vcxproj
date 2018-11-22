@@ -69,9 +69,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProgramFiles)\Visual Leak Detector\include;$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <ReferencePath>$(ProgramFiles)\Visual Leak Detector\lib;$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)build\$(PlatformTarget);$(VC_ReferencesPath_x86);</ReferencePath>
-    <LibraryPath>$(ProgramFiles)\Visual Leak Detector\lib;$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)build\$(PlatformTarget);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)build\$(PlatformTarget);$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)build\$(PlatformTarget);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
     <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
@@ -83,9 +83,9 @@
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProgramFiles)\Visual Leak Detector\include;$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <ReferencePath>$(ProgramFiles)\Visual Leak Detector\lib;$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)build\$(PlatformTarget);$(VC_ReferencesPath_x64);</ReferencePath>
-    <LibraryPath>$(ProgramFiles)\Visual Leak Detector\lib;$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)build\$(PlatformTarget);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)build\$(PlatformTarget);$(VC_ReferencesPath_x64);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)build\$(PlatformTarget);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
@@ -162,13 +162,14 @@
   <ItemGroup>
     <ClInclude Include="alien.hpp" />
     <ClInclude Include="astronaut.hpp" />
+    <ClInclude Include="big_guy.hpp" />
+    <ClInclude Include="female.hpp" />
     <ClInclude Include="ffmpeg_io.hpp" />
     <ClInclude Include="pitch2.hpp" />
     <ClInclude Include="radio.hpp" />
     <ClInclude Include="robot1.hpp" />
     <ClInclude Include="robot2.hpp" />
     <ClInclude Include="pitch.hpp" />
-    <ClInclude Include="test_jungle.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="jungle.hpp" />

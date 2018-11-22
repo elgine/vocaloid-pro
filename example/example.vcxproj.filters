@@ -39,7 +39,10 @@
     <ClInclude Include="pitch2.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="test_jungle.hpp">
+    <ClInclude Include="big_guy.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="female.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

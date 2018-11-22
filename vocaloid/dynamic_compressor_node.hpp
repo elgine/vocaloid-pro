@@ -29,7 +29,7 @@ namespace vocaloid {
 			float m_max_attack_compression_diff_db_;
 			float m_metering_gain_;
 			float m_metering_release_k_;
-			AudioFrame *m_predelay_buffers_;
+			AudioChannel *m_predelay_buffers_;
 
 			float m_last_filter_stage_gain_;
 			float m_last_filter_stage_ratio_;
@@ -99,7 +99,7 @@ namespace vocaloid {
 				return k;
 			}
 
-			void Process(AudioFrame *in, float db_threshold, float db_knee, float ratio,
+			void Process(AudioChannel *in, float db_threshold, float db_knee, float ratio,
 				float attack, float release, float predelay, float db_post_gain,
 				float effect_blend, float release_zone1, float release_zone2,
 				float release_zone3, float release_zone4) {
@@ -328,7 +328,7 @@ namespace vocaloid {
 				post_gain_ = 0;
 				reduction_ = 0;
 				effect_blend_ = 1;
-				m_predelay_buffers_ = new AudioFrame(channels_, frame_size_);
+				m_predelay_buffers_ = new AudioChannel(channels_, frame_size_);
 				Reset();
 			}
 

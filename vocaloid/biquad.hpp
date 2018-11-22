@@ -259,12 +259,12 @@ namespace vocaloid {
 				UpdateParams();
 			}
 
-			void Process(vector<float> input,
-				vector<float> frequency,
-				vector<float> gain,
-				vector<float> Q,
-				vector<float> detune,
-				int64_t input_len, vector<float> &output) {
+			void Process(const float* input,
+				const float* frequency,
+				const float* gain,
+				const float* Q,
+				const float* detune,
+				int64_t input_len, float *output) {
 				for (int i = 0; i < input_len; i++) {
 					SetParams(frequency[i], Q[i], gain[i], detune[i]);
 					float x = input[i],
@@ -277,7 +277,7 @@ namespace vocaloid {
 				}
 			}
 
-			int64_t Process(vector<float> input, int64_t input_len, vector<float> &output) {
+			int64_t Process(const float* input, int64_t input_len, float *output) {
 				for (int i = 0; i < input_len; i++) {
 					float x = input[i],
 						y = b0_ * x + b1_ * x1_ + b2_ * x2_ - a1_ * y1_ - a2_ * y2_;
