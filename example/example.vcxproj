@@ -163,16 +163,17 @@
     <ClInclude Include="alien.hpp" />
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="big_guy.hpp" />
+    <ClInclude Include="child.hpp" />
     <ClInclude Include="female.hpp" />
-    <ClInclude Include="ffmpeg_io.hpp" />
-    <ClInclude Include="pitch2.hpp" />
+    <ClInclude Include="female2.hpp" />
+    <ClInclude Include="female3.hpp" />
+    <ClInclude Include="male.hpp" />
+    <ClInclude Include="male2.hpp" />
+    <ClInclude Include="old_male.hpp" />
+    <ClInclude Include="old_woman.hpp" />
     <ClInclude Include="radio.hpp" />
     <ClInclude Include="robot1.hpp" />
     <ClInclude Include="robot2.hpp" />
-    <ClInclude Include="pitch.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="jungle.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

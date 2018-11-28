@@ -147,15 +147,15 @@
     <ClInclude Include="delay_node.hpp" />
     <ClInclude Include="destination_node.hpp" />
     <ClInclude Include="dynamic_compressor_node.hpp" />
-    <ClInclude Include="echo.hpp" />
     <ClInclude Include="effect.hpp" />
-    <ClInclude Include="equalizer.hpp" />
+    <ClInclude Include="equalizer_3_band.hpp" />
     <ClInclude Include="ffmpeg_io.hpp" />
     <ClInclude Include="fft.hpp" />
     <ClInclude Include="file.h" />
     <ClInclude Include="file_reader_node.hpp" />
     <ClInclude Include="file_writer_node.hpp" />
-    <ClInclude Include="audio_frame.hpp" />
+    <ClInclude Include="audio_channel.hpp" />
+    <ClInclude Include="flanger.hpp" />
     <ClInclude Include="gain_node.hpp" />
     <ClInclude Include="oscillator_node.hpp" />
     <ClInclude Include="pcm_player.hpp" />
@@ -169,7 +169,7 @@
     <ClInclude Include="audio_timeline.hpp" />
     <ClInclude Include="tone.hpp" />
     <ClInclude Include="maths.hpp" />
-    <ClInclude Include="wah_wah.hpp" />
+    <ClInclude Include="vibrato.hpp" />
     <ClInclude Include="wav.hpp" />
     <ClInclude Include="waveform.hpp" />
     <ClInclude Include="wave_shaper_node.hpp" />

@@ -20,7 +20,7 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() override {
-				auto gain_result = gain_->Result()->Channel(0)->Data();
+				auto gain_result = gain_->GetResult()->Channel(0)->Data();
 				for (auto i = 0; i < frame_size_; i++) {
 					auto value = gain_result[i];
 					if (value < 0)value = 0;

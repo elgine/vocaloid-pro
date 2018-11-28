@@ -28,6 +28,10 @@ void Run() {
 	context->Connect(source, delay);
 	context->Connect(delay, biquad);
 	context->Connect(biquad, player);
+
+	source->Start(0);
+	osc->Start();
+
 	context->Prepare();
 	context->Start();
 	getchar();

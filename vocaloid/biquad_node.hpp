@@ -45,10 +45,10 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() override {
-				auto frequency_buffer = frequency_->Result()->Channel(0)->Data();
-				auto gain_buffer = gain_->Result()->Channel(0)->Data();
-				auto Q_buffer = Q_->Result()->Channel(0)->Data();
-				auto detune_buffer = detune_->Result()->Channel(0)->Data();
+				auto frequency_buffer = frequency_->GetResult()->Channel(0)->Data();
+				auto gain_buffer = gain_->GetResult()->Channel(0)->Data();
+				auto Q_buffer = Q_->GetResult()->Channel(0)->Data();
+				auto detune_buffer = detune_->GetResult()->Channel(0)->Data();
 				for (auto i = 0; i < channels_; i++) {
 					filters_[i]->Process(summing_buffer_->Channel(i)->Data(),
 										frequency_buffer,

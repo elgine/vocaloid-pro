@@ -1,9 +1,11 @@
 #pragma once
 #include "stdafx.h"
 #include <thread>
+#include <stack>
 #include <mutex>
 #include <atomic>
 #include <iostream>
+#include <algorithm>
 #include "audio_channel.hpp"
 #include "audio_timeline.hpp"
 
@@ -55,10 +57,6 @@ namespace vocaloid {
 				inputs_.erase(input);
 				input_ports_.erase(input->id_);
 			}
-
-			AudioChannel* GetResult() {
-				return result_buffer_;
-			}
 		public:
 
 			explicit AudioProcessorUnit(AudioProcessorType type,
@@ -89,6 +87,10 @@ namespace vocaloid {
 				channels_ = c;
 			}
 
+			AudioChannel* GetResult() {
+				return result_buffer_;
+			}
+
 			virtual void PullBuffers() {
 				summing_buffer_->Zero();
 				for (auto input : inputs_) {
@@ -116,7 +118,7 @@ namespace vocaloid {
 				result_buffer_->Copy(summing_buffer_);
 			}
 
-			virtual int64_t ProcessFrame() = 0;
+			virtual int64_t ProcessFrame() { return 0; }
 
 			virtual void Close() {}
 
@@ -162,6 +164,25 @@ namespace vocaloid {
 
 			explicit AudioGraph(){}
 
+			void FindCircles(int64_t id, vector<vector<int64_t>> &circles) {
+				vector<int64_t> path;
+				FindCircle(id, path, circles);
+			}
+
+			void FindCircle(int64_t id, vector<int64_t> &path, vector<vector<int64_t>> &circles) {
+				// Exist circle
+				if (path.size() > 0 && id == path[0]) {
+					vector<int64_t> new_path(path);
+					circles.push_back(new_path);
+					path.pop_back();
+					return;
+				}
+				for (auto child : Children(id)) {
+					path.push_back(id);
+					FindCircle(child, path, circles);
+				}
+			}
+
 			void Traverse(vector<int64_t> &visited_nodes) {
 				queue<int64_t> traverse_nodes;
 				for (auto pair : nodes_) {
@@ -177,13 +198,18 @@ namespace vocaloid {
 					for (auto dependency : dependencies) {
 						if (find(visited_nodes.begin(), visited_nodes.end(), dependency->Id()) != visited_nodes.end())continue;
 						auto all_output_visited = true;
+						// TODO: Cycle handling
 						for (auto child : Children(dependency->Id())) {
 							if (find(visited_nodes.begin(), visited_nodes.end(), child) == visited_nodes.end()) {
 								all_output_visited = false;
 								break;
 							}
 						}
-						if (!all_output_visited)continue;
+						if (!all_output_visited) {
+							// TODO: Ecapse circle
+
+							continue;
+						}
 						traverse_nodes.push(dependency->Id());
 					}
 				}
@@ -242,6 +268,7 @@ namespace vocaloid {
 			A_RATE
 		};
 
+		class AudioNode;
 		class AudioParam: public AudioProcessorUnit, public AudioTimeline {
 		private:
 			int64_t offset_;

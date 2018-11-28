@@ -5,14 +5,14 @@ namespace vocaloid {
 	namespace node {
 		class WaveShaperNode : public AudioNode {
 		private:
-			vector<float> curve_;
+			float *curve_;
 			int64_t curve_length_;
 		public:
 			explicit WaveShaperNode(AudioContext *ctx) :AudioNode(ctx) {
 				curve_length_ = 0;
 			}
 
-			void SetCurve(vector<float> &c, int64_t len) {
+			void SetCurve(float *c, int64_t len) {
 				curve_ = c;
 				curve_length_ = len;
 			}

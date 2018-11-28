@@ -111,13 +111,7 @@
     <ClInclude Include="dynamic_compressor_node.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="pitch_shifter.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
     <ClInclude Include="audio_timeline.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
-    <ClInclude Include="audio_frame.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
     <ClInclude Include="audio_context.hpp">
@@ -129,16 +123,22 @@
     <ClInclude Include="buffer_node.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="echo.hpp">
-      <Filter>头文件\effect</Filter>
-    </ClInclude>
-    <ClInclude Include="wah_wah.hpp">
-      <Filter>头文件\effect</Filter>
-    </ClInclude>
-    <ClInclude Include="equalizer.hpp">
-      <Filter>头文件\effect</Filter>
-    </ClInclude>
     <ClInclude Include="effect.hpp">
+      <Filter>头文件\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_channel.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="pitch_shifter.hpp">
+      <Filter>头文件\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="equalizer_3_band.hpp">
+      <Filter>头文件\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="vibrato.hpp">
+      <Filter>头文件\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="flanger.hpp">
       <Filter>头文件\effect</Filter>
     </ClInclude>
   </ItemGroup>

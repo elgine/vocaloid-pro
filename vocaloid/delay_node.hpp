@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "maths.hpp"
-#include "audio_frame.hpp"
+#include "audio_channel.hpp"
 #include "audio_context.hpp"
 using namespace std;
 namespace vocaloid {
@@ -34,7 +34,7 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() override {
-				auto delay_buffer = delay_time_->Result()->Channel(0)->Data();
+				auto delay_buffer = delay_time_->GetResult()->Channel(0)->Data();
 				for (auto i = 0; i < frame_size_; i++) {
 					auto delay_time = delay_buffer[i];
 					delay_time = Clamp(0.0f, max_delay_time_, delay_time);

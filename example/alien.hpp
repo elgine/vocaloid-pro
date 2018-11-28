@@ -12,8 +12,6 @@ using namespace vocaloid::node;
 void Run() {
 	auto context = new AudioContext();
 	auto player = new PlayerNode(context);
-	/*auto writer = new FileWriterNode(context);
-	writer->SetPath("alien.mp3");*/
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\cpp\\vocaloid\\samples\\speech.wav");
 	auto delay = new DelayNode(context, 0.05f, 0.1f);
@@ -21,10 +19,13 @@ void Run() {
 	osc->SetFrequency(5.0f);
 	auto osc_gain = new GainNode(context, 0.05f);
 
-	/*context->Connect(osc, osc_gain);
+	context->Connect(osc, osc_gain);
 	context->Connect(osc_gain, delay->delay_time_);
-	context->Connect(source, delay);*/
-	context->Connect(source, player);
+	context->Connect(source, delay);
+	context->Connect(delay, player);
+
+	source->Start(0);
+	osc->Start();
 
 	context->Prepare();
 	context->Start();

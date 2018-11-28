@@ -16,7 +16,7 @@ void Run() {
 	auto format = new AudioFormat();
 	auto fut = async(ReadFileBuffer, "G:\\Projects\\VSC++\\vocaloid\\samples\\radio.wav", format, buffer);
 	fut.get();
-	auto kernel = new AudioFrame();
+	auto kernel = new AudioChannel();
 	kernel->FromBuffer(buffer, format->bits, format->channels);
 	convolution->SetKernel(kernel->Channel(0)->Data(), kernel->Channel(0)->Size());
 
@@ -24,6 +24,8 @@ void Run() {
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	context->Connect(source, convolution);
 	context->Connect(convolution, player);
+
+	source->Start(0);
 
 	context->Prepare();
 	context->Start();

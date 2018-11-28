@@ -32,6 +32,11 @@ void Run() {
 	context->Connect(source, delay);
 	context->Connect(delay, player);
 
+	source->Start(0);
+	osc1->Start();
+	osc2->Start();
+	osc3->Start();
+
 	context->Prepare();
 	context->Start();
 	getchar();
