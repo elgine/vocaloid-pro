@@ -141,5 +141,8 @@
     <ClInclude Include="flanger.hpp">
       <Filter>头文件\effect</Filter>
     </ClInclude>
+    <ClInclude Include="auto_wah.hpp">
+      <Filter>头文件\effect</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

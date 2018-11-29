@@ -138,6 +138,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="audio_context.hpp" />
+    <ClInclude Include="auto_wah.hpp" />
     <ClInclude Include="biquad.hpp" />
     <ClInclude Include="biquad_node.hpp" />
     <ClInclude Include="buffer_node.hpp" />

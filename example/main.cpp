@@ -12,7 +12,8 @@
 //#include "male.hpp"
 //#include "male2.hpp"
 //#include "old_male.hpp"
-#include "old_woman.hpp"
+//#include "old_woman.hpp"
+#include "fairy.hpp"
 void main() {
 	Run();
 }

@@ -164,6 +164,7 @@
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="big_guy.hpp" />
     <ClInclude Include="child.hpp" />
+    <ClInclude Include="fairy.hpp" />
     <ClInclude Include="female.hpp" />
     <ClInclude Include="female2.hpp" />
     <ClInclude Include="female3.hpp" />
