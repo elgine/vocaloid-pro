@@ -164,55 +164,124 @@ namespace vocaloid {
 
 			explicit AudioGraph(){}
 
-			void FindCircles(int64_t id, vector<vector<int64_t>> &circles) {
-				vector<int64_t> path;
-				FindCircle(id, path, circles);
-			}
-
-			void FindCircle(int64_t id, vector<int64_t> &path, vector<vector<int64_t>> &circles) {
-				// Exist circle
-				if (path.size() > 0 && id == path[0]) {
-					vector<int64_t> new_path(path);
-					circles.push_back(new_path);
-					path.pop_back();
-					return;
+			void FindCircleEnd(int64_t id, vector<int64_t> &path, map<int64_t, set<int64_t>> &circles) {
+				if (!path.empty()) {
+					// Exist circle
+					if (id == path[0]) {
+						circles[id].insert(path[path.size() - 1]);
+						path.pop_back();
+						return;
+					}
+					else if (find(path.begin(), path.end(), id) != path.end()) {
+						return;
+					}
 				}
+
 				for (auto child : Children(id)) {
 					path.push_back(id);
-					FindCircle(child, path, circles);
+					FindCircleEnd(child, path, circles);
 				}
 			}
 
-			void Traverse(vector<int64_t> &visited_nodes) {
+			void FindCircleEnds(int64_t id, map<int64_t, set<int64_t>> &circles) {
+				vector<int64_t> path;
+				FindCircleEnd(id, path, circles);
+			}
+
+			enum VisitColor {
+				WHITE,
+				GREY,
+				BLACK
+			};
+
+			void FindConnectedNodes(vector<int64_t> &visited_nodes) {
 				queue<int64_t> traverse_nodes;
+				map<int64_t, VisitColor> colors;
 				for (auto pair : nodes_) {
+					colors[pair.first] = VisitColor::WHITE;
 					if (pair.second->Type() == AudioProcessorType::OUTPUT) {
 						traverse_nodes.push(pair.second->Id());
+						colors[pair.first] = VisitColor::GREY;
 					}
 				}
 				while (!traverse_nodes.empty()) {
 					auto node = traverse_nodes.front();
 					traverse_nodes.pop();
 					visited_nodes.insert(visited_nodes.begin(), node);
+					colors[node] = VisitColor::BLACK;
 					auto dependencies = FindNode(node)->Inputs();
 					for (auto dependency : dependencies) {
-						if (find(visited_nodes.begin(), visited_nodes.end(), dependency->Id()) != visited_nodes.end())continue;
-						auto all_output_visited = true;
-						// TODO: Cycle handling
-						for (auto child : Children(dependency->Id())) {
-							if (find(visited_nodes.begin(), visited_nodes.end(), child) == visited_nodes.end()) {
-								all_output_visited = false;
+						if (colors[dependency->Id()] != VisitColor::WHITE)continue;
+						traverse_nodes.push(dependency->Id());
+						colors[dependency->Id()] = VisitColor::GREY;
+					}
+				}
+			}
+
+			void Traverse(vector<int64_t> &visited_nodes) {
+				vector<int64_t> nodes;
+				FindConnectedNodes(nodes);
+				queue<int64_t> traverse_nodes;
+				map<int64_t, set<int64_t>> circle_ends;
+				map<int64_t, VisitColor> colors;
+				for (auto node : nodes) {
+					colors[node] = VisitColor::WHITE;
+					if (FindNode(node)->Inputs().empty()) {
+						colors[node] = VisitColor::GREY;
+						traverse_nodes.push(node);
+					}
+					FindCircleEnds(node, circle_ends);
+				}
+				while (!traverse_nodes.empty()) {
+					auto node = traverse_nodes.front();
+					traverse_nodes.pop();
+					visited_nodes.push_back(node);
+					colors[node] = VisitColor::BLACK;
+					auto children = Children(node);
+					for (auto child : children) {
+						auto child_node = FindNode(child);
+						if (colors[child] == VisitColor::BLACK)continue;
+						auto all_visited = true;
+						for (auto input : child_node->Inputs()) {
+							if (colors[input->Id()] != VisitColor::BLACK && circle_ends[child].find(input->Id()) == circle_ends[child].end()) {
+								all_visited = false;
 								break;
 							}
 						}
-						if (!all_output_visited) {
-							// TODO: Ecapse circle
-
-							continue;
+						if (all_visited) {
+							colors[child] = VisitColor::GREY;
+							traverse_nodes.push(child);
 						}
-						traverse_nodes.push(dependency->Id());
 					}
 				}
+				//queue<int64_t> traverse_nodes;
+				//for (auto pair : nodes_) {
+				//	if (pair.second->Type() == AudioProcessorType::OUTPUT) {
+				//		traverse_nodes.push(pair.second->Id());
+				//	}
+				//}
+				//while (!traverse_nodes.empty()) {
+				//	auto node = traverse_nodes.front();
+				//	traverse_nodes.pop();
+				//	visited_nodes.insert(visited_nodes.begin(), node);
+				//	auto dependencies = FindNode(node)->Inputs();
+				//	for (auto dependency : dependencies) {
+				//		if (find(visited_nodes.begin(), visited_nodes.end(), dependency->Id()) != visited_nodes.end())continue;
+				//		auto all_output_visited = true;
+				//		// TODO: Cycle handling
+				//		for (auto child : Children(dependency->Id())) {
+				//			if (find(visited_nodes.begin(), visited_nodes.end(), child) == visited_nodes.end()) {
+				//				all_output_visited = false;
+				//				break;
+				//			}
+				//		}
+				//		if (!all_output_visited) {
+				//			// TODO: Ecapse circle
+				//			continue;
+				//		}
+				//		traverse_nodes.push(dependency->Id());
+				//	}
+				//}
 			}
 
 			set<int64_t> Children(int64_t id) {
