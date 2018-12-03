@@ -13,7 +13,10 @@ namespace vocaloid {
 		public:
 			bool silence_;
 
-			explicit AudioChannel(int16_t channels = 2, int64_t max_size = 1024) {
+			int32_t sample_rate_;
+
+			explicit AudioChannel(int16_t channels = 2, int64_t max_size = 1024, int32_t sample_rate = 44100) {
+				sample_rate_ = sample_rate;
 				channels_ = 0;
 				data_ = new PBuffer[8]{nullptr};
 				silence_ = true;
@@ -23,6 +26,7 @@ namespace vocaloid {
 			void Copy(AudioChannel *b) {
 				Alloc(b->Channels(), b->Size());
 				SetSize(b->Size());
+				sample_rate_ = b->sample_rate_;
 				for (auto i = 0; i < b->Channels(); i++) {
 					for (auto j = 0; j < b->Size(); j++) {
 						data_[i]->Data()[j] = b->Data()[i]->Data()[j];

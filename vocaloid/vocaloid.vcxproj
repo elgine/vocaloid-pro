@@ -143,6 +143,7 @@
     <ClInclude Include="biquad_node.hpp" />
     <ClInclude Include="buffer_node.hpp" />
     <ClInclude Include="channel.h" />
+    <ClInclude Include="chorus.hpp" />
     <ClInclude Include="convolution.hpp" />
     <ClInclude Include="convolution_node.hpp" />
     <ClInclude Include="delay_node.hpp" />

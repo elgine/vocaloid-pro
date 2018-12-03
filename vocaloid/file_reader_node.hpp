@@ -24,9 +24,16 @@ namespace vocaloid {
 			int64_t require_float_size_;
 			int16_t bits_;
 
+			int64_t played_began_;
+			int64_t played_point_;
+			bool began_;
 			int64_t start_point_;
 			int64_t offset_point_;
 			int64_t duration_point_;
+
+			int64_t start_;
+			int64_t offset_;
+			int64_t duration_;
 		public:
 
 			bool loop_;
@@ -62,10 +69,9 @@ namespace vocaloid {
 			// TODO: Loop and play in segments...
 			void Start(int64_t when, int64_t offset = 0, int64_t duration = 0) {
 				SourceNode::Start();
-				auto sample_rate = context_->SampleRate();
-				start_point_ = sample_rate * when * 0.001f;
-				offset_point_ = sample_rate * offset * 0.001f;
-				duration_point_ = sample_rate * duration * 0.001f;
+				start_ = when;
+				offset_ = offset;
+				duration_ = duration;
 			}
 
 			void Initialize(int32_t sample_rate, int64_t frame_size) override {
@@ -86,12 +92,35 @@ namespace vocaloid {
 				DeleteArray(&temp_buffer_);
 				AllocArray(require_buffer_size_, &temp_buffer_);
 
+				
+
+				began_ = false;
+				played_began_ = 0;
+				start_point_ = sample_rate * start_ * 0.001;
+				offset_point_ = format.sample_rate * offset_ * 0.001;
+				duration_point_ = format.sample_rate * duration_ * 0.001;
 				if (duration_point_ <= 0)
 					duration_point_ = reader_->FileLength() / BITS_PER_SEC / channels_;
+				played_point_ = offset_point_;
+				summing_buffer_->sample_rate_ = format.sample_rate;
 			}
 
 			int64_t ProcessFrame() override {
-				if (!enable_)return 0;
+				if (!loop_ && played_point_ - offset_point_ >= duration_point_) {
+					if (!finished_)finished_ = true;
+					return 0;
+				}
+				if (!began_) {
+					if (played_began_ < start_point_) {
+						played_began_ += frame_size_;
+						return 0;
+					}
+					auto diff = int64_t(float(played_began_ - start_point_) / sample_rate_ * 1000);
+					auto offset_time = offset_ + diff;
+					reader_->Seek(offset_time);
+					began_ = true;
+				}
+
 				int64_t size = 0;
 				if (reader_->IsEnd() && !reader_->CapableToRead(require_buffer_size_)) {
 					reader_->Flush(temp_buffer_, size);

@@ -357,8 +357,10 @@ namespace vocaloid {
 
 			int64_t Seek(int64_t time) override {
 				unique_lock<mutex> lck(decode_mutex_);
-				auto durationPerFrame = float(codec_ctx_->frame_size * AV_TIME_BASE) / codec_ctx_->sample_rate;
-				av_seek_frame(ctx_, a_stream_index_, floor(time / durationPerFrame), AVSEEK_FLAG_ANY);
+				//auto durationPerFrame = float(codec_ctx_->frame_size * AV_TIME_BASE) / codec_ctx_->sample_rate;
+				//av_seek_frame(ctx_, a_stream_index_, floor(time / durationPerFrame), AVSEEK_FLAG_ANY);
+				av_seek_frame(ctx_, a_stream_index_, int64_t(time * 0.001f / av_q2d(ctx_->streams[a_stream_index_]->time_base)), AVSEEK_FLAG_BACKWARD);
+				avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
 				return time;
 			}
 

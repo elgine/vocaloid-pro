@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "audio_channel.hpp"
 #include "audio_timeline.hpp"
+#include "../utility/emitter.hpp"
 
 namespace vocaloid {
 	
@@ -82,6 +83,8 @@ namespace vocaloid {
 				result_buffer_->Alloc(channels_, frame_size_);
 				result_buffer_->SetSize(frame_size_);
 			}
+
+			virtual bool Finished() { return false; }
 
 			virtual void SetChannels(int16_t c) {
 				channels_ = c;
@@ -372,7 +375,9 @@ namespace vocaloid {
 			PLAYING
 		};
 
-		class AudioContext : public AudioGraph {
+		class AudioContext : public AudioGraph,  public Emitter{
+		public:
+			static const char* ALL_INPUT_NOT_LOOP_FINISHED;
 		private:
 			atomic<AudioContextState> state_;
 			unique_ptr<thread> audio_render_thread_;
@@ -382,13 +387,21 @@ namespace vocaloid {
 			int64_t frame_size_;
 
 			void Run() {
+				
 				while (state_ == AudioContextState::PLAYING) {
 					{
+						bool all_input_not_loop_finished = true;
 						unique_lock<mutex> lck(audio_render_thread_mutex_);
 						try {
 							for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
 								auto node = FindNode(*iter);
 								node->Process();
+								if (node->Type() == AudioProcessorType::INPUT && !node->Finished()) {
+									all_input_not_loop_finished = false;
+								}
+							}
+							if (all_input_not_loop_finished) {
+								Emit(ALL_INPUT_NOT_LOOP_FINISHED, nullptr);
 							}
 						}
 						catch (exception e) {
@@ -400,8 +413,7 @@ namespace vocaloid {
 			}
 
 		public:
-
-			explicit AudioContext():state_(AudioContextState::STOPPED){
+			explicit AudioContext():AudioGraph(), Emitter(), state_(AudioContextState::STOPPED){
 				sample_rate_ = DEFAULT_SAMPLE_RATE;
 				frame_size_ = DEFAULT_FRAME_SIZE;
 			}
@@ -443,6 +455,8 @@ namespace vocaloid {
 				return sample_rate_;
 			}
 		};
+
+		const char* AudioContext::ALL_INPUT_NOT_LOOP_FINISHED = "all_input_not_loop_finished";
 
 		class AudioNode : public AudioProcessorUnit {
 		protected:
