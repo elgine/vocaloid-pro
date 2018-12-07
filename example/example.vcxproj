@@ -163,6 +163,7 @@
     <ClInclude Include="alien.hpp" />
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="big_guy.hpp" />
+    <ClInclude Include="cave.hpp" />
     <ClInclude Include="child.hpp" />
     <ClInclude Include="fairy.hpp" />
     <ClInclude Include="female.hpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="radio.hpp" />
     <ClInclude Include="robot1.hpp" />
     <ClInclude Include="robot2.hpp" />
+    <ClInclude Include="transformer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

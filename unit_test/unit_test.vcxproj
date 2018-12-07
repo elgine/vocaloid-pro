@@ -155,6 +155,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="test_offset.hpp" />
     <ClInclude Include="test_path.hpp" />
+    <ClInclude Include="test_pitch_shift.hpp" />
     <ClInclude Include="test_tone.hpp" />
   </ItemGroup>
   <ItemGroup>

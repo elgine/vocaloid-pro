@@ -190,7 +190,8 @@ namespace vocaloid {
 			int64_t FileLength() override {
 				unique_lock<mutex> lck(decode_mutex_);
 				auto audio_stream = ctx_->streams[a_stream_index_];
-				return audio_stream->duration * av_q2d(audio_stream->time_base) * codec_ctx_->sample_rate * codec_ctx_->block_align;
+				auto duration = audio_stream->duration * av_q2d(audio_stream->time_base);
+				return duration * codec_ctx_->sample_rate * codec_ctx_->channels * BITS_PER_SEC;
 			}
 
 			void Flush(char* data, int64_t& length) override {

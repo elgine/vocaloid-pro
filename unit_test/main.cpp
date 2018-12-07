@@ -1,7 +1,8 @@
 #include "stdafx.h"
-#include "test_path.hpp"
-#include "test_tone.hpp"
-#include "test_offset.hpp"
+//#include "test_path.hpp"
+//#include "test_tone.hpp"
+//#include "test_offset.hpp"
+#include "test_pitch_shift.hpp"
 
 //int main(int argc, char **argv) {
 //	::testing::InitGoogleTest(&argc, argv);

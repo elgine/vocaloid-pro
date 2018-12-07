@@ -1,39 +1,48 @@
 #pragma once
+#include "../utility/buffer.hpp"
 #include "fft.hpp"
 #include "maths.hpp"
 #include "window.hpp"
 #include <iostream>
+#include <algorithm>
 namespace vocaloid {
 	namespace dsp {
 		class PitchShift {
 		private:
 			FFT *fft_;
+			int64_t sample_rate_;
+			int64_t buffer_size_;
 			float* win_;
 			float* omega_;
 			Buffer<float>* input_queue_;
 			Buffer<float>* output_queue_;
 			Buffer<float> *out_;
+
 			float *buffer_;
-			float *prev_in_phase_;
-			float *prev_out_phase_;
 			float *frame_;
-			int64_t overlap_size_;
+
+			float *last_phase_;
+			float *new_phase_;		
+	
+			float overlap_;
 			int64_t hop_size_;
 			int64_t hop_size_s_;
+			
 			float stretch_;
 			float pitch_;
 			float tempo_;
-			
+
+			int64_t order_;
 
 			void Processing() {
-				for (int i = 0; i < fft_->GetBufferSize(); i++) {
+				for (int i = 0; i < buffer_size_; i++) {
 					float magn = FFT::CalculateMagnitude(fft_->real_[i], fft_->imag_[i]);
 					float phase = FFT::CalculatePhase(fft_->real_[i], fft_->imag_[i]);
-					float diff = phase - prev_in_phase_[i] - omega_[i];
+					float diff = phase - last_phase_[i] - omega_[i];
 					float freq_diff = omega_[i] + FFT::MapRadianToPi(diff);
-					float new_phase = FFT::MapRadianToPi(prev_out_phase_[i] + freq_diff * stretch_);
-					prev_out_phase_[i] = new_phase;
-					prev_in_phase_[i] = phase;
+					float new_phase = FFT::MapRadianToPi(new_phase_[i] + freq_diff * stretch_);
+					new_phase_[i] = new_phase;
+					last_phase_[i] = phase;
 					fft_->real_[i] = cosf(new_phase) * magn;
 					fft_->imag_[i] = sinf(new_phase) * magn;
 				}
@@ -73,9 +82,9 @@ namespace vocaloid {
 
 			explicit PitchShift() :hop_size_(0),
 				hop_size_s_(0),
-				overlap_size_(0),
 				stretch_(1.0f),
 				pitch_(1.0f),
+				order_(50),
 				tempo_(1.0f) {
 				fft_ = new FFT();
 				input_queue_ = new Buffer<float>();
@@ -84,12 +93,15 @@ namespace vocaloid {
 				frame_ = nullptr;
 				win_ = nullptr;
 				buffer_ = nullptr;
-				prev_in_phase_ = nullptr;
-				prev_out_phase_ = nullptr;
+				last_phase_ = nullptr;
+				new_phase_ = nullptr;
 				omega_ = nullptr;
 			}
 
-			void Initialize(int64_t fft_size, float overlap, WINDOW_TYPE win = WINDOW_TYPE::HAMMING, float extra = 1.0f) {
+			void Initialize(int64_t fft_size, float overlap, WINDOW_TYPE win = WINDOW_TYPE::HAMMING, int64_t sample_rate = 44100, float extra = 1.0f) {
+				buffer_size_ = fft_size;
+				sample_rate_ = sample_rate;
+				overlap_ = overlap;
 				fft_->Initialize(fft_size);
 
 				DeleteArray(&frame_);
@@ -102,14 +114,13 @@ namespace vocaloid {
 				DeleteArray(&buffer_);
 				AllocArray(fft_size, &buffer_);
 
-				DeleteArray(&prev_in_phase_);
-				AllocArray(fft_size, &prev_in_phase_);
+				DeleteArray(&last_phase_);
+				AllocArray(fft_size, &last_phase_);
 
-				DeleteArray(&prev_out_phase_);
-				AllocArray(fft_size, &prev_out_phase_);
+				DeleteArray(&new_phase_);
+				AllocArray(fft_size, &new_phase_);
 
-				overlap_size_ = (int64_t)(fft_size * overlap);
-				hop_size_s_ = hop_size_ = fft_size - overlap_size_;
+				hop_size_s_ = hop_size_ = (int64_t)(fft_size * overlap);
 
 				DeleteArray(&omega_);
 				AllocArray(fft_size, &omega_);
@@ -128,6 +139,7 @@ namespace vocaloid {
 				int64_t offset = 0;
 				auto data = input_queue_->Data();
 				auto input_buffer_size = input_queue_->Size();
+
 				while (input_buffer_size > offset + fft_size) {
 					// Windowing
 					for (int i = 0; i < fft_size; i++) {
@@ -137,7 +149,7 @@ namespace vocaloid {
 					// Forward fft
 					fft_->Forward(frame_, fft_size);
 					// Do processing
-					 Processing();
+					Processing();
 					// Do inverse fft
 					fft_->Inverse(frame_);
 					ShiftWindow(frame_, fft_size);
@@ -161,8 +173,8 @@ namespace vocaloid {
 			}
 
 			int64_t PopFrame(float *frame, int64_t len) {
-				auto frame_len = min((int64_t)output_queue_->Size(), int64_t(len * stretch_));
-				if (frame_len < len)return 0;
+				auto frame_len = int64_t(len * stretch_);
+				if (output_queue_->Size() < frame_len)return 0;
 				out_->Alloc(frame_len);
 				out_->SetSize(frame_len);
 				output_queue_->Pop(out_, frame_len);
@@ -196,8 +208,8 @@ namespace vocaloid {
 				DeleteArray(&out_);
 				DeleteArray(&omega_);
 				DeleteArray(&frame_);
-				DeleteArray(&prev_in_phase_);
-				DeleteArray(&prev_out_phase_);
+				DeleteArray(&last_phase_);
+				DeleteArray(&new_phase_);
 			}
 		};
 	}

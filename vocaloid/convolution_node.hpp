@@ -4,7 +4,7 @@
 namespace vocaloid {
 	namespace node {
 		class ConvolutionNode : public AudioNode {
-		private:
+		protected:
 			dsp::Convolution *convolver_;
 			float *kernel_;
 			int64_t kernel_len_;

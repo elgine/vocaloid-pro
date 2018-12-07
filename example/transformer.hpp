@@ -1,0 +1,44 @@
+#include "../vocaloid/pitch_shifter.hpp"
+#include "../vocaloid/audio_context.hpp"
+#include "../vocaloid/file_reader_node.hpp"
+#include "../vocaloid/gain_node.hpp"
+#include "../vocaloid/player_node.hpp"
+#include "../vocaloid/dynamic_compressor_node.hpp"
+using namespace vocaloid;
+using namespace vocaloid::node;
+
+void Run() {
+	
+	auto context = new AudioContext();
+	auto player = new PlayerNode(context);
+	auto source = new FileReaderNode(context);
+	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
+	source->Start(0);
+
+	auto compressor = new DynamicsCompressorNode(context);
+
+	auto dee = new PitchShifter(context);
+	dee->SetPitchOffset(-0.1f);
+	auto deep = new PitchShifter(context);
+	deep->SetPitchOffset(-0.2f);
+	auto deeper = new PitchShifter(context);
+	deeper->SetPitchOffset(-0.4f);
+	auto deeperer = new PitchShifter(context);
+	deeperer->SetPitchOffset(-0.8f);
+
+	context->Connect(source, dee->input_);
+	context->Connect(source, deep->input_);
+	context->Connect(source, deeper->input_);
+	context->Connect(source, deeperer->input_);
+
+	context->Connect(dee->output_, compressor);
+	context->Connect(deep->output_, compressor);
+	context->Connect(deeper->output_, compressor);
+	context->Connect(deeperer->output_, compressor);
+	context->Connect(compressor, player);
+
+	context->Prepare();
+	context->Start();
+	getchar();
+	context->Close();
+}

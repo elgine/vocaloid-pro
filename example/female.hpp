@@ -16,7 +16,7 @@ void Run() {
 	high_pass->frequency_->value_ = 120;
 	auto player = new PlayerNode(context);
 	auto source = new FileReaderNode(context);
-	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\taotai.mp3");
+	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 
 	auto pitch_shifter = new PitchShifter(context);
 	pitch_shifter->SetPitchOffset(0.35);

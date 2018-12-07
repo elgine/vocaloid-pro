@@ -147,5 +147,20 @@
     <ClInclude Include="chorus.hpp">
       <Filter>头文件\effect</Filter>
     </ClInclude>
+    <ClInclude Include="reverb.hpp">
+      <Filter>头文件\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="reverb_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="distortion.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="pitch_shifter_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="find_peaks.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

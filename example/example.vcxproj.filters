@@ -60,6 +60,12 @@
     <ClInclude Include="fairy.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="transformer.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cave.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

@@ -4,7 +4,7 @@
 namespace vocaloid {
 	namespace node {
 		class WaveShaperNode : public AudioNode {
-		private:
+		protected:
 			float *curve_;
 			int64_t curve_length_;
 		public:

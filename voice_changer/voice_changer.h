@@ -1,14 +1,22 @@
 #pragma once
 #include "stdafx.h"
 
-enum Effect {
+enum Character {
+	CHILD,
 	MALE,
 	FEMALE,
+	ROBOT1,
+	ROBOT2,
 	ALIEN,
-	ROBOT,
-	ECHO
+	ASTRONAUT,
+	TRANSFORMER
 };
 
+enum Environment {
+	TELEPHONE,
+	CAVE,
+	BROAD
+};
 
 void SetParam();
 

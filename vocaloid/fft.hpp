@@ -1,8 +1,10 @@
 #pragma once
 #include "stdafx.h"
 #include "maths.hpp"
+#include "window.hpp"
 namespace vocaloid {
 	namespace dsp {
+
 		// Fast Fourier Transformation
 		class FFT {
 		protected:
@@ -12,8 +14,8 @@ namespace vocaloid {
 			float* rev_real_;
 			float* rev_imag_;
 			int64_t buffer_size_;
-		public:
 
+		public:
 			float* real_;
 			float* imag_;
 
@@ -40,6 +42,16 @@ namespace vocaloid {
 				sin_table_ = nullptr;
 				cos_table_ = nullptr;
 				buffer_size_ = 1024;
+			}
+
+			void Cepstrum(float *cepstrum) {
+				for (auto i = 0; i < buffer_size_; i++) {
+					cepstrum[i] = log(CalculateMagnitude(real_[i], imag_[i]));
+				}
+				auto imag = new float[buffer_size_] {0};
+				Inverse(cepstrum, imag, buffer_size_, cepstrum);
+				delete[] imag;
+				imag = nullptr;
 			}
 
 			void Initialize(int64_t buffer_size) {
@@ -81,7 +93,6 @@ namespace vocaloid {
 				return buffer_size_;
 			}
 
-			// Do FFT
 			void Forward(const float *buffer, int64_t buffer_len) {
 				float k = floorf(logf(buffer_size_) / 0.693f);
 				if (pow(2, k) != buffer_size_) {

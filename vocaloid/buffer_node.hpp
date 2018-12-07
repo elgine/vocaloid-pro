@@ -42,6 +42,9 @@ namespace vocaloid {
 				start_point_ = sample_rate * start_ * 0.001f;
 				offset_point_ = summing_buffer_->sample_rate_ * offset_ * 0.001f;
 				duration_point_ = Clamp(int64_t(0), summing_buffer_->Size(), int64_t(summing_buffer_->sample_rate_ * duration_ * 0.001f));
+				if (duration_point_ == 0) {
+					duration_point_ = summing_buffer_->Size();
+				}
 				began_ = false;
 				played_began_ = 0;
 				played_point_ = offset_point_;
