@@ -1,4 +1,4 @@
-#include "../vocaloid/pitch_shifter.hpp"
+#include "../vocaloid/jungle.hpp"
 #include "../vocaloid/equalizer_3_band.hpp"
 #include "../vocaloid/player_node.hpp"
 #include "../vocaloid/file_reader_node.hpp"
@@ -13,13 +13,13 @@ void Run() {
 	auto high_pass = new BiquadNode(context);
 	high_pass->type_ = BIQUAD_TYPE::HIGH_PASS;
 	high_pass->frequency_->value_ = 1250;
-	auto pitch_shifter = new PitchShifter(context);
-	pitch_shifter->SetPitchOffset(0.305f);
+	auto pitch_shifter = new Jungle(context);
+	pitch_shifter->SetPitchOffset(0.2005f);
 	auto vibrato = new Vibrato(context);
 	vibrato->SetOptions({
 		0.05f,
 		0.001f,
-		8.0f,
+		7.2f,
 	});
 	auto amplify = new GainNode(context, 1.5);
 	auto player = new PlayerNode(context);

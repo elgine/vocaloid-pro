@@ -130,7 +130,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -146,7 +146,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
       <PreprocessorDefinitions>_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
@@ -167,15 +167,14 @@
     <ClInclude Include="child.hpp" />
     <ClInclude Include="fairy.hpp" />
     <ClInclude Include="female.hpp" />
-    <ClInclude Include="female2.hpp" />
-    <ClInclude Include="female3.hpp" />
     <ClInclude Include="male.hpp" />
-    <ClInclude Include="male2.hpp" />
     <ClInclude Include="old_male.hpp" />
     <ClInclude Include="old_woman.hpp" />
     <ClInclude Include="radio.hpp" />
     <ClInclude Include="robot1.hpp" />
     <ClInclude Include="robot2.hpp" />
+    <ClInclude Include="satan.hpp" />
+    <ClInclude Include="telephone.hpp" />
     <ClInclude Include="transformer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

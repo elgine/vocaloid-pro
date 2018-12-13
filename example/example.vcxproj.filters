@@ -39,16 +39,7 @@
     <ClInclude Include="child.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="female2.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="female3.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="male.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="male2.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="old_male.hpp">
@@ -64,6 +55,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="cave.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="telephone.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="satan.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

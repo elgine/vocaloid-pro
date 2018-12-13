@@ -21,7 +21,8 @@ using namespace std;
 
 template<typename T>
 void AllocArray(int64_t len, T** arr) {
-	(*arr) = new T[len]{};
+	(*arr) = new T[len];
+	memset(*arr, 0.0f, sizeof(T) * len);
 }
 
 template<typename T>

@@ -4,7 +4,7 @@
 #include "../vocaloid/gain_node.hpp"
 #include "../vocaloid/player_node.hpp"
 #include "../vocaloid/biquad_node.hpp"
-#include "../vocaloid/pitch_shifter.hpp"
+#include "../vocaloid/jungle.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
 using namespace vocaloid::dsp;
@@ -18,8 +18,8 @@ void Run() {
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 
-	auto pitch_shifter = new PitchShifter(context);
-	pitch_shifter->SetPitchOffset(0.35);
+	auto pitch_shifter = new Jungle(context);
+	pitch_shifter->SetPitchOffset(0.6);
 
 	context->Connect(source, pitch_shifter->input_);
 	context->Connect(pitch_shifter->output_, high_pass);

@@ -30,9 +30,6 @@
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="tone.hpp">
-      <Filter>头文件\dsp</Filter>
-    </ClInclude>
     <ClInclude Include="wgn.hpp">
       <Filter>头文件\dsp</Filter>
     </ClInclude>
@@ -81,9 +78,6 @@
     <ClInclude Include="pcm_player.hpp">
       <Filter>头文件\io</Filter>
     </ClInclude>
-    <ClInclude Include="pitch_shift.hpp">
-      <Filter>头文件\dsp</Filter>
-    </ClInclude>
     <ClInclude Include="biquad.hpp">
       <Filter>头文件\dsp</Filter>
     </ClInclude>
@@ -129,9 +123,6 @@
     <ClInclude Include="audio_channel.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="pitch_shifter.hpp">
-      <Filter>头文件\effect</Filter>
-    </ClInclude>
     <ClInclude Include="equalizer_3_band.hpp">
       <Filter>头文件\effect</Filter>
     </ClInclude>
@@ -156,11 +147,26 @@
     <ClInclude Include="distortion.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="pitch_shifter_node.hpp">
+    <ClInclude Include="overlap_add.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="dft.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="phase_vocoder_node.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="find_peaks.hpp">
+    <ClInclude Include="lpc.hpp">
       <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="phase_vocoder.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="freq_2_note.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="jungle.hpp">
+      <Filter>头文件\effect</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

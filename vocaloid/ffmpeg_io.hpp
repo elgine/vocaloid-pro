@@ -191,7 +191,7 @@ namespace vocaloid {
 				unique_lock<mutex> lck(decode_mutex_);
 				auto audio_stream = ctx_->streams[a_stream_index_];
 				auto duration = audio_stream->duration * av_q2d(audio_stream->time_base);
-				return duration * codec_ctx_->sample_rate * codec_ctx_->channels * BITS_PER_SEC;
+				return duration * codec_ctx_->sample_rate * codec_ctx_->channels * BITS_PER_SEC/8;
 			}
 
 			void Flush(char* data, int64_t& length) override {

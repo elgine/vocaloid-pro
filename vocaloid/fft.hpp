@@ -5,6 +5,7 @@
 namespace vocaloid {
 	namespace dsp {
 
+		const float* EMPTY_IMAG = new float[MAX_FFT_SIZE] {0.0f};
 		// Fast Fourier Transformation
 		class FFT {
 		protected:
@@ -14,7 +15,6 @@ namespace vocaloid {
 			float* rev_real_;
 			float* rev_imag_;
 			int64_t buffer_size_;
-
 		public:
 			float* real_;
 			float* imag_;
@@ -48,10 +48,7 @@ namespace vocaloid {
 				for (auto i = 0; i < buffer_size_; i++) {
 					cepstrum[i] = log(CalculateMagnitude(real_[i], imag_[i]));
 				}
-				auto imag = new float[buffer_size_] {0};
-				Inverse(cepstrum, imag, buffer_size_, cepstrum);
-				delete[] imag;
-				imag = nullptr;
+				Inverse(cepstrum, buffer_size_, cepstrum);
 			}
 
 			void Initialize(int64_t buffer_size) {
@@ -81,7 +78,7 @@ namespace vocaloid {
 				}
 				DeleteArray(&sin_table_);
 				AllocArray(buffer_size_, &sin_table_);
-				DeleteArray(&cos_table_);
+				//DeleteArray(&cos_table_);
 				AllocArray(buffer_size_, &cos_table_);
 				for (i = 0; i < buffer_size_; i++) {
 					sin_table_[i] = (float)sin(-M_PI / i);
@@ -144,9 +141,10 @@ namespace vocaloid {
 
 			void Inverse(float *output) {
 				Inverse(real_, imag_, buffer_size_, output);
-				for (int i = 0; i < buffer_size_; i++) {
-					output[i] /= buffer_size_;
-				}
+			}
+
+			void Inverse(const float* real, int64_t len, float *output) {
+				Inverse(real, EMPTY_IMAG, len, output);
 			}
 
 			// Do IFFT
@@ -192,7 +190,7 @@ namespace vocaloid {
 				}
 
 				for (i = 0; i < buffer_size_; i++) {
-					output[i] = real_c[i];
+					output[i] = real_c[i] / buffer_size_;
 				}
 			}
 

@@ -65,11 +65,11 @@ AudioChannel* CreateDelayTimeBuffer(AudioContext *ctx, float active_time, float 
 	return buffer;
 }
 
-class PitchShifter : public Effect {
+class Jungle : public Effect {
 private:
 	float previous_pitch_;
 public:
-	struct PitchShifterOptions {
+	struct JungleOptions {
 		float pitch_offset;
 	};
 
@@ -93,7 +93,7 @@ public:
 	GainNode *mix2_;
 
 
-	PitchShifter(AudioContext *ctx, float delay_time = 0.1, float fade_time = 0.05, float buffer_time = 0.1):Effect(ctx) {
+	Jungle(AudioContext *ctx, float delay_time = 0.1, float fade_time = 0.05, float buffer_time = 0.1):Effect(ctx) {
 		previous_pitch_ = -1;
 
 		auto mod1 = new BufferNode(ctx);
@@ -207,7 +207,7 @@ public:
 		previous_pitch_ = mul;
 	}
 
-	void SetOptions(PitchShifterOptions options) {
+	void SetOptions(JungleOptions options) {
 		SetPitchOffset(options.pitch_offset);
 	}
 };

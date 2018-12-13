@@ -130,7 +130,6 @@
     <ClInclude Include="..\example\ffmpeg_io.hpp" />
     <ClInclude Include="buffer.hpp" />
     <ClInclude Include="emitter.hpp" />
-    <ClInclude Include="logger.hpp" />
     <ClInclude Include="path.hpp" />
     <ClInclude Include="str_num.hpp" />
     <ClInclude Include="thread_pool.hpp" />

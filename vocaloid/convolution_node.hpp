@@ -12,6 +12,7 @@ namespace vocaloid {
 
 			explicit ConvolutionNode(AudioContext *ctx) :AudioNode(ctx) {
 				convolver_ = new dsp::Convolution();
+				kernel_ = nullptr;
 			}
 
 			void Initialize(int32_t sample_rate, int64_t frame_size) override {
@@ -20,7 +21,9 @@ namespace vocaloid {
 			}
 
 			void SetKernel(float *k, int64_t kernel_len) {
-				kernel_ = k;
+				DeleteArray(&kernel_);
+				AllocArray(kernel_len, &kernel_);
+				memcpy(kernel_, k, sizeof(float) * kernel_len);
 				kernel_len_ = kernel_len;
 			}
 

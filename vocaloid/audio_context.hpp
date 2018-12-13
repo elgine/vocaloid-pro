@@ -341,6 +341,7 @@ namespace vocaloid {
 		};
 
 		class AudioNode;
+
 		class AudioParam: public AudioProcessorUnit, public AudioTimeline {
 		private:
 			int64_t offset_;

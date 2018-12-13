@@ -33,9 +33,6 @@
     <ClInclude Include="str_num.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="logger.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\example\ffmpeg_io.hpp">
       <Filter>头文件</Filter>
     </ClInclude>

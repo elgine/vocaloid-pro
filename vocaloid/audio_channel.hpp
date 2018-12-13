@@ -28,9 +28,10 @@ namespace vocaloid {
 				SetSize(b->Size());
 				sample_rate_ = b->sample_rate_;
 				for (auto i = 0; i < b->Channels(); i++) {
-					for (auto j = 0; j < b->Size(); j++) {
+					/*for (auto j = 0; j < b->Size(); j++) {
 						data_[i]->Data()[j] = b->Data()[i]->Data()[j];
-					}
+					}*/
+					memcpy(data_[i]->Data(), b->Channel(i)->Data(), b->Size() * sizeof(float));
 				}
 				silence_ = b->silence_;
 			}
@@ -97,9 +98,10 @@ namespace vocaloid {
 			void Fill(float v, int64_t len = 0, int64_t offset = 0) {
 				len = len <= 0 ? Size() : len;
 				for (auto i = 0; i < channels_; i++) {
-					for (auto j = 0; j < len; j++) {
+					data_[i]->Fill(v, len, offset);
+					/*for (auto j = 0; j < len; j++) {
 						data_[i]->Data()[j + offset] = v;
-					}
+					}*/
 				}
 			}
 

@@ -1,5 +1,5 @@
 #include "../vocaloid/biquad_node.hpp"
-#include "../vocaloid/pitch_shifter.hpp"
+#include "../vocaloid/jungle.hpp"
 #include "../vocaloid/gain_node.hpp"
 #include "../vocaloid/player_node.hpp"
 #include "../vocaloid/file_reader_node.hpp"
@@ -11,7 +11,7 @@ void Run() {
 	auto context = new AudioContext();
 	auto low_pass = new BiquadNode(context);
 	low_pass->frequency_->value_ = 2000;
-	auto pitch_shifter = new PitchShifter(context);
+	auto pitch_shifter = new Jungle(context);
 	pitch_shifter->SetPitchOffset(-0.18);
 	auto amplify = new GainNode(context, 1.8);
 	auto player = new PlayerNode(context);

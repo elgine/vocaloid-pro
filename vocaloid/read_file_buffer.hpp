@@ -43,6 +43,7 @@ namespace vocaloid {
 				buffer->Add(temp, size);
 				sum += size;
 			}
+			reader->Stop();
 			reader->Close();
 			return sum;
 		}

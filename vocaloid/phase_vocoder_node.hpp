@@ -1,28 +1,28 @@
 #pragma once
-#include "pitch_shift.hpp"
+#include "phase_vocoder.hpp"
 #include "audio_context.hpp"
 namespace vocaloid {
 	namespace node {
-		class PitchShifterNode : public AudioNode {
+		class PhaseVocoderNode : public AudioNode {
 		private:
-			dsp::PitchShift **shifters_;
+			dsp::PhaseVocoder **shifters_;
 			float overlap_;
 		public:
 			float pitch_;
 			float tempo_;
 
-			explicit PitchShifterNode(AudioContext *ctx) :AudioNode(ctx) {
-				shifters_ = new dsp::PitchShift*[8]{ nullptr };
+			explicit PhaseVocoderNode(AudioContext *ctx) :AudioNode(ctx) {
+				shifters_ = new dsp::PhaseVocoder*[8]{ nullptr };
 				pitch_ = 1.0f;
 				tempo_ = 1.0f;
-				overlap_ = 0.75f;
+				overlap_ = 0.25f;
 			}
 
 			void Initialize(int32_t sample_rate, int64_t frame_size) {
 				AudioNode::Initialize(sample_rate, frame_size);
 				for (int i = 0; i < channels_; i++) {
 					if (shifters_[i] == nullptr) {
-						shifters_[i] = new dsp::PitchShift();
+						shifters_[i] = new dsp::PhaseVocoder();
 					}
 					shifters_[i]->Initialize(frame_size, overlap_);
 				}

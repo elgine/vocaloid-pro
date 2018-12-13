@@ -30,9 +30,10 @@ namespace vocaloid{
         }
 
         void Fill(T v){
-            for(auto i = 0;i < size_;i++){
+           /* for(auto i = 0;i < size_;i++){
                 data_[i] = v;
-            }
+            }*/
+			memset(data_, v, size_ * sizeof(T));
         }
 
         void Fill(T v, int64_t length, int64_t offset){
@@ -40,22 +41,25 @@ namespace vocaloid{
                 Alloc(length);
             }
             if(length > size_)size_ = length;
-            for(auto i = 0;i < length;i++){
+            /*for(auto i = 0;i < length;i++){
                 data_[i + offset] = v;
-            }
+            }*/
+			memset(data_ + offset, v, length * sizeof(T));
         }
 
         void Splice(int64_t len, int64_t offset = 0){
 			len = min(offset + len, size_) - offset;
 			if (len <= 0)return;
-			for (auto i = offset; i < size_; i++) {
+			memmove(data_ + offset, data_ + offset + len, (size_ - offset - len) * sizeof(T));
+			memset(data_ + offset + len, 0, (size_ - offset - len) * sizeof(T));
+			/*for (auto i = offset; i < size_; i++) {
 				if (i + len < size_) {
 					data_[i] = data_[i + len];
 				}
 				else {
 					data_[i] = 0.0f;
 				}
-			}
+			}*/
 			size_ -= len;
         }
 
@@ -64,17 +68,19 @@ namespace vocaloid{
             if(max_size_ < size_ + len){
                 Alloc(size_ + len);
             }
-			for (auto i = 0; i < len; i++) {
+			/*for (auto i = 0; i < len; i++) {
 				data_[i + data_offset] = data[i + offset];
-			}
+			}*/
+			memcpy(data_ + data_offset, data + offset, len * sizeof(T));
             size_ += len;
         }
 
         void Pop(T *out, int64_t len, int64_t offset = 0){
             len = min(offset + len, size_) - offset;
-			for (auto i = 0; i < len; i++) {
+			/*for (auto i = 0; i < len; i++) {
 				out[i] = data_[i + offset];
-			}
+			}*/
+			memcpy(out, data_ + offset, len * sizeof(T));
             Splice(len, offset);
         }
 
@@ -84,9 +90,10 @@ namespace vocaloid{
 
         void Set(const T* data, int64_t len, int64_t offset = 0, int64_t dst = 0){
             Alloc(dst + len);
-			for (auto i = 0; i < len; i++) {
+			/*for (auto i = 0; i < len; i++) {
 				data_[i + dst] = data[i + offset];
-			}
+			}*/
+			memcpy(data_ + dst, data + offset, len * sizeof(T));
         }
 
         void Alloc(int64_t size){
@@ -94,7 +101,7 @@ namespace vocaloid{
 				T* new_data = nullptr;
 				AllocArray(size, &new_data);
 				if (data_ != nullptr) {
-					memcpy(new_data, data_, max_size_);
+					memcpy(new_data, data_, max_size_ * sizeof(T));
 					DeleteArray(&data_);
 				}
 				data_ = new_data;

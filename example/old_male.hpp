@@ -1,4 +1,4 @@
-#include "../vocaloid/pitch_shifter.hpp"
+#include "../vocaloid/Jungle.hpp"
 #include "../vocaloid/equalizer_3_band.hpp"
 #include "../vocaloid/player_node.hpp"
 #include "../vocaloid/file_reader_node.hpp"
@@ -12,8 +12,8 @@ void Run() {
 	auto context = new AudioContext();
 	auto low_pass = new BiquadNode(context);
 	low_pass->frequency_->value_ = 2000;
-	auto pitch_shifter = new PitchShifter(context);
-	pitch_shifter->SetPitchOffset(-0.4);
+	auto pitch_shifter = new Jungle(context);
+	pitch_shifter->SetPitchOffset(-0.2);
 	auto vibrato = new Vibrato(context);
 	vibrato->SetOptions({
 		0.03f,

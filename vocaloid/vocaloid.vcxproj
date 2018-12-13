@@ -148,6 +148,7 @@
     <ClInclude Include="convolution_node.hpp" />
     <ClInclude Include="delay_node.hpp" />
     <ClInclude Include="destination_node.hpp" />
+    <ClInclude Include="dft.hpp" />
     <ClInclude Include="distortion.hpp" />
     <ClInclude Include="dynamic_compressor_node.hpp" />
     <ClInclude Include="effect.hpp" />
@@ -158,14 +159,15 @@
     <ClInclude Include="file_reader_node.hpp" />
     <ClInclude Include="file_writer_node.hpp" />
     <ClInclude Include="audio_channel.hpp" />
-    <ClInclude Include="find_peaks.hpp" />
     <ClInclude Include="flanger.hpp" />
     <ClInclude Include="gain_node.hpp" />
+    <ClInclude Include="lpc.hpp" />
     <ClInclude Include="oscillator_node.hpp" />
+    <ClInclude Include="overlap_add.hpp" />
     <ClInclude Include="pcm_player.hpp" />
-    <ClInclude Include="pitch_shift.hpp" />
-    <ClInclude Include="pitch_shifter.hpp" />
-    <ClInclude Include="pitch_shifter_node.hpp" />
+    <ClInclude Include="jungle.hpp" />
+    <ClInclude Include="phase_vocoder_node.hpp" />
+    <ClInclude Include="phase_vocoder.hpp" />
     <ClInclude Include="player.h" />
     <ClInclude Include="player_node.hpp" />
     <ClInclude Include="read_file_buffer.hpp" />
@@ -174,7 +176,7 @@
     <ClInclude Include="source_node.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="audio_timeline.hpp" />
-    <ClInclude Include="tone.hpp" />
+    <ClInclude Include="freq_2_note.hpp" />
     <ClInclude Include="maths.hpp" />
     <ClInclude Include="vibrato.hpp" />
     <ClInclude Include="wav.hpp" />
