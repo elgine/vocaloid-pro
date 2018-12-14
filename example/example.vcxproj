@@ -162,6 +162,7 @@
   <ItemGroup>
     <ClInclude Include="alien.hpp" />
     <ClInclude Include="astronaut.hpp" />
+    <ClInclude Include="balrog.hpp" />
     <ClInclude Include="big_guy.hpp" />
     <ClInclude Include="cave.hpp" />
     <ClInclude Include="child.hpp" />

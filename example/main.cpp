@@ -9,11 +9,12 @@
 //#include "male.hpp"
 //#include "old_male.hpp"
 //#include "old_woman.hpp"
-#include "fairy.hpp"
+//#include "fairy.hpp"
 //#include "transformer.hpp"
 //#include "cave.hpp"
 //#include "telephone.hpp"
 //#include "satan.hpp"
+#include "balrog.hpp"
 void main() {
 	Run();
 }
