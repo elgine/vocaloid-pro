@@ -15,14 +15,14 @@ using namespace std;
 #define M_PI_2 M_PI * 2
 #define DEFAULT_SAMPLE_RATE 44100
 #define DEFAULT_FRAME_SIZE 4096
-#define MAX_FFT_SIZE 32678
+#define MAX_FFT_SIZE 32768
+#define MAX_FRAME_SIZE MAX_FFT_SIZE * 100
 #define MINUS_SLEEP_UNIT 5
 #define BITS_PER_SEC 16
 
 template<typename T>
 void AllocArray(int64_t len, T** arr) {
-	(*arr) = new T[len];
-	memset(*arr, 0.0f, sizeof(T) * len);
+	(*arr) = new T[len]{0};
 }
 
 template<typename T>

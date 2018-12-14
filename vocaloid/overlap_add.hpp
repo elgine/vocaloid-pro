@@ -15,23 +15,6 @@ namespace vocaloid {
 			float *buffer_;
 			float *frame_;
 			float *win_;
-
-			// Analyse step
-			virtual void Analyse() {
-			
-			}
-
-			// Processing step
-			virtual void Processing() {
-				
-			}
-
-			// Sythesis step
-			// Apply change to frame array
-			virtual void Synthesis() {
-				
-			}
-
 		public:
 
 			OverlapAdd():hop_ana_(0), hop_syn_(0){
@@ -61,7 +44,17 @@ namespace vocaloid {
 				output_queue_->Alloc(frame_size * 2);
 			}
 
-			void Process(float *in, int64_t len, float *out) {
+			// Analyse step
+			virtual void Analyse() = 0;
+
+			// Processing step
+			virtual void Processing() = 0;
+
+			// Sythesis step
+			// Apply change to frame array
+			virtual void Synthesis() = 0;
+
+			void Process(float *in, int64_t len) {
 				// Add to input data queue
 				input_queue_->Add(in, len);
 				int64_t offset = 0;
@@ -80,7 +73,6 @@ namespace vocaloid {
 						buffer_[i] += frame_[i] * win_[i];
 					}
 					output_queue_->Add(buffer_, hop_syn_);
-					// Move items left
 					for (int i = 0; i < frame_size_; i++) {
 						if (i + hop_syn_ >= frame_size_) {
 							buffer_[i] = 0.0f;

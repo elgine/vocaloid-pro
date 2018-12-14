@@ -153,8 +153,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="test_dft.hpp" />
-    <ClInclude Include="test_spectral_envelope.hpp" />
     <ClInclude Include="test_new_pitch_shift.hpp" />
     <ClInclude Include="test_offset.hpp" />
     <ClInclude Include="test_path.hpp" />

@@ -21,12 +21,10 @@ void Run() {
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 
+	//context->Connect(source, filter);
 	context->Connect(source, pitch_shifter);
-	/*context->Connect(filter, pitch_shifter->input_);
-	context->Connect(pitch_shifter->output_, amplify);*/
-	//context->Connect(filter, pitch_shifter);
+	//context->Connect(pitch_shifter, amplify);
 	context->Connect(pitch_shifter, player);
-	//context->Connect(amplify, player);
 
 	source->Start(0);
 

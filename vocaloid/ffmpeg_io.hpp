@@ -208,31 +208,34 @@ namespace vocaloid {
 					return 0;
 				}
 				else {
-					unique_lock<mutex> lck(decode_mutex_);
-					if (buffer_size_ < length) {
+					{
+						unique_lock<mutex> lck(decode_mutex_);
+						if (buffer_size_ < length) {
 #ifdef _DEBUG
-						//cout << "buffer size is too small: " << buffer_size_ << endl;
+							//cout << "buffer size is too small: " << buffer_size_ << endl;
 #endif
-						return 0;
-					}
+							return 0;
+						}
 
-					try {
-						memcpy(data, buffer_, length);
-						buffer_size_ -= length;
-						if (buffer_size_ < 0)
-							buffer_size_ = 0;
-						if (buffer_size_ > 0)
-							memcpy(buffer_, buffer_ + length, buffer_size_);
-					}
-					catch (exception e) {
-						cout << e.what() << endl;
-					}
-					
-					if (EnableToDecode())
-						can_decode_.notify_all();
+						try {
+							memcpy(data, buffer_, length);
+							buffer_size_ -= length;
+							if (buffer_size_ < 0)
+								buffer_size_ = 0;
+							if (buffer_size_ > 0)
+								memmove(buffer_, buffer_ + length, buffer_size_);
+							// memcpy(buffer_, buffer_ + length, buffer_size_);
+						}
+						catch (exception e) {
+							cout << e.what() << endl;
+						}
+
+						if (EnableToDecode())
+							can_decode_.notify_all();
 #ifdef _DEBUG
-					//cout << "Pick buffer" << endl;
+						//cout << "Pick buffer" << endl;
 #endif
+					}
 					return length;
 				}
 			}

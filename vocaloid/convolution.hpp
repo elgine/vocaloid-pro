@@ -2,13 +2,10 @@
 #include "stdafx.h"
 #include "fft.hpp"
 #include "maths.hpp"
-#include <thread>
-#include <mutex>
-#include <memory>
 // Segmented fft convolution
 namespace vocaloid {
-	namespace dsp {	
-		class Convolution{
+	namespace dsp {
+		class Convolution {
 		private:
 			int64_t kernel_size_;
 			int64_t input_size_;
@@ -16,14 +13,17 @@ namespace vocaloid {
 			uint16_t channels_;
 			Buffer<float>** input_;
 			Buffer<float>** output_;
-			FFT *kernel_;
-			FFT *main_;
-
+			float *kernel_real_;
+			float *kernel_imag_;
+			float *main_real_;
+			float *main_imag_;
 		public:
 
-			explicit Convolution():kernel_size_(0), input_size_(0), fft_size_(0){
-				kernel_ = new FFT();
-				main_ = new FFT();
+			explicit Convolution() :kernel_size_(0), input_size_(0), fft_size_(0) {
+				kernel_real_ = nullptr;
+				kernel_imag_ = nullptr;
+				main_real_ = nullptr;
+				main_imag_ = nullptr;
 				input_ = new Buffer<float>*[8]{ nullptr };
 				output_ = new Buffer<float>*[8]{ nullptr };
 			}
@@ -47,15 +47,21 @@ namespace vocaloid {
 					output_[i]->SetSize(fft_size_);
 				}
 
-				kernel_->Dispose();
-				kernel_->Initialize(fft_size_); 
-				float *kernel = nullptr;
-				AllocArray(fft_size_, &kernel);
-				memcpy(kernel, k, kernel_len);
-				kernel_->Forward(kernel, fft_size_);
-				DeleteArray(&kernel);
-				main_->Dispose();
-				main_->Initialize(fft_size_);
+				DeleteArray(&kernel_real_);
+				AllocArray(fft_size_, &kernel_real_);
+
+				memcpy(kernel_real_, k, kernel_len * sizeof(float));
+
+				DeleteArray(&kernel_imag_);
+				AllocArray(fft_size_, &kernel_imag_);
+
+				FFT(kernel_real_, kernel_imag_, fft_size_, 1);
+
+				DeleteArray(&main_real_);
+				AllocArray(fft_size_, &main_real_);
+
+				DeleteArray(&main_imag_);
+				AllocArray(fft_size_, &main_imag_);
 			}
 
 			int64_t Process(Buffer<float> **in, int64_t len, Buffer<float> **out) {
@@ -65,21 +71,24 @@ namespace vocaloid {
 					auto input = input_[channel]->Data();
 					auto buffer = output_[channel]->Data();
 					// Forward fft
-					main_->Forward(input, fft_size_);
+					memcpy(main_real_, input, sizeof(float) * fft_size_);
+					memset(main_imag_, 0, sizeof(float) * fft_size_);
+					FFT(main_real_, main_imag_, fft_size_, 1);
 					// Do processing
 					for (int i = 0; i < fft_size_; i++) {
-						float a = main_->real_[i];
-						float b = main_->imag_[i];
-						float c = kernel_->real_[i];
-						float d = kernel_->imag_[i];
-						main_->real_[i] = a * c - b * d;
-						main_->imag_[i] = b * c + a * d;
+						float a = main_real_[i];
+						float b = main_imag_[i];
+						float c = kernel_real_[i];
+						float d = kernel_imag_[i];
+						main_real_[i] = a * c - b * d;
+						main_imag_[i] = b * c + a * d;
 					}
 					// Do inverse fft
-					main_->Inverse(input);
+					FFT(main_real_, main_imag_, fft_size_, -1);
+					// main_->Inverse(input);
 					// Do overlap add method
 					for (int i = 0; i < fft_size_; i++) {
-						buffer[i] += input[i];
+						buffer[i] += main_real_[i];
 						if (i < input_size_) {
 							out[channel]->Data()[i] = buffer[i];
 						}

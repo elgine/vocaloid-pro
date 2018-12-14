@@ -2,6 +2,24 @@
 #include "stdafx.h"
 namespace vocaloid {
 
+	float DB(float magn) {
+		return 20 * log(magn);
+	}
+
+	float CalculateMagnitude(float real, float imag) {
+		return sqrtf(powf(real, 2.0f) + powf(imag, 2.0f));
+	}
+
+	float CalculatePhase(float real, float imag) {
+		return atan2f(imag, real);
+	}
+
+	float WrapToPi(float rad) {
+		double a = rad + M_PI,
+			b = -2 * M_PI;
+		return float(a - (int)(a / b) * b + M_PI);
+	}
+
 	int64_t CalculatePlayedTime(int32_t sample_rate, int64_t offset) {
 		return int64_t((float)(offset) / float(sample_rate) * 1000.0f);
 	}

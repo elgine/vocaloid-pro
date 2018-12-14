@@ -11,13 +11,10 @@ namespace vocaloid {
 
 		class PhaseVocoder: public OverlapAdd{
 		private:
-			FFT *fft_;
 			int64_t sample_rate_;
-			float* win_;
 			float* omega_;
-
-			float *envelope_;
-
+			float* real_;
+			float* imag_;
 			float *last_phase_;
 			float *new_phase_;
 
@@ -26,30 +23,6 @@ namespace vocaloid {
 			float stretch_;
 			float pitch_;
 			float tempo_;
-
-			void Analyse() override {
-				ShiftWindow(frame_, frame_size_);
-				fft_->Forward(frame_, frame_size_);
-			}
-
-			void Processing() override {
-				for (int i = 0; i < frame_size_; i++) {
-					float magn = FFT::CalculateMagnitude(fft_->real_[i], fft_->imag_[i]);
-					float phase = FFT::CalculatePhase(fft_->real_[i], fft_->imag_[i]);
-					float diff = FFT::MapRadianToPi(phase - last_phase_[i] - omega_[i]);
-					float freq_diff = omega_[i] + diff;
-					float new_phase = FFT::MapRadianToPi(new_phase_[i] + freq_diff * stretch_);
-					new_phase_[i] = new_phase;
-					last_phase_[i] = phase;
-					fft_->real_[i] = cosf(new_phase) * magn;
-					fft_->imag_[i] = sinf(new_phase) * magn;
-				}
-			}
-
-			void Synthesis() override {
-				fft_->Inverse(frame_);
-				ShiftWindow(frame_, frame_size_);
-			}
 
 			void ShiftWindow(float *data, int64_t len) {
 				int64_t halfLen = len / 2;
@@ -86,7 +59,6 @@ namespace vocaloid {
 			explicit PhaseVocoder():stretch_(1.0f),
 									pitch_(1.0f),
 									tempo_(1.0f), OverlapAdd(){
-				fft_ = new FFT();
 				input_queue_ = new Buffer<float>();
 				output_queue_ = new Buffer<float>();
 				out_ = new Buffer<float>();
@@ -96,13 +68,19 @@ namespace vocaloid {
 				last_phase_ = nullptr;
 				new_phase_ = nullptr;
 				omega_ = nullptr;
+				real_ = nullptr;
+				imag_ = nullptr;
 			}
 
 			void Initialize(int64_t fft_size, float overlap, WINDOW_TYPE win = WINDOW_TYPE::HAMMING, int64_t sample_rate = 44100) {
 				OverlapAdd::Initialize(fft_size, fft_size * overlap, fft_size * overlap, win);
 				sample_rate_ = sample_rate;
 				overlap_ = overlap;
-				fft_->Initialize(fft_size);
+
+				DeleteArray(&real_);
+				AllocArray(fft_size, &real_);
+				DeleteArray(&imag_);
+				AllocArray(fft_size, &imag_);
 
 				DeleteArray(&last_phase_);
 				AllocArray(fft_size, &last_phase_);
@@ -120,8 +98,35 @@ namespace vocaloid {
 				output_queue_->Alloc(fft_size * 2);
 			}
 
+			void Analyse() override {
+				ShiftWindow(frame_, frame_size_);
+				memcpy(real_, frame_, sizeof(float) * frame_size_);
+				memset(imag_, 0, sizeof(float) * frame_size_);
+				FFT(real_, imag_, frame_size_, 1);
+			}
+
+			void Processing() override {
+				for (int i = 0; i < frame_size_; i++) {
+					float magn = CalculateMagnitude(real_[i], imag_[i]);
+					float phase = CalculatePhase(real_[i], imag_[i]);
+					float diff = WrapToPi(phase - last_phase_[i] - omega_[i]);
+					float freq_diff = omega_[i] + diff;
+					float new_phase = WrapToPi(new_phase_[i] + freq_diff * stretch_);
+					new_phase_[i] = new_phase;
+					last_phase_[i] = phase;
+					real_[i] = cosf(new_phase) * magn;
+					imag_[i] = sinf(new_phase) * magn;
+				}
+			}
+
+			void Synthesis() override {
+				FFT(real_, imag_, frame_size_, -1);
+				memcpy(frame_, real_, sizeof(float) * frame_size_);
+				ShiftWindow(frame_, frame_size_);
+			}
+
 			int64_t Process(float *in, int64_t len, float *out) {
-				OverlapAdd::Process(in, len, out);
+				OverlapAdd::Process(in, len);
 				return PopFrame(out, len);
 			}
 
@@ -155,7 +160,7 @@ namespace vocaloid {
 			}
 
 			void Dispose() {
-				fft_->Dispose();
+				Dispose();
 				DeleteArray(&win_);
 				DeleteArray(&buffer_);
 				DeleteArray(&out_);

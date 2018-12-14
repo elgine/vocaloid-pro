@@ -6,6 +6,7 @@
 #include "../vocaloid/biquad_node.hpp"
 #include "../vocaloid/read_file_buffer.hpp"
 #include "../vocaloid/phase_vocoder_node.hpp"
+#include "../vocaloid/jungle.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
 
@@ -16,7 +17,7 @@ void Run() {
 	auto lowpass = new BiquadNode(context);
 	lowpass->frequency_->value_ = 3000;
 	auto phase_vocoder = new PhaseVocoderNode(context);
-	phase_vocoder->pitch_ = 0.67;
+	phase_vocoder->pitch_ = 0.8;
 	auto convolution = new ConvolutionNode(context);
 	auto buffer = new Buffer<char>();
 	auto format = new io::AudioFormat();
@@ -28,15 +29,18 @@ void Run() {
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
 
-	context->Connect(source, phase_vocoder);
-	context->Connect(phase_vocoder, compressor);
-	context->Connect(phase_vocoder, convolution);
-	context->Connect(compressor, lowpass);
-	context->Connect(convolution, lowpass);
-	context->Connect(lowpass, player);
+	//context->Connect(source, phase_vocoder);
+	//context->Connect(phase_vocoder, compressor);
+	//context->Connect(phase_vocoder, convolution);
+	//context->Connect(compressor, lowpass);
+	//context->Connect(convolution, lowpass);
+	//context->Connect(lowpass, player);
+	context->Connect(source, convolution);
+	context->Connect(convolution, player);
 
 	context->Prepare();
 	context->Start();
 	getchar();
 	context->Close();
+
 }

@@ -33,13 +33,7 @@
     <ClInclude Include="test_pitch_shift.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="test_dft.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="test_new_pitch_shift.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="test_spectral_envelope.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

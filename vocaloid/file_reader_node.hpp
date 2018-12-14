@@ -100,7 +100,7 @@ namespace vocaloid {
 				offset_point_ = format.sample_rate * offset_ * 0.001;
 				duration_point_ = format.sample_rate * duration_ * 0.001;
 				if (duration_point_ <= 0)
-					duration_point_ = reader_->FileLength() / BITS_PER_SEC / channels_;
+					duration_point_ = reader_->FileLength() / (BITS_PER_SEC / 8) / channels_;
 				played_point_ = offset_point_;
 				summing_buffer_->sample_rate_ = format.sample_rate;
 			}
@@ -140,6 +140,7 @@ namespace vocaloid {
 				else
 					result_buffer_->FromByteArray(temp_buffer_, require_buffer_size_, bits_, channels_);
 				result_buffer_->silence_ = false;
+				played_point_ += frame_size_;
 				return frame_size_;
 			}
 
