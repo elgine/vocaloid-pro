@@ -4,12 +4,15 @@
 #include "../vocaloid/equalizer_3_band.hpp"
 #include "../vocaloid/file_reader_node.hpp"
 #include "../vocaloid/player_node.hpp"
+#include "../vocaloid/gain_node.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
 using namespace vocaloid::effect;
 
 void Run() {
 	auto ctx = new AudioContext();
+	auto gain = new GainNode(ctx);
+	gain->gain_->value_ = 2.5f;
 	auto pitch_shifter = new PhaseVocoderNode(ctx);
 	pitch_shifter->pitch_ = 1.5f;
 	auto equalizer = new Equalizer3Band(ctx);
@@ -23,7 +26,8 @@ void Run() {
 	ctx->Connect(source, equalizer->input_);
 	ctx->Connect(equalizer->output_, pitch_shifter);
 	ctx->Connect(pitch_shifter, high_pass);
-	ctx->Connect(high_pass, player);
+	ctx->Connect(high_pass, gain);
+	ctx->Connect(gain, player);
 	ctx->Prepare();
 	ctx->Start();
 	getchar();

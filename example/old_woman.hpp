@@ -21,7 +21,7 @@ void Run() {
 		0.001f,
 		7.2f,
 	});
-	auto amplify = new GainNode(context, 1.5);
+	auto amplify = new GainNode(context, 2.5);
 	auto player = new PlayerNode(context);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");

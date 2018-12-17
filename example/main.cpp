@@ -13,8 +13,9 @@
 //#include "transformer.hpp"
 //#include "cave.hpp"
 //#include "telephone.hpp"
-//#include "satan.hpp"
-#include "balrog.hpp"
+//#include "balrog.hpp"
+//#include "megaphone.hpp"
+#include "sauron.hpp"
 void main() {
 	Run();
 }

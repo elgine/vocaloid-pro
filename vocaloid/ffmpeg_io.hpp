@@ -69,12 +69,12 @@ namespace vocaloid {
 			SwrContext *swr_ctx_;
 			int16_t a_stream_index_;
 
-			unique_ptr<thread> decode_thread_;
+			thread *decode_thread_;
 			mutex decode_mutex_;
 			condition_variable can_decode_;
 			atomic<bool> is_end_;
 			atomic<bool> decoding_;
-			bool has_begun_;
+			atomic<bool> has_begun_;
 
 			int64_t frame_count_;
 			int64_t output_frame_size_;
@@ -204,7 +204,7 @@ namespace vocaloid {
 				if (!has_begun_) {
 					has_begun_ = true;
 					decoding_ = true;
-					decode_thread_ = make_unique<thread>(thread(&FFmpegFileReader::Loop, this));
+					decode_thread_ = new thread(&FFmpegFileReader::Loop, this);
 					return 0;
 				}
 				else {
@@ -365,6 +365,10 @@ namespace vocaloid {
 				//av_seek_frame(ctx_, a_stream_index_, floor(time / durationPerFrame), AVSEEK_FLAG_ANY);
 				av_seek_frame(ctx_, a_stream_index_, int64_t(time * 0.001f / av_q2d(ctx_->streams[a_stream_index_]->time_base)), AVSEEK_FLAG_BACKWARD);
 				avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
+				if (is_end_) {
+					is_end_ = false;
+					has_begun_ = false;
+				}
 				return time;
 			}
 

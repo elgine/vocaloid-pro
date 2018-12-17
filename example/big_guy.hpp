@@ -12,19 +12,18 @@ using namespace vocaloid::dsp;
 void Run() {
 	auto context = new AudioContext();
 	auto player = new PlayerNode(context);
-	auto filter = new BiquadNode(context);
-	filter->type_ = BIQUAD_TYPE::LOW_PASS;
-	filter->frequency_->value_ = 6000.0f;
+	auto lowpass = new BiquadNode(context);
+	lowpass->frequency_->value_ = 4000;
 	auto pitch_shifter = new PhaseVocoderNode(context);
-	pitch_shifter->pitch_ = 0.93f;
-	auto amplify = new GainNode(context, 1.8f);
+	pitch_shifter->pitch_ = 0.88f;
+	auto amplify = new GainNode(context, 1.0f);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 
-	//context->Connect(source, filter);
-	context->Connect(source, pitch_shifter);
-	//context->Connect(pitch_shifter, amplify);
-	context->Connect(pitch_shifter, player);
+	context->Connect(source, lowpass);
+	context->Connect(lowpass, pitch_shifter);
+	context->Connect(pitch_shifter, amplify);
+	context->Connect(amplify, player);
 
 	source->Start(0);
 

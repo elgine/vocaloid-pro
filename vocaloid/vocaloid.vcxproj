@@ -179,6 +179,7 @@
     <ClInclude Include="freq_2_note.hpp" />
     <ClInclude Include="maths.hpp" />
     <ClInclude Include="vibrato.hpp" />
+    <ClInclude Include="vocoder.hpp" />
     <ClInclude Include="wav.hpp" />
     <ClInclude Include="waveform.hpp" />
     <ClInclude Include="wave_shaper_node.hpp" />

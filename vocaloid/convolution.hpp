@@ -10,9 +10,8 @@ namespace vocaloid {
 			int64_t kernel_size_;
 			int64_t input_size_;
 			int64_t fft_size_;
-			uint16_t channels_;
-			Buffer<float>** input_;
-			Buffer<float>** output_;
+			Buffer<float>* input_;
+			Buffer<float>* output_;
 			float *kernel_real_;
 			float *kernel_imag_;
 			float *main_real_;
@@ -24,8 +23,8 @@ namespace vocaloid {
 				kernel_imag_ = nullptr;
 				main_real_ = nullptr;
 				main_imag_ = nullptr;
-				input_ = new Buffer<float>*[8]{ nullptr };
-				output_ = new Buffer<float>*[8]{ nullptr };
+				input_ = new Buffer<float>();
+				output_ = new Buffer<float>();
 			}
 
 			void Initialize(int64_t input_size, uint16_t channels, float* k, int64_t kernel_len) {
@@ -36,16 +35,10 @@ namespace vocaloid {
 					fft_size_ = NextPow2(fft_size_);
 				}
 
-				channels_ = channels;
-				for (auto i = 0; i < channels; i++) {
-					if (input_[i] == nullptr)
-						input_[i] = new Buffer<float>();
-					input_[i]->SetSize(fft_size_);
-
-					if (output_[i] == nullptr)
-						output_[i] = new Buffer<float>();
-					output_[i]->SetSize(fft_size_);
-				}
+				input_->Alloc(fft_size_);
+				input_->SetSize(fft_size_);
+				output_->Alloc(fft_size_);
+				output_->SetSize(fft_size_);
 
 				DeleteArray(&kernel_real_);
 				AllocArray(fft_size_, &kernel_real_);
@@ -64,43 +57,40 @@ namespace vocaloid {
 				AllocArray(fft_size_, &main_imag_);
 			}
 
-			int64_t Process(Buffer<float> **in, int64_t len, Buffer<float> **out) {
-				for (auto channel = 0; channel < channels_; channel++) {
-					input_[channel]->Fill(0);
-					input_[channel]->Set(in[channel]->Data(), len);
-					auto input = input_[channel]->Data();
-					auto buffer = output_[channel]->Data();
-					// Forward fft
-					memcpy(main_real_, input, sizeof(float) * fft_size_);
-					memset(main_imag_, 0, sizeof(float) * fft_size_);
-					FFT(main_real_, main_imag_, fft_size_, 1);
-					// Do processing
-					for (int i = 0; i < fft_size_; i++) {
-						float a = main_real_[i];
-						float b = main_imag_[i];
-						float c = kernel_real_[i];
-						float d = kernel_imag_[i];
-						main_real_[i] = a * c - b * d;
-						main_imag_[i] = b * c + a * d;
+			int64_t Process(float *in, int64_t len, float *out) {
+				input_->Fill(0);
+				input_->Set(in, len);
+				auto input = input_->Data();
+				auto buffer = output_->Data();
+				// Forward fft
+				memcpy(main_real_, input, sizeof(float) * fft_size_);
+				memset(main_imag_, 0, sizeof(float) * fft_size_);
+				FFT(main_real_, main_imag_, fft_size_, 1);
+				// Do processing
+				for (int i = 0; i < fft_size_; i++) {
+					float a = main_real_[i];
+					float b = main_imag_[i];
+					float c = kernel_real_[i];
+					float d = kernel_imag_[i];
+					main_real_[i] = a * c - b * d;
+					main_imag_[i] = b * c + a * d;
+				}
+				// Do inverse fft
+				FFT(main_real_, main_imag_, fft_size_, -1);
+				// Do overlap add method
+				for (int i = 0; i < fft_size_; i++) {
+					buffer[i] += main_real_[i];
+					if (i < input_size_) {
+						out[i] = buffer[i];
 					}
-					// Do inverse fft
-					FFT(main_real_, main_imag_, fft_size_, -1);
-					// main_->Inverse(input);
-					// Do overlap add method
-					for (int i = 0; i < fft_size_; i++) {
-						buffer[i] += main_real_[i];
-						if (i < input_size_) {
-							out[channel]->Data()[i] = buffer[i];
-						}
+				}
+				// Move items left
+				for (int i = 0; i < fft_size_; i++) {
+					if (i + input_size_ >= fft_size_) {
+						buffer[i] = 0.0f;
 					}
-					// Move items left
-					for (int i = 0; i < fft_size_; i++) {
-						if (i + input_size_ >= fft_size_) {
-							buffer[i] = 0.0f;
-						}
-						else
-							buffer[i] = buffer[i + input_size_];
-					}
+					else
+						buffer[i] = buffer[i + input_size_];
 				}
 				return input_size_;
 			}

@@ -10,10 +10,10 @@ using namespace vocaloid::dsp;
 void Run() {
 	auto context = new AudioContext();
 	auto low_pass = new BiquadNode(context);
-	low_pass->frequency_->value_ = 2000;
+	low_pass->frequency_->value_ = 4500;
 	auto pitch_shifter = new Jungle(context);
-	pitch_shifter->SetPitchOffset(-0.18);
-	auto amplify = new GainNode(context, 1.8);
+	pitch_shifter->SetPitchOffset(-0.1);
+	auto amplify = new GainNode(context, 1.1);
 	auto player = new PlayerNode(context);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");

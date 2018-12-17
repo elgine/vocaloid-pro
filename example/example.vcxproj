@@ -169,12 +169,13 @@
     <ClInclude Include="fairy.hpp" />
     <ClInclude Include="female.hpp" />
     <ClInclude Include="male.hpp" />
+    <ClInclude Include="megaphone.hpp" />
     <ClInclude Include="old_male.hpp" />
     <ClInclude Include="old_woman.hpp" />
     <ClInclude Include="radio.hpp" />
     <ClInclude Include="robot1.hpp" />
     <ClInclude Include="robot2.hpp" />
-    <ClInclude Include="satan.hpp" />
+    <ClInclude Include="sauron.hpp" />
     <ClInclude Include="telephone.hpp" />
     <ClInclude Include="transformer.hpp" />
   </ItemGroup>

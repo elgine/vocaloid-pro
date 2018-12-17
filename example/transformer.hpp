@@ -1,4 +1,4 @@
-#include "../vocaloid/pitch_shifter.hpp"
+#include "../vocaloid/Jungle.hpp"
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/file_reader_node.hpp"
 #include "../vocaloid/gain_node.hpp"
@@ -17,13 +17,13 @@ void Run() {
 
 	auto compressor = new DynamicsCompressorNode(context);
 
-	auto dee = new PitchShifter(context);
+	auto dee = new Jungle(context);
 	dee->SetPitchOffset(-0.1f);
-	auto deep = new PitchShifter(context);
+	auto deep = new Jungle(context);
 	deep->SetPitchOffset(-0.2f);
-	auto deeper = new PitchShifter(context);
+	auto deeper = new Jungle(context);
 	deeper->SetPitchOffset(-0.4f);
-	auto deeperer = new PitchShifter(context);
+	auto deeperer = new Jungle(context);
 	deeperer->SetPitchOffset(-0.8f);
 
 	context->Connect(source, dee->input_);

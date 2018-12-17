@@ -1,29 +1,23 @@
 #pragma once
 #include "stdafx.h"
+#include "effects.h"
+#include "../vocaloid/audio_context.hpp"
+using namespace vocaloid;
+using namespace vocaloid::node;
 
-enum Character {
-	CHILD,
-	MALE,
-	FEMALE,
-	ROBOT1,
-	ROBOT2,
-	ALIEN,
-	ASTRONAUT,
-	TRANSFORMER
+struct ConversationParams {
+	const char* source;
+	const char* dest;
+	Effect effect;
+	void* effect_param;
 };
 
-enum Environment {
-	TELEPHONE,
-	CAVE,
-	BROAD
-};
+AudioContext* GetContext();
 
-void SetParam();
-
-void Prepare();
+int Prepare(ConversationParams params[]);
 
 void Start();
 
-void Stop();
+int Stop();
 
-void Close();
+int Close();

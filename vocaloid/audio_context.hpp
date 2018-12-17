@@ -419,16 +419,22 @@ namespace vocaloid {
 				frame_size_ = DEFAULT_FRAME_SIZE;
 			}
 
-			void Prepare() {
-				Traverse(traversal_nodes_);
-				int64_t frame_size = DEFAULT_FRAME_SIZE;
-				for (auto node : traversal_nodes_) {
-					frame_size = max(FindNode(node)->SuggestFrameSize(), frame_size);
+			int Prepare() {
+				try {
+					Traverse(traversal_nodes_);
+					int64_t frame_size = DEFAULT_FRAME_SIZE;
+					for (auto node : traversal_nodes_) {
+						frame_size = max(FindNode(node)->SuggestFrameSize(), frame_size);
+					}
+					frame_size_ = min((int64_t)MAX_FFT_SIZE, frame_size);
+					for (auto node : traversal_nodes_) {
+						FindNode(node)->Initialize(SampleRate(), frame_size_);
+					}
 				}
-				frame_size_ = min((int64_t)MAX_FFT_SIZE, frame_size);
-				for (auto node : traversal_nodes_) {
-					FindNode(node)->Initialize(SampleRate(), frame_size_);
+				catch (exception e) {
+					
 				}
+				return 0;
 			}
 
 			void Start() {
@@ -436,20 +442,22 @@ namespace vocaloid {
 				audio_render_thread_ = make_unique<thread>(thread(&AudioContext::Run, this));
 			}
 
-			void Stop() {
+			int Stop() {
 				for (auto node : traversal_nodes_) {
 					FindNode(node)->Stop();
 				}
 				state_ = AudioContextState::STOPPED;
 				if (audio_render_thread_->joinable())
 					audio_render_thread_->join();
+				return 0;
 			}
 
-			void Close() {
+			int Close() {
 				Stop();
 				for (auto node : traversal_nodes_) {
 					FindNode(node)->Close();
 				}
+				return 0;
 			}
 
 			int32_t SampleRate() {

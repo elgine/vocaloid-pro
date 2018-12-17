@@ -25,6 +25,7 @@
     <None Include="exports.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="effects.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="voice_changer.h" />
   </ItemGroup>

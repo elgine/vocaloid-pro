@@ -1,0 +1,37 @@
+#pragma once
+enum Effect {
+	CHILD,
+	MALE,
+	FEMALE,
+	OLD_MALE,
+	OLD_FEMALE,
+	BIG_GUY,
+	ROBOT1,
+	ROBOT2,
+	ALIEN,
+	ASTRONAUT,
+	TRANSFORMER,
+	TELEPHONE,
+	RADIO,
+	CAVE
+};
+
+Effect *CHARACTER = new Effect[11]{
+	CHILD,
+	MALE,
+	FEMALE,
+	OLD_MALE,
+	OLD_FEMALE,
+	BIG_GUY,
+	ROBOT1,
+	ROBOT2,
+	ALIEN,
+	ASTRONAUT,
+	TRANSFORMER
+};
+
+Effect *ENVIRONMENT = new Effect[3]{
+	TELEPHONE,
+	RADIO,
+	CAVE
+};

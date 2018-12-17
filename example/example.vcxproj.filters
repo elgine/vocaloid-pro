@@ -60,10 +60,13 @@
     <ClInclude Include="telephone.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="satan.hpp">
+    <ClInclude Include="balrog.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="balrog.hpp">
+    <ClInclude Include="megaphone.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sauron.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
