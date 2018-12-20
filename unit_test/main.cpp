@@ -3,7 +3,7 @@
 //#include "test_tone.hpp"
 //#include "test_offset.hpp"
 //#include "test_pitch_shift.hpp"
-#include "test_new_pitch_shift.hpp"
+//#include "test_new_pitch_shift.hpp"
 
 //int main(int argc, char **argv) {
 //	::testing::InitGoogleTest(&argc, argv);
@@ -11,7 +11,8 @@
 //	getchar();
 //	return ret;
 //}
-//
+
+#include "test_convolution.hpp"
 void main() {
 	Run();
 }

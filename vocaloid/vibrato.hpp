@@ -10,8 +10,11 @@ namespace vocaloid {
 		class Vibrato : public Effect {
 		public:
 			struct VibratoOptions {
+				// 3.5, [0.5, 15]
 				float vibrato_delay;
+				// 0.03 [0.005, 0.055]
 				float vibrato_depth;
+				// 0.002, [0.0005, 0.004]
 				float vibrato_speed;
 			};
 
@@ -28,6 +31,12 @@ namespace vocaloid {
 				ctx->Connect(input_, delay_);
 				ctx->Connect(delay_, wet_);
 				osc_->Start();
+
+				SetOptions({
+					3.5f,
+					0.03f,
+					0.002f
+				});
 			}
 
 			void SetOptions(VibratoOptions options) {

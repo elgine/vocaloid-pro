@@ -9,10 +9,14 @@ namespace vocaloid {
 		class Flanger : public Effect {
 		public:
 			struct FlangerOptions {
-				float flanger_delay;
-				float flanger_depth;
-				float flanger_feedback;
+				// 0.25, [0.05, 5]
 				float flanger_speed;
+				// 0.005, [0.001, 0.02]
+				float flanger_delay;
+				// 0.002, [0.0005, 0.005]
+				float flanger_depth;
+				// 0.5, [0, 1]
+				float flanger_feedback;
 			};
 
 			OscillatorNode *osc_;
@@ -35,6 +39,13 @@ namespace vocaloid {
 				ctx->Connect(feedback_, input_);
 
 				osc_->Start();
+
+				SetOptions({
+					0.25f,
+					0.005f,
+					0.002f,
+					0.5f
+				});
 			}
 
 			void SetOptions(FlangerOptions options) {

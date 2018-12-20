@@ -11,12 +11,15 @@ enum Effect {
 	ALIEN,
 	ASTRONAUT,
 	TRANSFORMER,
+	BALROG,
+	SAURON,
 	TELEPHONE,
+	MEGAPHONE,
 	RADIO,
 	CAVE
 };
 
-Effect *CHARACTER = new Effect[11]{
+Effect *CHARACTER = new Effect[14]{
 	CHILD,
 	MALE,
 	FEMALE,
@@ -27,10 +30,12 @@ Effect *CHARACTER = new Effect[11]{
 	ROBOT2,
 	ALIEN,
 	ASTRONAUT,
-	TRANSFORMER
+	TRANSFORMER,
+	BALROG,
+	SAURON
 };
 
-Effect *ENVIRONMENT = new Effect[3]{
+Effect *ENVIRONMENT = new Effect[4]{
 	TELEPHONE,
 	RADIO,
 	CAVE

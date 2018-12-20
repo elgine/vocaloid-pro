@@ -168,8 +168,8 @@
     <ClInclude Include="jungle.hpp">
       <Filter>头文件\effect</Filter>
     </ClInclude>
-    <ClInclude Include="vocoder.hpp">
-      <Filter>头文件\effect</Filter>
+    <ClInclude Include="script_node.hpp">
+      <Filter>头文件\node</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

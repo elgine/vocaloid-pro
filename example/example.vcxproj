@@ -164,9 +164,11 @@
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="balrog.hpp" />
     <ClInclude Include="big_guy.hpp" />
+    <ClInclude Include="broad_room.hpp" />
     <ClInclude Include="cave.hpp" />
     <ClInclude Include="child.hpp" />
     <ClInclude Include="fairy.hpp" />
+    <ClInclude Include="hall.hpp" />
     <ClInclude Include="female.hpp" />
     <ClInclude Include="male.hpp" />
     <ClInclude Include="megaphone.hpp" />
@@ -178,6 +180,7 @@
     <ClInclude Include="sauron.hpp" />
     <ClInclude Include="telephone.hpp" />
     <ClInclude Include="transformer.hpp" />
+    <ClInclude Include="underwater.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

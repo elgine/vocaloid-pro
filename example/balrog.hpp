@@ -8,6 +8,8 @@
 #include "../vocaloid/dynamic_compressor_node.hpp"
 #include "../vocaloid/read_file_buffer.hpp"
 #include "../vocaloid/biquad_node.hpp"
+#include "../vocaloid/file_writer_node.hpp"
+#include "../vocaloid/file_writer_node.hpp"
 using namespace vocaloid;
 using namespace vocaloid::io;
 using namespace vocaloid::node;
@@ -37,6 +39,9 @@ void Run() {
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 
+	auto writer = new FileWriterNode(context);
+	writer->SetPath("C:\\Users\\Elgine\\Desktop\\out.mp3");
+
 	auto convolver = new ConvolutionNode(context);
 	auto buf = new Buffer<char>();
 	auto format = new AudioFormat();
@@ -46,12 +51,12 @@ void Run() {
 	convolver->kernel_ = channel;
 
 	auto convolver_gain = new GainNode(context);
-	convolver_gain->gain_->value_ = 2;
+	convolver_gain->gain_->value_ = 0.5;
 	
 	auto fire = new FileReaderNode(context);
 	fire->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\fire.mp3");
 	auto fire_gain = new GainNode(context);
-	fire_gain->gain_->value_ = 0.2;
+	fire_gain->gain_->value_ = 0.1;
 	fire->loop_ = true;
 
 	auto filter2 = new BiquadNode(context);
@@ -63,6 +68,8 @@ void Run() {
 
 	auto player = new PlayerNode(context);
 
+	auto amplify = new GainNode(context, 2.5f);
+
 	context->Connect(osc, osc_gain);
 	context->Connect(osc_gain, delay->delay_time_);
 
@@ -70,10 +77,9 @@ void Run() {
 	context->Connect(delay, convolver);
 
 	context->Connect(convolver, convolver_gain);
-	context->Connect(convolver_gain, filter);
-	
+	context->Connect(convolver_gain, filter);	
 	context->Connect(filter, compressor);
-	context->Connect(compressor, player);
+	context->Connect(compressor, amplify);
 
 	context->Connect(delay, filter2);
 	context->Connect(filter2, filter);
@@ -81,7 +87,9 @@ void Run() {
 	context->Connect(no_conv_gain, compressor);
 
 	context->Connect(fire, fire_gain);
-	context->Connect(fire_gain, player);
+	context->Connect(fire_gain, amplify);
+
+	context->Connect(amplify, writer);
 
 	source->Start(0);
 	fire->Start(0);

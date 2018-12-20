@@ -8,6 +8,8 @@
 #include "../vocaloid/dynamic_compressor_node.hpp"
 #include "../vocaloid/read_file_buffer.hpp"
 #include "../vocaloid/biquad_node.hpp"
+#include "../vocaloid/gain_node.hpp"
+#include "../vocaloid/file_writer_node.hpp"
 using namespace vocaloid;
 using namespace vocaloid::io;
 using namespace vocaloid::node;
@@ -20,29 +22,22 @@ void Run() {
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
 
+	auto writer = new FileWriterNode(context);
+	writer->SetPath("C:\\Users\\Elgine\\Desktop\\out.mp3");
+
 	auto osc1 = new OscillatorNode(context);
-	osc1->SetFrequency(10);
+	osc1->SetFrequency(-10);
 	osc1->SetWaveformType(WAVEFORM_TYPE::SAWTOOTH);
 
 	auto osc2 = new OscillatorNode(context);
 	osc2->SetFrequency(50);
 	osc2->SetWaveformType(WAVEFORM_TYPE::SAWTOOTH);
 
-	auto osc3 = new OscillatorNode(context);
-	osc3->SetFrequency(30);
-	osc3->SetWaveformType(WAVEFORM_TYPE::SAWTOOTH);
-
 	auto osc_gain = new GainNode(context);
 	osc_gain->gain_->value_ = 0.007;
 
-	auto osc_gain2 = new GainNode(context);
-	osc_gain2->gain_->value_ = 0.007;
-
 	auto delay = new DelayNode(context);
 	delay->delay_time_->value_ = 0.01;
-
-	auto delay2 = new DelayNode(context);
-	delay2->delay_time_->value_ = 0.01;
 
 	auto filter = new BiquadNode(context);
 	filter->type_ = BIQUAD_TYPE::LOW_PASS;
@@ -56,7 +51,8 @@ void Run() {
 	kernel->FromBuffer(buf, format->bits, format->channels);
 	convolver->kernel_ = kernel;
 
-	auto compressor = new DynamicsCompressorNode(context);
+	auto amplify = new GainNode(context, 1.0);
+
 	auto compressor2 = new DynamicsCompressorNode(context);
 	auto compressor3 = new DynamicsCompressorNode(context);
 
@@ -66,21 +62,24 @@ void Run() {
 
 	context->Connect(source, compressor2);
 	context->Connect(compressor2, delay);
+
 	context->Connect(delay, compressor3);
 	context->Connect(compressor3, filter);
 	context->Connect(filter, convolver);
-	context->Connect(convolver, player);
-
-	/*context->Connect(osc3, osc_gain2);
-	context->Connect(osc_gain2, delay2->delay_time_);*/
+	context->Connect(convolver, amplify);
 
 	auto no_conv_gain = new GainNode(context, 0.9f);
 	context->Connect(filter, no_conv_gain);
-	context->Connect(no_conv_gain, player);
+	context->Connect(no_conv_gain, amplify);
+	
+	context->Connect(amplify, writer);
+	
+	context->On(AudioContext::ALL_INPUT_NOT_LOOP_FINISHED, [](void*) {
+		printf("End\n");
+	});
 
 	osc1->Start();
 	osc2->Start();
-	osc3->Start();
 
 	context->Prepare();
 	context->Start();

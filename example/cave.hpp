@@ -22,9 +22,9 @@ void Run() {
 
 	ReadFileBuffer("G:\\Projects\\VSC++\\vocaloid\\samples\\large-long-echo-hall.wav", format, buffer);
 	channel_data->FromBuffer(buffer, format->bits, format->channels);
-	convolution->SetKernel(channel_data->Channel(0)->Data(), channel_data->Size());
+	convolution->kernel_ = channel_data;
 
-	auto amplify = new GainNode(context, 0.3f);
+	auto amplify = new GainNode(context, 1.0f);
 
 	context->Connect(source, convolution);
 	context->Connect(convolution, amplify);

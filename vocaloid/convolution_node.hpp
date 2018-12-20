@@ -10,17 +10,17 @@ namespace vocaloid {
 
 			float CalculateNormalizationScale(AudioChannel* buf) {
 				auto gain_calibration = 0.00125;
-				auto gain_calibration_sample_rate = 44100;
+				auto gain_calibration_sample_rate = sample_rate_;
 				auto min_power = 0.000125;
 				// Normalize by RMS power.
 				auto channels = buf->Channels();
 				auto length = buf->Size();
 				auto power = 0.0f;
 				for (auto i = 0; i < channels; i++) {
-					auto channel_power = 0;
+					float channel_power = 0;
 					auto channel_data = buf->Channel(i)->Data();
 					for (auto j = 0; j < length; j++) {
-						auto sample = channel_data[j];
+						float sample = channel_data[j];
 						channel_power += sample * sample;
 					}
 					power += channel_power;
@@ -29,7 +29,7 @@ namespace vocaloid {
 				// Protect against accidental overload.
 				if (!isfinite(power) || isnan(power) || power < min_power)
 					power = min_power;
-				auto scale = 1 / power;
+				auto scale = 1.0f / power;
 				// Calibrate to make perceived volume same as unprocessed.
 				scale *= gain_calibration;
 				// Scale depends on sample-rate.
@@ -44,16 +44,20 @@ namespace vocaloid {
 
 			AudioChannel *kernel_;
 
+			bool normalize_;
+
 			explicit ConvolutionNode(AudioContext *ctx) :AudioNode(ctx) {
 				convolver_ = new Convolution*[8]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 				kernel_ = nullptr;
+				normalize_ = true;
 			}
 
 			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
+				auto scale = normalize_?CalculateNormalizationScale(kernel_):1.0f;
 				for (auto i = 0; i < channels_; i++) {
 					if (convolver_[i] == nullptr)convolver_[i] = new Convolution();
-					convolver_[i]->Initialize(frame_size, channels_, kernel_->Channel(i)->Data(), kernel_->Size());
+					convolver_[i]->Initialize(frame_size, channels_, kernel_->Channel(i)->Data(), kernel_->Size(), scale);
 				}
 			}
 

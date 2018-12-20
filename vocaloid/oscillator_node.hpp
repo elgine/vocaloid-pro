@@ -24,12 +24,23 @@ namespace vocaloid {
 				offset_ = 0;
 			}
 
+			void SetBuffer(float *buffer, int64_t len) {
+				waveform_buffer_->Set(buffer, len);
+				waveform_dirty_ = true;
+			}
+
 			int64_t ProcessFrame() override {
 				if (waveform_dirty_) {
-					auto size = int64_t(sample_rate_ / frequency_);
+					auto freq = abs(frequency_);
+					auto size = int64_t(sample_rate_ / freq);
 					waveform_buffer_->Alloc(size);
 					waveform_buffer_->SetSize(size);
 					GenWaveform(type_, size, waveform_buffer_->Data());
+					if (frequency_ < 0) {
+						for (auto i = 0; i < size; i++) {
+							waveform_buffer_->Data()[i] *= -1.0f;
+						}
+					}
 					waveform_dirty_ = false;
 				}
 				result_buffer_->Alloc(channels_, frame_size_);

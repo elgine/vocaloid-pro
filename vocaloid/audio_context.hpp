@@ -45,8 +45,6 @@ namespace vocaloid {
 			AudioChannel *summing_buffer_;
 			AudioChannel *result_buffer_;
 
-			bool enable_;
-
 			virtual void ConnectFrom(AudioProcessorUnit* input, Channel from, Channel to) {
 				if (can_be_connected_) {
 					inputs_.insert(input);
@@ -59,6 +57,8 @@ namespace vocaloid {
 				input_ports_.erase(input->id_);
 			}
 		public:
+
+			bool enable_;
 
 			explicit AudioProcessorUnit(AudioProcessorType type,
 										bool can_be_connected = true,
@@ -96,6 +96,7 @@ namespace vocaloid {
 
 			virtual void PullBuffers() {
 				summing_buffer_->Zero();
+				result_buffer_->Zero();
 				for (auto input : inputs_) {
 					if (input->type_ != AudioProcessorType::PARAM) {
 						if (input->type_ == AudioProcessorType::SPLITTER) {
@@ -118,7 +119,7 @@ namespace vocaloid {
 
 					}
 				}
-				result_buffer_->Copy(summing_buffer_);
+				//result_buffer_->Copy(summing_buffer_);
 			}
 
 			virtual int64_t ProcessFrame() { return 0; }
@@ -135,7 +136,9 @@ namespace vocaloid {
 
 			virtual int64_t Process() {
 				PullBuffers();
-				return ProcessFrame();
+				if(enable_)
+					return ProcessFrame();
+				return 0;
 			}
 
 			set<AudioProcessorUnit*> Inputs() {
@@ -198,24 +201,24 @@ namespace vocaloid {
 			};
 
 			void FindConnectedNodes(vector<int64_t> &visited_nodes) {
-				queue<int64_t> traverse_nodes;
+				vector<int64_t> traverse_nodes;
 				map<int64_t, VisitColor> colors;
 				for (auto pair : nodes_) {
 					colors[pair.first] = VisitColor::WHITE;
 					if (pair.second->Type() == AudioProcessorType::OUTPUT) {
-						traverse_nodes.push(pair.second->Id());
+						traverse_nodes.emplace_back(pair.second->Id());
 						colors[pair.first] = VisitColor::GREY;
 					}
 				}
 				while (!traverse_nodes.empty()) {
 					auto node = traverse_nodes.front();
-					traverse_nodes.pop();
+					traverse_nodes.erase(traverse_nodes.begin());
 					visited_nodes.insert(visited_nodes.begin(), node);
 					colors[node] = VisitColor::BLACK;
 					auto dependencies = FindNode(node)->Inputs();
 					for (auto dependency : dependencies) {
 						if (colors[dependency->Id()] != VisitColor::WHITE)continue;
-						traverse_nodes.push(dependency->Id());
+						traverse_nodes.emplace_back(dependency->Id());
 						colors[dependency->Id()] = VisitColor::GREY;
 					}
 				}
@@ -292,7 +295,8 @@ namespace vocaloid {
 			}
 
 			void AddNode(AudioProcessorUnit* node) {
-				nodes_.insert(pair<int64_t, AudioProcessorUnit*>(node->Id(), node));
+				nodes_[node->Id()] = node;
+				//nodes_.insert(pair<int64_t, AudioProcessorUnit*>(node->Id(), node));
 			}
 
 			void RemoveNode(AudioProcessorUnit* node) {
@@ -420,19 +424,14 @@ namespace vocaloid {
 			}
 
 			int Prepare() {
-				try {
-					Traverse(traversal_nodes_);
-					int64_t frame_size = DEFAULT_FRAME_SIZE;
-					for (auto node : traversal_nodes_) {
-						frame_size = max(FindNode(node)->SuggestFrameSize(), frame_size);
-					}
-					frame_size_ = min((int64_t)MAX_FFT_SIZE, frame_size);
-					for (auto node : traversal_nodes_) {
-						FindNode(node)->Initialize(SampleRate(), frame_size_);
-					}
+				Traverse(traversal_nodes_);
+				int64_t frame_size = DEFAULT_FRAME_SIZE;
+				for (auto node : traversal_nodes_) {
+					frame_size = max(FindNode(node)->SuggestFrameSize(), frame_size);
 				}
-				catch (exception e) {
-					
+				frame_size_ = min((int64_t)MAX_FFT_SIZE, frame_size);
+				for (auto node : traversal_nodes_) {
+					FindNode(node)->Initialize(SampleRate(), frame_size_);
 				}
 				return 0;
 			}

@@ -48,9 +48,6 @@
     <ClInclude Include="old_woman.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="fairy.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="transformer.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -67,6 +64,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="sauron.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="broad_room.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="hall.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="underwater.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="fairy.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

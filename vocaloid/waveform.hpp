@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "fft.hpp"
 using namespace std;
 // Generate a waveform between [0, 2pi]
 namespace vocaloid {
@@ -9,7 +10,8 @@ namespace vocaloid {
 			SINE,
 			TRIANGLE,
 			SAWTOOTH,
-			SQUARE
+			SQUARE,
+			CUSTOM
 		};
 
 		template<typename T>

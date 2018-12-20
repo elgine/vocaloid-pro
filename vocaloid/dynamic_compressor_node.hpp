@@ -99,7 +99,7 @@ namespace vocaloid {
 				return k;
 			}
 
-			void Process(AudioChannel *in, float db_threshold, float db_knee, float ratio,
+			void Process(float db_threshold, float db_knee, float ratio,
 				float attack, float release, float predelay, float db_post_gain,
 				float effect_blend, float release_zone1, float release_zone2,
 				float release_zone3, float release_zone4) {
@@ -256,7 +256,7 @@ namespace vocaloid {
 							}
 
 							for (auto i = 0; i < channels_; i++) {
-								in->Channel(i)->Data()[frame_index] = m_predelay_buffers_->Channel(i)->Data()[predelay_read_index] * total_gain;
+								result_buffer_->Channel(i)->Data()[frame_index] = m_predelay_buffers_->Channel(i)->Data()[predelay_read_index] * total_gain;
 							}
 							frame_index++;
 							predelay_read_index = (predelay_read_index + 1) & MAX_PREDELAY_FRAMES_MASK;
@@ -375,7 +375,7 @@ namespace vocaloid {
 					m_last_filter_stage_ratio_ = filter_stage_ratio;
 					m_last_anchor_ = anchor;
 				}
-				Process(result_buffer_, threshold_, knee_, ratio_, attack_, release_, predelay_,
+				Process(threshold_, knee_, ratio_, attack_, release_, predelay_,
 					post_gain_, effect_blend_, release_zone1_, release_zone2_, release_zone3_,
 					release_zone4_);
 				reduction_ = m_metering_gain_;

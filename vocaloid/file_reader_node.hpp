@@ -131,6 +131,10 @@ namespace vocaloid {
 				if (reader_->IsEnd() && !reader_->CapableToRead(require_buffer_size_)) {
 					reader_->Flush(temp_buffer_, size);
 					memset(temp_buffer_ + size, 0, require_buffer_size_ - size);
+					if (size <= 0 && !loop_) {
+						finished_ = true;
+						return 0;
+					}
 				}else {
 					size = reader_->ReadData(temp_buffer_, require_buffer_size_);
 				}

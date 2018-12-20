@@ -16,6 +16,8 @@ namespace vocaloid {
 			float *kernel_imag_;
 			float *main_real_;
 			float *main_imag_;
+
+			float normal_scale_;
 		public:
 
 			explicit Convolution() :kernel_size_(0), input_size_(0), fft_size_(0) {
@@ -25,11 +27,13 @@ namespace vocaloid {
 				main_imag_ = nullptr;
 				input_ = new Buffer<float>();
 				output_ = new Buffer<float>();
+				normal_scale_ = 1.0f;
 			}
 
-			void Initialize(int64_t input_size, uint16_t channels, float* k, int64_t kernel_len) {
+			void Initialize(int64_t input_size, uint16_t channels, float* k, int64_t kernel_len, float normal_scale = 1.0f) {
 				input_size_ = input_size;
 				kernel_size_ = kernel_len;
+				normal_scale_ = normal_scale;
 				fft_size_ = kernel_size_ + input_size_ - 1;
 				if ((fft_size_ & (fft_size_ - 1)) != 0) {
 					fft_size_ = NextPow2(fft_size_);
@@ -81,7 +85,7 @@ namespace vocaloid {
 				for (int i = 0; i < fft_size_; i++) {
 					buffer[i] += main_real_[i];
 					if (i < input_size_) {
-						out[i] = buffer[i];
+						out[i] = buffer[i] * normal_scale_;
 					}
 				}
 				// Move items left

@@ -23,15 +23,17 @@ namespace vocaloid {
 				Alloc(channels, max_size);
 			}
 
-			void Copy(AudioChannel *b) {
-				Alloc(b->Channels(), b->Size());
+			void Copy(AudioChannel *b, int64_t size = 0, int64_t offset = 0, int64_t dst = 0) {
+				if (size <= 0)size = b->Size();
+				if (offset + size > b->Size())size = b->Size() - offset;
+				Alloc(b->Channels(), size);
 				SetSize(b->Size());
 				sample_rate_ = b->sample_rate_;
 				for (auto i = 0; i < b->Channels(); i++) {
 					/*for (auto j = 0; j < b->Size(); j++) {
 						data_[i]->Data()[j] = b->Data()[i]->Data()[j];
 					}*/
-					memcpy(data_[i]->Data(), b->Channel(i)->Data(), b->Size() * sizeof(float));
+					memcpy(data_[i]->Data() + dst, b->Channel(i)->Data() + offset, size * sizeof(float));
 				}
 				silence_ = b->silence_;
 			}

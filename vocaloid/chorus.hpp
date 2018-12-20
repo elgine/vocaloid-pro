@@ -12,8 +12,11 @@ namespace vocaloid {
 		class Chorus : public Effect {
 		public:
 			struct ChorusOptions {
-				float chorus_delay;
+				// 3.5, [0.5, 15]
 				float chorus_speed;
+				// 0.03, [0.005, 0.055]
+				float chorus_delay;
+				// 0.002, [0.0005, 0.004]
 				float chorus_depth;
 			};
 
@@ -33,6 +36,12 @@ namespace vocaloid {
 				ctx->Connect(delay_, wet_);
 
 				osc_->Start();
+
+				SetOptions({
+					3.5,
+					0.03,
+					0.002
+				});
 			}
 
 			void SetOptions(ChorusOptions options) {

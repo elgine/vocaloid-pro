@@ -8,9 +8,12 @@ namespace vocaloid {
 		class AutoWah : public Effect {
 		public:
 			struct AutoWahOptions {
-				float aw_follower_frequency;
-				float awr_depth;
-				float aw_filter_Q;
+				// 10, [0.25, 20]
+				float envelope_follower_filter_frequency;
+				// 3.5, [0, 4]
+				float filter_depth;
+				// 5.0, [0, 20]
+				float filter_Q;
 			};
 
 			WaveShaperNode *wave_shaper_;
@@ -43,12 +46,18 @@ namespace vocaloid {
 
 				ctx->Connect(input_, wave_shaper_);
 				ctx->Connect(input_, aw_filter_);
+
+				SetOptions({
+					10.0f,
+					3.5f,
+					5.0f
+				});
 			}
 
 			void SetOptions(AutoWahOptions options) {
-				aw_follower_->frequency_->value_ = options.aw_follower_frequency;
-				aw_depth_->gain_->value_ = options.awr_depth;
-				aw_filter_->Q_->value_ = options.aw_filter_Q;
+				aw_follower_->frequency_->value_ = options.envelope_follower_filter_frequency;
+				aw_depth_->gain_->value_ = pow(2, 10 + float(options.filter_depth));
+				aw_filter_->Q_->value_ = options.filter_Q;
 			}
 		};
 	}

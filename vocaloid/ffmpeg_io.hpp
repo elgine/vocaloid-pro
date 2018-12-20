@@ -86,7 +86,7 @@ namespace vocaloid {
 			int Decode(AVPacket *packet, unique_lock<mutex> &lck) {
 				auto got_frame = 0;
 				auto ret = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet);
-				if (got_frame > 0 && frame_->nb_samples == codec_ctx_->frame_size) {
+				if (got_frame > 0) {
 					frame_count_++;
 					Convert((const uint8_t**)frame_->data, frame_->nb_samples, lck);
 				}
@@ -288,8 +288,9 @@ namespace vocaloid {
 					return -1;
 				}
 
-				if (codec_ctx_->frame_size <= 0)
+				if (codec_ctx_->frame_size <= 0) {
 					codec_ctx_->frame_size = 1024;
+				}	
 
 				swr_ctx_ = swr_alloc();
 				enum AVSampleFormat in_sample_fmt = codec_ctx_->sample_fmt;
@@ -360,14 +361,16 @@ namespace vocaloid {
 			}
 
 			int64_t Seek(int64_t time) override {
-				unique_lock<mutex> lck(decode_mutex_);
-				//auto durationPerFrame = float(codec_ctx_->frame_size * AV_TIME_BASE) / codec_ctx_->sample_rate;
-				//av_seek_frame(ctx_, a_stream_index_, floor(time / durationPerFrame), AVSEEK_FLAG_ANY);
-				av_seek_frame(ctx_, a_stream_index_, int64_t(time * 0.001f / av_q2d(ctx_->streams[a_stream_index_]->time_base)), AVSEEK_FLAG_BACKWARD);
-				avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
-				if (is_end_) {
-					is_end_ = false;
-					has_begun_ = false;
+				{
+					unique_lock<mutex> lck(decode_mutex_);
+					//auto durationPerFrame = float(codec_ctx_->frame_size * AV_TIME_BASE) / codec_ctx_->sample_rate;
+					//av_seek_frame(ctx_, a_stream_index_, floor(time / durationPerFrame), AVSEEK_FLAG_ANY);
+					av_seek_frame(ctx_, a_stream_index_, int64_t(time * 0.001f / av_q2d(ctx_->streams[a_stream_index_]->time_base)), AVSEEK_FLAG_BACKWARD);
+					avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
+					if (is_end_) {
+						is_end_ = false;
+						has_begun_ = false;
+					}
 				}
 				return time;
 			}
