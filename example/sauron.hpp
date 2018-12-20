@@ -64,6 +64,7 @@ void Run() {
 	context->Connect(compressor2, delay);
 
 	context->Connect(delay, compressor3);
+
 	context->Connect(compressor3, filter);
 	context->Connect(filter, convolver);
 	context->Connect(convolver, amplify);
@@ -72,7 +73,7 @@ void Run() {
 	context->Connect(filter, no_conv_gain);
 	context->Connect(no_conv_gain, amplify);
 	
-	context->Connect(amplify, writer);
+	context->Connect(amplify, player);
 	
 	context->On(AudioContext::ALL_INPUT_NOT_LOOP_FINISHED, [](void*) {
 		printf("End\n");

@@ -171,8 +171,6 @@
     <ClInclude Include="player.h" />
     <ClInclude Include="player_node.hpp" />
     <ClInclude Include="read_file_buffer.hpp" />
-    <ClInclude Include="reverb.hpp" />
-    <ClInclude Include="reverb_node.hpp" />
     <ClInclude Include="script_node.hpp" />
     <ClInclude Include="source_node.hpp" />
     <ClInclude Include="stdafx.h" />

@@ -167,11 +167,11 @@
     <ClInclude Include="broad_room.hpp" />
     <ClInclude Include="cave.hpp" />
     <ClInclude Include="child.hpp" />
-    <ClInclude Include="fairy.hpp" />
     <ClInclude Include="hall.hpp" />
     <ClInclude Include="female.hpp" />
     <ClInclude Include="male.hpp" />
     <ClInclude Include="megaphone.hpp" />
+    <ClInclude Include="muffler.hpp" />
     <ClInclude Include="old_male.hpp" />
     <ClInclude Include="old_woman.hpp" />
     <ClInclude Include="radio.hpp" />

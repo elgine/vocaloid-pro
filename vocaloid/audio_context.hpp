@@ -96,7 +96,6 @@ namespace vocaloid {
 
 			virtual void PullBuffers() {
 				summing_buffer_->Zero();
-				result_buffer_->Zero();
 				for (auto input : inputs_) {
 					if (input->type_ != AudioProcessorType::PARAM) {
 						if (input->type_ == AudioProcessorType::SPLITTER) {
@@ -119,7 +118,7 @@ namespace vocaloid {
 
 					}
 				}
-				//result_buffer_->Copy(summing_buffer_);
+				result_buffer_->Copy(summing_buffer_);
 			}
 
 			virtual int64_t ProcessFrame() { return 0; }

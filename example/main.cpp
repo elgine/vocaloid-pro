@@ -11,10 +11,10 @@
 //#include "old_woman.hpp"
 //#include "transformer.hpp"
 //#include "balrog.hpp"
-//#include "sauron.hpp"
-#include "fairy.hpp"
+///#include "sauron.hpp"
 
 /// environment or tool
+#include "muffler.hpp"
 //#include "cave.hpp"
 //#include "telephone.hpp"
 //#include "hall.hpp"

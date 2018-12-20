@@ -10,6 +10,7 @@ namespace vocaloid {
 		class OscillatorNode : public SourceNode {
 		private:
 			float frequency_;
+			float detune_;
 			dsp::WAVEFORM_TYPE type_;
 			Buffer<float> *waveform_buffer_;
 			bool waveform_dirty_;
@@ -22,6 +23,7 @@ namespace vocaloid {
 				type_ = dsp::WAVEFORM_TYPE::SINE;
 				waveform_buffer_ = new Buffer<float>();
 				offset_ = 0;
+				detune_ = 0.0f;
 			}
 
 			void SetBuffer(float *buffer, int64_t len) {
@@ -31,7 +33,7 @@ namespace vocaloid {
 
 			int64_t ProcessFrame() override {
 				if (waveform_dirty_) {
-					auto freq = abs(frequency_);
+					auto freq = abs(frequency_) * pow(2, detune_ / 1200.0f);
 					auto size = int64_t(sample_rate_ / freq);
 					waveform_buffer_->Alloc(size);
 					waveform_buffer_->SetSize(size);
@@ -57,6 +59,11 @@ namespace vocaloid {
 					offset_ = (offset_ + fill_size) % buffer_size;
 				}
 				return frame_size_;
+			}
+
+			void SetDetune(float detune) {
+				detune_ = detune;
+				waveform_dirty_ = true;
 			}
 
 			void SetFrequency(float frequency) {

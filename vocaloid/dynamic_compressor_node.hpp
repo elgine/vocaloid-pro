@@ -140,7 +140,7 @@ namespace vocaloid {
 				SetPredelayTime(predelay);
 				const int n_division_frames = 32;
 				const int n_divisions = frame_size_ / n_division_frames;
-				int16_t frame_index = 0;
+				int64_t frame_index = 0;
 				for (auto i = 0; i < n_divisions; i++) {
 					// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 					// Calculate desired gain

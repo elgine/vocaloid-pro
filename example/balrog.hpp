@@ -68,7 +68,7 @@ void Run() {
 
 	auto player = new PlayerNode(context);
 
-	auto amplify = new GainNode(context, 2.5f);
+	auto amplify = new GainNode(context, 2.0f);
 
 	context->Connect(osc, osc_gain);
 	context->Connect(osc_gain, delay->delay_time_);
@@ -89,7 +89,7 @@ void Run() {
 	context->Connect(fire, fire_gain);
 	context->Connect(fire_gain, amplify);
 
-	context->Connect(amplify, writer);
+	context->Connect(amplify, player);
 
 	source->Start(0);
 	fire->Start(0);

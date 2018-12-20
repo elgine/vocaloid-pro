@@ -30,9 +30,6 @@ namespace vocaloid {
 				SetSize(b->Size());
 				sample_rate_ = b->sample_rate_;
 				for (auto i = 0; i < b->Channels(); i++) {
-					/*for (auto j = 0; j < b->Size(); j++) {
-						data_[i]->Data()[j] = b->Data()[i]->Data()[j];
-					}*/
 					memcpy(data_[i]->Data() + dst, b->Channel(i)->Data() + offset, size * sizeof(float));
 				}
 				silence_ = b->silence_;
