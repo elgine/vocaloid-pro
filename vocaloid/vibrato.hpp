@@ -1,13 +1,12 @@
-#include "./effect.hpp"
+#include "composite.hpp"
 #include "oscillator_node.hpp"
 #include "delay_node.hpp"
 #include "gain_node.hpp"
 
 namespace vocaloid {
-	namespace effect {
+	namespace composite {
 		using namespace vocaloid::node;
-
-		class Vibrato : public Effect {
+		class Vibrato : public Composite {
 		public:
 			struct VibratoOptions {
 				// 3.5, [0.5, 15]
@@ -22,7 +21,7 @@ namespace vocaloid {
 			DelayNode *delay_;
 			GainNode *gain_;
 
-			Vibrato(AudioContext *ctx) : Effect(ctx) {
+			Vibrato(AudioContext *ctx) : Composite(ctx) {
 				delay_ = new DelayNode(ctx);
 				osc_ = new OscillatorNode(ctx);
 				gain_ = new GainNode(ctx);
@@ -30,13 +29,16 @@ namespace vocaloid {
 				ctx->Connect(gain_, delay_->delay_time_);
 				ctx->Connect(input_, delay_);
 				ctx->Connect(delay_, wet_);
-				osc_->Start();
 
 				SetOptions({
 					3.5f,
 					0.03f,
 					0.002f
 				});
+			}
+
+			void Start() override {
+				osc_->Start();
 			}
 
 			void SetOptions(VibratoOptions options) {

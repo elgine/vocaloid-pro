@@ -22,7 +22,7 @@
     <Filter Include="头文件\io">
       <UniqueIdentifier>{7e1df2f1-fbc7-44ad-bb45-51584d320852}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\effect">
+    <Filter Include="头文件\composite">
       <UniqueIdentifier>{a7fa3c0a-ae7f-46a0-ab7a-da91774b8c5c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -31,9 +31,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="wgn.hpp">
-      <Filter>头文件\dsp</Filter>
-    </ClInclude>
-    <ClInclude Include="convolution.hpp">
       <Filter>头文件\dsp</Filter>
     </ClInclude>
     <ClInclude Include="fft.hpp">
@@ -117,26 +114,23 @@
     <ClInclude Include="buffer_node.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="effect.hpp">
-      <Filter>头文件\effect</Filter>
-    </ClInclude>
     <ClInclude Include="audio_channel.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
     <ClInclude Include="equalizer_3_band.hpp">
-      <Filter>头文件\effect</Filter>
+      <Filter>头文件\composite</Filter>
     </ClInclude>
     <ClInclude Include="vibrato.hpp">
-      <Filter>头文件\effect</Filter>
+      <Filter>头文件\composite</Filter>
     </ClInclude>
     <ClInclude Include="flanger.hpp">
-      <Filter>头文件\effect</Filter>
+      <Filter>头文件\composite</Filter>
     </ClInclude>
     <ClInclude Include="auto_wah.hpp">
-      <Filter>头文件\effect</Filter>
+      <Filter>头文件\composite</Filter>
     </ClInclude>
     <ClInclude Include="chorus.hpp">
-      <Filter>头文件\effect</Filter>
+      <Filter>头文件\composite</Filter>
     </ClInclude>
     <ClInclude Include="distortion.hpp">
       <Filter>头文件\node</Filter>
@@ -160,10 +154,22 @@
       <Filter>头文件\dsp</Filter>
     </ClInclude>
     <ClInclude Include="jungle.hpp">
-      <Filter>头文件\effect</Filter>
+      <Filter>头文件\composite</Filter>
     </ClInclude>
     <ClInclude Include="script_node.hpp">
       <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="composite.hpp">
+      <Filter>头文件\composite</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_graph.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="convolver.hpp">
+      <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="convolver2.hpp">
+      <Filter>头文件\dsp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

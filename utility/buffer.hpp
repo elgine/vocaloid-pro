@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include <stdint.h>
 #include <memory>
 using namespace std;
@@ -69,13 +68,14 @@ namespace vocaloid{
             size_ += len;
         }
 
-        void Pop(T *out, int64_t len, int64_t offset = 0){
+        int64_t Pop(T *out, int64_t len, int64_t offset = 0){
             len = min(offset + len, size_) - offset;
 			/*for (auto i = 0; i < len; i++) {
 				out[i] = data_[i + offset];
 			}*/
 			memcpy(out, data_ + offset, len * sizeof(T));
             Splice(len, offset);
+			return len;
         }
 
         void Pop(Buffer<T> *buf, int64_t len, int64_t offset = 0){

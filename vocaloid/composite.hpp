@@ -2,10 +2,10 @@
 #include "audio_context.hpp"
 #include "gain_node.hpp"
 namespace vocaloid {
-	namespace effect {
+	namespace composite {
 		using namespace vocaloid;
 		using namespace vocaloid::node;
-		class Effect {
+		class Composite {
 		protected:
 			AudioContext *ctx_;
 		public:		
@@ -14,7 +14,7 @@ namespace vocaloid {
 			GainNode *wet_;
 			GainNode *output_;
 
-			explicit Effect(AudioContext *ctx) {
+			explicit Composite(AudioContext *ctx) {
 				ctx_ = ctx;
 				input_ = new GainNode(ctx);
 				dry_ = new GainNode(ctx);
@@ -24,6 +24,8 @@ namespace vocaloid {
 				ctx->Connect(wet_, output_);
 				CrossFade(1.0);
 			}
+
+			virtual void Start() {}
 
 			void CrossFade(float v) {
 				auto gain1 = cosf(v * 0.5 * M_PI);

@@ -1,10 +1,6 @@
 #pragma once
-#include "stdafx.h"
-#include "maths.hpp"
-#include "window.hpp"
 namespace vocaloid {
 	namespace dsp {
-
 		void FFT(float *x, float *y, long n, short int dir, bool normalize = true){
 			long i, i1, j, k, i2, l, l1, l2;
 			double c1, c2, tx, ty, t1, t2, u1, u2, z;

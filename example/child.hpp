@@ -7,7 +7,7 @@
 #include "../vocaloid/gain_node.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
-using namespace vocaloid::effect;
+using namespace vocaloid::composite;
 
 void Run() {
 	auto ctx = new AudioContext();

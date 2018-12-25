@@ -1,12 +1,12 @@
-#include "effect.hpp"
+#include "composite.hpp"
 #include "../vocaloid/oscillator_node.hpp"
 #include "../vocaloid/delay_node.hpp"
 #include "../vocaloid/gain_node.hpp"
 namespace vocaloid {
-	namespace effect {
+	namespace composite {
 		using namespace vocaloid::node;
 
-		class Flanger : public Effect {
+		class Flanger : public Composite {
 		public:
 			struct FlangerOptions {
 				// 0.25, [0.05, 5]
@@ -24,7 +24,7 @@ namespace vocaloid {
 			GainNode *gain_;
 			GainNode *feedback_;
 
-			Flanger(AudioContext *ctx):Effect(ctx) {
+			Flanger(AudioContext *ctx):Composite(ctx) {
 				osc_ = new OscillatorNode(ctx);
 				delay_ = new DelayNode(ctx);
 				gain_ = new GainNode(ctx);
@@ -38,14 +38,16 @@ namespace vocaloid {
 				ctx->Connect(delay_, feedback_);
 				ctx->Connect(feedback_, input_);
 
-				osc_->Start();
-
 				SetOptions({
 					0.25f,
 					0.005f,
 					0.002f,
 					0.5f
 				});
+			}
+
+			void Start() override {
+				osc_->Start();
 			}
 
 			void SetOptions(FlangerOptions options) {

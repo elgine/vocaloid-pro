@@ -14,7 +14,7 @@ void Run() {
 	auto player = new PlayerNode(context);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
-	source->Start(0);
+	source->Start(0, 10000);
 	auto convolution = new ConvolutionNode(context);
 	auto channel_data = new AudioChannel();
 	auto buffer = new Buffer<char>();

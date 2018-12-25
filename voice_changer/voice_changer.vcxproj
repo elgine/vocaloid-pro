@@ -19,15 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="voice_changer.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="exports.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="alien.hpp" />
+    <ClInclude Include="apis.h" />
+    <ClInclude Include="player.hpp" />
+    <ClInclude Include="renderer.hpp" />
+    <ClInclude Include="effect.hpp" />
     <ClInclude Include="effects.h" />
+    <ClInclude Include="events.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="voice_changer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="apis.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AECEBFF0-24F0-4923-BA88-6F05306F33E7}</ProjectGuid>

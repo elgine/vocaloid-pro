@@ -1,4 +1,4 @@
-#include "effect.hpp"
+#include "composite.hpp"
 #include "wave_shaper_node.hpp"
 #include "biquad_node.hpp"
 #include "delay_node.hpp"
@@ -6,10 +6,10 @@
 #include "gain_node.hpp"
 
 namespace vocaloid {
-	namespace effect {
+	namespace composite {
 		using namespace vocaloid::node;
 
-		class Chorus : public Effect {
+		class Chorus : public Composite {
 		public:
 			struct ChorusOptions {
 				// 3.5, [0.5, 15]
@@ -24,7 +24,7 @@ namespace vocaloid {
 			GainNode *gain_;
 			OscillatorNode *osc_;
 
-			Chorus(AudioContext *ctx) :Effect(ctx) {
+			Chorus(AudioContext *ctx) :Composite(ctx) {
 				delay_ = new DelayNode(ctx);
 				osc_ = new OscillatorNode(ctx);
 				gain_ = new GainNode(ctx);
@@ -35,13 +35,15 @@ namespace vocaloid {
 				ctx->Connect(input_, delay_);
 				ctx->Connect(delay_, wet_);
 
-				osc_->Start();
-
 				SetOptions({
 					3.5,
 					0.03,
 					0.002
 				});
+			}
+
+			void Start() override {
+				osc_->Start();
 			}
 
 			void SetOptions(ChorusOptions options) {

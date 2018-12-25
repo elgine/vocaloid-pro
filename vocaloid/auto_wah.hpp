@@ -1,11 +1,11 @@
-#include "effect.hpp"
+#include "composite.hpp"
 #include "wave_shaper_node.hpp"
 #include "biquad_node.hpp"
 
 namespace vocaloid {
-	namespace effect {
+	namespace composite {
 		using namespace vocaloid::node;
-		class AutoWah : public Effect {
+		class AutoWah : public Composite {
 		public:
 			struct AutoWahOptions {
 				// 10, [0.25, 20]
@@ -21,7 +21,7 @@ namespace vocaloid {
 			GainNode *aw_depth_;
 			BiquadNode *aw_filter_;
 
-			AutoWah(AudioContext *ctx):Effect(ctx) {
+			AutoWah(AudioContext *ctx):Composite(ctx) {
 				wave_shaper_ = new WaveShaperNode(ctx);
 				aw_follower_ = new BiquadNode(ctx);
 				aw_follower_->frequency_->value_ = 10.0f;

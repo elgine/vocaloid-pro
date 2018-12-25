@@ -51,9 +51,13 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() override {
-				if (!loop_ && played_point_ - offset_point_ >= duration_point_) {
-					if (!finished_)finished_ = true;
-					return 0;
+				if (played_point_ - offset_point_ >= duration_point_) {
+					if (!loop_) {
+						return EOF;
+					}
+					else {
+						played_point_ = offset_point_ + (played_point_ - offset_point_) % duration_point_;
+					}
 				}
 				if (!began_) {
 					if (played_began_ < start_point_) {
@@ -88,7 +92,15 @@ namespace vocaloid {
 				auto sample_rate = context_->SampleRate();
 			}
 
+			void Reset() override {
+				played_point_ = 0;
+				played_began_ = 0;
+				began_ = false;
+			}
 
+			void Seek(int64_t time) override {
+				played_point_ = time * 0.001 * sample_rate_;
+			}
 		};
 	}
 }

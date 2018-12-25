@@ -6,7 +6,7 @@
 using namespace vocaloid;
 using namespace vocaloid::node;
 using namespace vocaloid::io;
-using namespace vocaloid::effect;
+using namespace vocaloid::composite;
 
 void Run() {
 	auto context = new AudioContext();

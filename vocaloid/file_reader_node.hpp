@@ -65,6 +65,18 @@ namespace vocaloid {
 				path_ = path;
 			}
 
+			void Reset() override {
+				played_point_ = 0;
+				played_began_ = 0;
+				began_ = false;
+				reader_->Seek(0);
+			}
+
+			void Seek(int64_t time) override {
+				played_point_ = time * 0.001 * sample_rate_;
+				reader_->Seek(time);
+			}
+
 
 			// TODO: Loop and play in segments...
 			void Start(int64_t when, int64_t offset = 0, int64_t duration = 0) {
@@ -108,8 +120,7 @@ namespace vocaloid {
 			int64_t ProcessFrame() override {
 				if (played_point_ - offset_point_ >= duration_point_) {
 					if (!loop_) {
-						if (!finished_)finished_ = true;
-						return 0;
+						return EOF;
 					}
 					else {
 						played_point_ = offset_point_ + (played_point_ - offset_point_) % duration_point_;
@@ -132,8 +143,7 @@ namespace vocaloid {
 					reader_->Flush(temp_buffer_, size);
 					memset(temp_buffer_ + size, 0, require_buffer_size_ - size);
 					if (size <= 0 && !loop_) {
-						finished_ = true;
-						return 0;
+						return EOF;
 					}
 				}else {
 					size = reader_->ReadData(temp_buffer_, require_buffer_size_);

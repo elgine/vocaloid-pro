@@ -1,14 +1,14 @@
 #pragma once
 #include "audio_context.hpp"
 #include "biquad_node.hpp"
-#include "effect.hpp"
+#include "composite.hpp"
 namespace vocaloid {
-	namespace effect {
+	namespace composite {
 		using namespace vocaloid;
 		using namespace vocaloid::node;
 		using namespace vocaloid::dsp;
 
-		class Equalizer3Band : public Effect {
+		class Equalizer3Band : public Composite {
 		public:
 			struct Equalizer3BandOptions {
 				float low_frequency;
@@ -32,7 +32,7 @@ namespace vocaloid {
 			BiquadNode *lo_;
 			BiquadNode *mi_;
 
-			explicit Equalizer3Band(AudioContext *ctx):Effect(ctx){
+			explicit Equalizer3Band(AudioContext *ctx):Composite(ctx){
 				hi_ = new BiquadNode(ctx);
 				hi_->type_ = BIQUAD_TYPE::HIGH_SHELF;
 				hi_->frequency_->value_ = 2500;

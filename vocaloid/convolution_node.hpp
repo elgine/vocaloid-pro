@@ -1,12 +1,12 @@
 #pragma once
 #include "audio_context.hpp"
-#include "convolution.hpp"
+#include "convolver2.hpp"
 using namespace vocaloid::dsp;
 namespace vocaloid {
 	namespace node {
 		class ConvolutionNode : public AudioNode {
 		protected:
-			Convolution **convolver_;
+			Convolver2 **convolver_;
 
 			float CalculateNormalizationScale(AudioChannel* buf) {
 				auto gain_calibration = 0.00125;
@@ -47,7 +47,7 @@ namespace vocaloid {
 			bool normalize_;
 
 			explicit ConvolutionNode(AudioContext *ctx) :AudioNode(ctx) {
-				convolver_ = new Convolution*[8]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+				convolver_ = new Convolver2*[8]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 				kernel_ = nullptr;
 				normalize_ = true;
 			}
@@ -56,8 +56,8 @@ namespace vocaloid {
 				AudioNode::Initialize(sample_rate, frame_size);
 				auto scale = normalize_?CalculateNormalizationScale(kernel_):1.0f;
 				for (auto i = 0; i < channels_; i++) {
-					if (convolver_[i] == nullptr)convolver_[i] = new Convolution();
-					convolver_[i]->Initialize(frame_size, channels_, kernel_->Channel(i)->Data(), kernel_->Size(), scale);
+					if (convolver_[i] == nullptr)convolver_[i] = new Convolver2();
+					convolver_[i]->Initialize(frame_size, kernel_->Channel(0)->Data(), kernel_->Size(), scale);
 				}
 			}
 

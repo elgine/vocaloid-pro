@@ -16,10 +16,11 @@ using namespace std;
 #define M_PI_2 M_PI * 2
 #define DEFAULT_SAMPLE_RATE 44100
 #define DEFAULT_FRAME_SIZE 4096
-#define MAX_FFT_SIZE 32768 * 2
+#define MAX_FFT_SIZE 32768
 #define MAX_FRAME_SIZE MAX_FFT_SIZE * 10
 #define MINUS_SLEEP_UNIT 5
 #define BITS_PER_SEC 16
+#define EOF -1
 
 template<typename T>
 void AllocArray(int64_t len, T** arr) {
