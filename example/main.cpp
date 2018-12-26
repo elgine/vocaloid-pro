@@ -14,12 +14,12 @@
 ///#include "sauron.hpp"
 
 /// environment or tool
-#include "muffler.hpp"
+//#include "muffler.hpp"
 //#include "cave.hpp"
 //#include "telephone.hpp"
 //#include "hall.hpp"
 //#include "radio.hpp"
-//#include "broad_room.hpp"
+#include "broad_room.hpp"
 //#include "underwater.hpp"
 //#include "megaphone.hpp"
 

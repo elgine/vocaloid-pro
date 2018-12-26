@@ -117,10 +117,6 @@ namespace vocaloid {
 
 			virtual void Reset() {}
 
-			virtual int64_t SuggestFrameSize() {
-				return DEFAULT_FRAME_SIZE;
-			}
-
 			virtual int64_t Process() {
 				PullBuffers();
 				if (enable_)

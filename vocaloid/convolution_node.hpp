@@ -1,12 +1,12 @@
 #pragma once
 #include "audio_context.hpp"
-#include "convolver2.hpp"
+#include "convolver.hpp"
 using namespace vocaloid::dsp;
 namespace vocaloid {
 	namespace node {
 		class ConvolutionNode : public AudioNode {
 		protected:
-			Convolver2 **convolver_;
+			Convolver **convolver_;
 
 			float CalculateNormalizationScale(AudioChannel* buf) {
 				auto gain_calibration = 0.00125;
@@ -47,7 +47,7 @@ namespace vocaloid {
 			bool normalize_;
 
 			explicit ConvolutionNode(AudioContext *ctx) :AudioNode(ctx) {
-				convolver_ = new Convolver2*[8]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+				convolver_ = new Convolver*[8]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 				kernel_ = nullptr;
 				normalize_ = true;
 			}
@@ -55,9 +55,12 @@ namespace vocaloid {
 			void Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				auto scale = normalize_?CalculateNormalizationScale(kernel_):1.0f;
-				for (auto i = 0; i < channels_; i++) {
-					if (convolver_[i] == nullptr)convolver_[i] = new Convolver2();
-					convolver_[i]->Initialize(frame_size, kernel_->Channel(0)->Data(), kernel_->Size(), scale);
+				if (kernel_ != nullptr) {
+					auto kernel_channels = kernel_->Channels();
+					for (auto i = 0; i < channels_; i++) {
+						if (convolver_[i] == nullptr)convolver_[i] = new Convolver();
+						convolver_[i]->Initialize(frame_size, kernel_->Channel(i % kernel_channels)->Data(), kernel_->Size(), scale);
+					}
 				}
 			}
 
@@ -68,10 +71,6 @@ namespace vocaloid {
 					}
 				}	
 				return frame_size_;
-			}
-
-			int64_t SuggestFrameSize() override {
-				return NextPow2(kernel_->Size());
 			}
 		};
 	}

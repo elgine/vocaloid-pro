@@ -1,74 +1,207 @@
 #pragma once
-#include "stdafx.h"
 #include "fft.hpp"
 #include "maths.hpp"
 #include "../utility/buffer.hpp"
+#include <vector>
 #include <mutex>
+#include <thread>
+#include <atomic>
+using namespace std;
 // Segmented fft convolution
 namespace vocaloid {
 	namespace dsp {
 		class Convolver {
 		private:
-			int64_t kernel_size_;
-			int64_t input_size_;
-			int64_t fft_size_;
-			Buffer<float> *output_;
-			float *buffer_;
+			float **kernel_real_segs_;
+			float **kernel_imag_segs_;
 			float *kernel_real_;
 			float *kernel_imag_;
 			float *main_real_;
 			float *main_imag_;
+			float *buffer_;
+			float *segment_;
+			float *segment_buffer_;
 
-			float normal_scale_;
+			atomic<bool> processing_;
 
-			thread *thread_;
+			atomic<int> kernel_segments_;
+			atomic<int> seg_index_;
+			atomic<int> compose_index_;
+
+			int64_t kernel_size_;
+			int64_t input_size_;
+			int64_t fft_size_;
+			int64_t seg_fft_size_;
+			
+			Buffer<float>* input_;
+			Buffer<float>* output_;
+
+			atomic<float> normal_scale_;
+
+			vector<thread*> thread_pool_;
+			thread* compose_thread_;
 			mutex process_mutex_;
-		public:
+			condition_variable compose_condition_;
+			condition_variable take_condition_;
 
-			explicit Convolver() :kernel_size_(0), input_size_(0), fft_size_(0) {
-				kernel_real_ = nullptr;
-				kernel_imag_ = nullptr;
-				main_real_ = nullptr;
-				main_imag_ = nullptr;
-				buffer_ = nullptr;
-				output_ = new Buffer<float>();
-				normal_scale_ = 1.0f;
-			}
-
-			void Initialize(int64_t input_size, uint16_t channels, float* k, int64_t kernel_len, float normal_scale = 1.0f) {
-				input_size_ = input_size;
-				kernel_size_ = kernel_len;
-				normal_scale_ = normal_scale;
-				fft_size_ = kernel_size_ + input_size_ - 1;
-				if ((fft_size_ & (fft_size_ - 1)) != 0) {
-					fft_size_ = NextPow2(fft_size_);
+			void OverlapAddSegment(float *in, int index) {
+				for (int i = 0; i < seg_fft_size_; i++) {
+					segment_buffer_[i] += in[i];
+					if (isnan(segment_buffer_[i]) || isinf(segment_buffer_[i])) {
+						segment_buffer_[i] = 0.0f;
+					}
 				}
-
-				output_->Alloc(fft_size_);
-
-				DeleteArray(&buffer_);
-				AllocArray(fft_size_, &buffer_);
-
-				DeleteArray(&kernel_real_);
-				AllocArray(fft_size_, &kernel_real_);
-
-				memcpy(kernel_real_, k, kernel_len * sizeof(float));
-
-				DeleteArray(&kernel_imag_);
-				AllocArray(fft_size_, &kernel_imag_);
-
-				FFT(kernel_real_, kernel_imag_, fft_size_, 1);
-
-				DeleteArray(&main_real_);
-				AllocArray(fft_size_, &main_real_);
-
-				DeleteArray(&main_imag_);
-				AllocArray(fft_size_, &main_imag_);
+				memcpy(segment_ + index * input_size_, segment_buffer_, input_size_ * sizeof(float));
+				// Move items left
+				for (int i = 0; i < seg_fft_size_; i++) {
+					if (i + input_size_ >= seg_fft_size_) {
+						segment_buffer_[i] = 0.0f;
+					}
+					else
+						segment_buffer_[i] = segment_buffer_[i + input_size_];
+				}
 			}
 
-			int64_t Process(float *in, int64_t len) {
-				// Forward fft
-				memcpy(main_real_, in, sizeof(float) * len);
+			void OverlapAdd() {
+				// Do overlap add method
+				for (int i = 0; i < fft_size_; i++) {
+					buffer_[i] += segment_[i] * normal_scale_;
+					if (isnan(buffer_[i]) || isinf(buffer_[i])) {
+						//printf("invalidate data\n");
+						buffer_[i] = 0.0f;
+					}
+				}
+				output_->Add(buffer_, input_size_);
+				// Move items left
+				for (int i = 0; i < fft_size_; i++) {
+					if (i + input_size_ >= fft_size_) {
+						buffer_[i] = 0.0f;
+					}
+					else
+						buffer_[i] = buffer_[i + input_size_];
+				}
+			}
+
+			int ExtractFrames(float *main_real, float *main_imag, float *kernel_real, float *kernel_imag) {
+				int index = -1;
+				{
+					unique_lock<mutex> lck(process_mutex_);
+					if (input_->Size() < input_size_ || seg_index_ < 0 || seg_index_ >= kernel_segments_) {
+						return -1;
+					}
+					index = seg_index_++;
+					memcpy(kernel_real, kernel_real_segs_[index], seg_fft_size_ * sizeof(float));
+					memcpy(kernel_imag, kernel_imag_segs_[index], seg_fft_size_ * sizeof(float));
+					memcpy(main_real, main_real_, seg_fft_size_ * sizeof(float));
+					memcpy(main_imag, main_imag_, seg_fft_size_ * sizeof(float));
+				}
+				return index;
+			}
+
+			void ComposeFrame(float *main_real, int index) {
+				{
+					unique_lock<mutex> lck(process_mutex_); 
+					if (!processing_)return;
+					while (compose_index_ < index) {
+						compose_condition_.wait(lck);
+					}
+					OverlapAddSegment(main_real, index);
+					if (compose_index_ < kernel_segments_ - 1)
+						compose_index_++;
+					compose_condition_.notify_all();
+				}
+			}
+
+			void OverlapAddLoop() {
+				while (true) {
+					bool has_frame = true;
+					{
+						unique_lock<mutex> lck(process_mutex_);
+						if (!processing_)break;
+						if (compose_index_ == kernel_segments_ - 1) {
+							OverlapAdd();
+							NextFrame();
+							take_condition_.notify_all();
+						}
+						else
+							has_frame = false;
+					}
+					this_thread::sleep_for(chrono::milliseconds(!has_frame ? MINUS_SLEEP_UNIT : 1));
+				}
+			}
+
+			void NextFrame() {
+				seg_index_ = 0;
+				compose_index_ = 0;
+				if (input_->Size() >= input_size_) {
+					auto pop_len = input_->Pop(main_real_, input_size_);
+					if(seg_fft_size_ - pop_len > 0)
+						memset(main_real_ + pop_len, 0, (seg_fft_size_ - pop_len) * sizeof(float));
+					memset(main_imag_, 0, seg_fft_size_ * sizeof(float));
+					FFT(main_real_, main_imag_, seg_fft_size_, 1);
+					memset(segment_buffer_, 0, sizeof(float) * seg_fft_size_);
+				}
+				else {
+					seg_index_ = -1;
+				}
+			}
+
+			void ProcessInThread() {
+				int64_t fft_size;
+				int16_t index;
+				float *main_real = nullptr, *main_imag = nullptr, *kernel_real = nullptr, *kernel_imag = nullptr;
+				{
+					unique_lock<mutex> lck(process_mutex_);
+					fft_size = seg_fft_size_;
+					AllocArray(fft_size, &main_real);
+					AllocArray(fft_size, &main_imag);
+					AllocArray(fft_size, &kernel_real);
+					AllocArray(fft_size, &kernel_imag);
+				}
+				while (true) {
+					{
+						unique_lock<mutex> lck(process_mutex_);
+						if (!processing_)break;
+					}
+					index = ExtractFrames(main_real, main_imag, kernel_real, kernel_imag);
+					if (index > -1) {
+						for (int i = 0; i < fft_size; i++) {
+							float a = main_real[i];
+							float b = main_imag[i];
+							float c = kernel_real[i];
+							float d = kernel_imag[i];
+							main_real[i] = a * c - b * d;
+							main_imag[i] = b * c + a * d; 
+						}
+						FFT(main_real, main_imag, fft_size, -1);
+						ComposeFrame(main_real, index);
+					}
+					this_thread::sleep_for(chrono::milliseconds(index < 0 ? MINUS_SLEEP_UNIT : 2));
+				}
+			}
+
+			void ProcessBackground(float *in, int64_t size) {
+				{
+					unique_lock<mutex> lck(process_mutex_);
+					input_->Add(in, size);
+					if (seg_index_ < 0)NextFrame();
+				}
+			}
+
+			int64_t PopFrame(float *out) {
+				int64_t len = 0;
+				{
+					unique_lock<mutex> lck(process_mutex_);
+					while (output_->Size() < input_size_) {
+						take_condition_.wait(lck);
+					}
+					len = output_->Pop(out, input_size_);
+				}
+				return len;
+			}
+
+			int64_t ProcessDirect(float *in, int64_t size, float *out) {
+				memcpy(main_real_, in, sizeof(float) * size);
 				memset(main_imag_, 0, sizeof(float) * fft_size_);
 				FFT(main_real_, main_imag_, fft_size_, 1);
 				// Do processing
@@ -85,8 +218,10 @@ namespace vocaloid {
 				// Do overlap add method
 				for (int i = 0; i < fft_size_; i++) {
 					buffer_[i] += main_real_[i];
+					if (i < input_size_) {
+						out[i] = buffer_[i];
+					}
 				}
-				output_->Add(buffer_, input_size_);
 				// Move items left
 				for (int i = 0; i < fft_size_; i++) {
 					if (i + input_size_ >= fft_size_) {
@@ -95,10 +230,138 @@ namespace vocaloid {
 					else
 						buffer_[i] = buffer_[i + input_size_];
 				}
+				return input_size_;
 			}
 
-			int64_t PopFrame(float *out, int64_t len) {
-				return output_->Pop(out, len);
+		public:
+
+			int16_t thread_count_;
+			static const int16_t max_thread_count_ = 16;
+
+			explicit Convolver() {
+				input_ = new Buffer<float>();
+				output_ = new Buffer<float>();
+				normal_scale_ = 1.0f;
+				kernel_real_segs_ = nullptr;
+				kernel_imag_segs_ = nullptr;
+				kernel_real_ = nullptr;
+				kernel_imag_ = nullptr;
+				buffer_ = nullptr;
+				segment_ = nullptr;
+				main_real_ = nullptr;
+				main_imag_ = nullptr;
+				segment_buffer_ = nullptr;
+				compose_thread_ = nullptr;
+				thread_count_ = 16;
+				seg_index_ = 0;
+				compose_index_ = 0;
+			}
+
+			void Initialize(int64_t input_size, float* k, int64_t kernel_len, float normal_scale = 1.0f) {
+				Stop();
+				seg_index_ = -1;
+				compose_index_ = 0;
+				input_size_ = input_size;
+				kernel_size_ = kernel_len;
+				normal_scale_ = normal_scale;
+				fft_size_ = kernel_size_ + input_size_ - 1;
+				if ((fft_size_ & (fft_size_ - 1)) != 0) {
+					fft_size_ = NextPow2(fft_size_);
+				}
+				input_->Alloc(fft_size_);
+				output_->Alloc(fft_size_);
+				output_->SetSize(input_size_);
+
+				DeleteArray(&buffer_);
+				AllocArray(fft_size_, &buffer_);
+
+				DeleteArray(&segment_);
+				AllocArray(fft_size_, &segment_);
+				// Calculate segments divide kernel into
+				auto new_segments = fft_size_ / input_size_;
+				if (thread_count_ > max_thread_count_)
+					thread_count_ = max_thread_count_;
+				if (thread_count_ > 1 && new_segments > 1) {
+					seg_fft_size_ = input_size_ * 2;
+					DeleteArray(&main_real_);
+					AllocArray(seg_fft_size_, &main_real_);
+					DeleteArray(&main_imag_);
+					AllocArray(seg_fft_size_, &main_imag_);
+					DeleteArray(&segment_buffer_);
+					AllocArray(seg_fft_size_, &segment_buffer_);
+					if (kernel_real_segs_ != nullptr && kernel_imag_segs_ != nullptr) {
+						for (auto i = 0; i < kernel_segments_; i++) {
+							DeleteArray(kernel_real_segs_ + i);
+							DeleteArray(kernel_imag_segs_ + i);
+						}
+						delete[] kernel_real_segs_;
+						kernel_real_segs_ = nullptr;
+						delete[] kernel_imag_segs_;
+						kernel_imag_segs_ = nullptr;
+					}
+
+					kernel_segments_ = new_segments;
+					kernel_real_segs_ = new float*[kernel_segments_];
+					kernel_imag_segs_ = new float*[kernel_segments_];
+					
+					int64_t k_start = 0;
+					int64_t k_len = 0;
+					for (auto i = 0; i < kernel_segments_; i++) {
+						AllocArray(seg_fft_size_, kernel_real_segs_ + i);
+						AllocArray(seg_fft_size_, kernel_imag_segs_ + i);
+						k_start = input_size_ * i;
+						k_len = min(input_size_, kernel_len - k_start);
+						if (k_start < kernel_len) {
+							memcpy(kernel_real_segs_[i], k + k_start, k_len * sizeof(float));
+							FFT(kernel_real_segs_[i], kernel_imag_segs_[i], seg_fft_size_, 1);
+						}
+					}
+
+					if (thread_pool_.size() <= 0) {
+						processing_ = true;
+						thread_pool_.reserve(thread_count_);
+						for (auto i = 0; i < thread_count_; i++) {
+							thread_pool_.emplace_back(new thread(&Convolver::ProcessInThread, this));
+						}
+					}
+					compose_thread_ = new thread(&Convolver::OverlapAddLoop, this);
+				}
+				else {
+					DeleteArray(&main_real_);
+					AllocArray(fft_size_, &main_real_);
+					DeleteArray(&main_imag_);
+					AllocArray(fft_size_, &main_imag_);
+
+					DeleteArray(&kernel_real_);
+					DeleteArray(&kernel_imag_);
+					AllocArray(fft_size_, &kernel_real_);
+					AllocArray(fft_size_, &kernel_imag_);
+					memcpy(kernel_real_, k, kernel_len * sizeof(float));
+					FFT(kernel_real_, kernel_imag_, input_size_, 1);
+				}
+			}
+
+			int64_t Process(float *in, int64_t size, float *out) {
+				if (kernel_segments_ > 1) {
+					ProcessBackground(in, size);
+					return PopFrame(out);
+				}
+				else {
+					ProcessDirect(in, size, out);
+				}
+			}
+
+			void Stop() {
+				processing_ = false;
+				compose_condition_.notify_all();
+				if(compose_thread_ != nullptr && compose_thread_->joinable())
+					compose_thread_->join();
+				for (auto thread : thread_pool_) {
+					if (thread->joinable()) {
+						thread->join();
+					}
+				}
+				thread_pool_.clear();
 			}
 		};
 	}

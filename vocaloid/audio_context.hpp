@@ -99,11 +99,6 @@ namespace vocaloid {
 
 			int Prepare() {
 				Traverse(traversal_nodes_);
-				/*int64_t frame_size = DEFAULT_FRAME_SIZE;
-				for (auto node : traversal_nodes_) {
-					frame_size = max(FindNode(node)->SuggestFrameSize(), frame_size);
-				}
-				frame_size_ = min((int64_t)MAX_FFT_SIZE, frame_size);*/
 				for (auto node : traversal_nodes_) {
 					FindNode(node)->Initialize(SampleRate(), frame_size_);
 				}

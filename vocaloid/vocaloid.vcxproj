@@ -145,7 +145,6 @@
     <ClInclude Include="buffer_node.hpp" />
     <ClInclude Include="channel.h" />
     <ClInclude Include="chorus.hpp" />
-    <ClInclude Include="convolver.hpp" />
     <ClInclude Include="convolution_node.hpp" />
     <ClInclude Include="delay_node.hpp" />
     <ClInclude Include="destination_node.hpp" />
@@ -163,7 +162,7 @@
     <ClInclude Include="flanger.hpp" />
     <ClInclude Include="gain_node.hpp" />
     <ClInclude Include="lpc.hpp" />
-    <ClInclude Include="convolver2.hpp" />
+    <ClInclude Include="convolver.hpp" />
     <ClInclude Include="oscillator_node.hpp" />
     <ClInclude Include="overlap_add.hpp" />
     <ClInclude Include="pcm_player.hpp" />

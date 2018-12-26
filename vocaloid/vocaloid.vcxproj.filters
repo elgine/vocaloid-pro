@@ -168,8 +168,5 @@
     <ClInclude Include="convolver.hpp">
       <Filter>头文件\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="convolver2.hpp">
-      <Filter>头文件\dsp</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
