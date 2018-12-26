@@ -57,9 +57,6 @@
     <ClInclude Include="source_node.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
-    <ClInclude Include="destination_node.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
     <ClInclude Include="ffmpeg_io.hpp">
       <Filter>头文件\io</Filter>
     </ClInclude>
@@ -103,9 +100,6 @@
       <Filter>头文件\node</Filter>
     </ClInclude>
     <ClInclude Include="audio_timeline.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
-    <ClInclude Include="audio_context.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
     <ClInclude Include="read_file_buffer.hpp">
@@ -156,17 +150,26 @@
     <ClInclude Include="jungle.hpp">
       <Filter>头文件\composite</Filter>
     </ClInclude>
-    <ClInclude Include="script_node.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
     <ClInclude Include="composite.hpp">
       <Filter>头文件\composite</Filter>
     </ClInclude>
-    <ClInclude Include="audio_graph.hpp">
-      <Filter>头文件\node</Filter>
-    </ClInclude>
     <ClInclude Include="convolver.hpp">
       <Filter>头文件\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_param.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_context.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="destination_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="base_audio_context.h">
+      <Filter>头文件\node</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

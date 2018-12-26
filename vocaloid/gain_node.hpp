@@ -1,17 +1,17 @@
 #pragma once
-#include "audio_context.hpp"
+#include "audio_node.hpp"
+#include "audio_param.hpp"
 using namespace std;
 namespace vocaloid {
-
 	namespace node {
 		class GainNode : public AudioNode {
 		public:
 			AudioParam *gain_;
 
-			explicit GainNode(AudioContext *ctx, float v = 1.0f):AudioNode(ctx) {
-				gain_ = new AudioParam();
+			explicit GainNode(BaseAudioContext *ctx, float v = 1.0f):AudioNode(ctx) {
+				gain_ = new AudioParam(ctx);
 				gain_->value_ = v;
-				RegisterAudioParam(gain_);
+				context_->Connect(gain_, this);
 			}
 
 			void Initialize(int32_t sample_rate, int64_t frame_size) override {

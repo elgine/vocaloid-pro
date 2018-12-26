@@ -9,6 +9,7 @@ namespace effect {
 	
 	class Effect {
 	protected:
+		Effects id_;
 		AudioContext *ctx_;
 		GainNode *gain_;
 	public:

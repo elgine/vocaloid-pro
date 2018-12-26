@@ -138,8 +138,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="audio_context.hpp" />
-    <ClInclude Include="audio_graph.hpp" />
+    <ClInclude Include="audio_node.hpp" />
+    <ClInclude Include="audio_param.hpp" />
     <ClInclude Include="auto_wah.hpp" />
+    <ClInclude Include="base_audio_context.h" />
     <ClInclude Include="biquad.hpp" />
     <ClInclude Include="biquad_node.hpp" />
     <ClInclude Include="buffer_node.hpp" />
@@ -172,7 +174,6 @@
     <ClInclude Include="player.h" />
     <ClInclude Include="player_node.hpp" />
     <ClInclude Include="read_file_buffer.hpp" />
-    <ClInclude Include="script_node.hpp" />
     <ClInclude Include="source_node.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="audio_timeline.hpp" />

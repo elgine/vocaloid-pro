@@ -12,7 +12,7 @@ namespace vocaloid {
 			Buffer<char>* bytes_;
 
 		public:
-			explicit PlayerNode(AudioContext *ctx) :DestinationNode(ctx) {
+			explicit PlayerNode(BaseAudioContext *ctx) :DestinationNode(ctx) {
 				player_ = nullptr;
 #ifdef _WIN32 || _WIN64
 				player_ = new io::PCMPlayer();

@@ -7,7 +7,7 @@ namespace vocaloid {
 		protected:
 			bool played_;
 		public:
-			explicit SourceNode(AudioContext *ctx) :AudioNode(ctx, AudioProcessorType::INPUT, false, true) {
+			explicit SourceNode(AudioContext *ctx) :AudioNode(ctx, AudioNodeType::INPUT, false, true) {
 				played_ = false;
 			}
 

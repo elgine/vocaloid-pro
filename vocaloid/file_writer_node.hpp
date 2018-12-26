@@ -14,7 +14,7 @@ namespace vocaloid {
 			string path_;
 			Buffer<char> *buf_;
 		public:
-			explicit FileWriterNode(AudioContext *ctx): DestinationNode(ctx){
+			explicit FileWriterNode(BaseAudioContext *ctx): DestinationNode(ctx){
 #ifdef _WIN32 || _WIN64
 				writer_ = new io::FFmpegFileWriter();
 #else

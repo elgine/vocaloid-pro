@@ -1,14 +1,30 @@
 #pragma once
-#include "stdafx.h"
-#include "audio_context.hpp"
+#include "audio_node.hpp"
 namespace vocaloid {
 	namespace node {
-		class DestinationNode: public AudioNode{
+		enum OutputType {
+			PLAYER,
+			RECORDER
+		};
+
+		class DestinationNode : public AudioNode {
 		protected:
 			int32_t sample_rate_ = 44100;
+			OutputType output_type_;
 		public:
-			explicit DestinationNode(AudioContext *ctx) :AudioNode(ctx, AudioProcessorType::OUTPUT) {
-				can_connect_ = false;
+			explicit DestinationNode(BaseAudioContext *ctx) :AudioNode(ctx, AudioNodeType::OUTPUT, true, false) {}
+
+			void SetFormat(int32_t sample_rate, int16_t channels) {
+				sample_rate_ = sample_rate;
+				channels_ = channels;
+			}
+
+			OutputType OutputType() {
+				return output_type_;
+			}
+			
+			int32_t SampleRate() {
+				return sample_rate_;
 			}
 		};
 	}

@@ -16,12 +16,12 @@ namespace vocaloid {
 			AudioParam *delay_time_;
 
 			explicit DelayNode(AudioContext *ctx, float delay_time = 0, float max_delay_time = 1.0f) :AudioNode(ctx), max_delay_time_(max_delay_time) {
-				delay_time_ = new AudioParam();
+				delay_time_ = new AudioParam(ctx);
 				delay_time_->value_ = delay_time;
 				max_delay_size_ = 0;
 				write_index_ = 0;
 				buffers_ = new vector<float>[8];
-				RegisterAudioParam(delay_time_);
+				context_->Connect(delay_time_, this);
 			}
 
 			void Initialize(int32_t sample_rate, int64_t frame_size) override {

@@ -24,8 +24,7 @@
   <ItemGroup>
     <ClInclude Include="alien.hpp" />
     <ClInclude Include="apis.h" />
-    <ClInclude Include="player.hpp" />
-    <ClInclude Include="renderer.hpp" />
+    <ClInclude Include="controller.hpp" />
     <ClInclude Include="effect.hpp" />
     <ClInclude Include="effects.h" />
     <ClInclude Include="events.h" />
