@@ -1,6 +1,7 @@
 #pragma once
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/gain_node.hpp"
+#include "effects.h"
 using namespace vocaloid::node;
 namespace effect {
 	struct EffectOptions {
@@ -32,6 +33,10 @@ namespace effect {
 
 		virtual void Start() {}
 
-		virtual void Dispose() {}
+		virtual void Dispose() {
+			gain_->Dispose();
+			delete gain_;
+			gain_ = nullptr;
+		}
 	};
 }

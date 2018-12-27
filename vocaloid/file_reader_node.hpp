@@ -5,6 +5,7 @@
 #include "audio_context.hpp"
 #include "../utility/path.hpp"
 #include "maths.hpp"
+#include "status.h"
 #ifdef _WIN32 || _WIN64
 #include "ffmpeg_io.hpp"
 #else
@@ -34,6 +35,8 @@ namespace vocaloid {
 			int64_t start_;
 			int64_t offset_;
 			int64_t duration_;
+
+			bool need_update_;
 		public:
 
 			bool loop_;
@@ -56,13 +59,19 @@ namespace vocaloid {
 				duration_point_ = 0;
 			}
 
-			void SetPath(const char* path) {
+			int SetPath(const char* path) {
+				if (path_ == path)return SUCCEED;
+				if (IsPathDirectory(path))
+					return PATH_NOT_FILE;
+				if (!IsFileReadable(path))
+					return FILE_NOT_READABLE;
 #ifndef _WIN32 || _WIN64
 				if (GetExtension(path) != ".wav") {
-					throw "Don't support audio file except 'wav'";
+					return FILE_NOT_WAV;
 				}
 #endif
 				path_ = path;
+				need_update_ = true;
 			}
 
 			void Reset() override {
@@ -77,6 +86,9 @@ namespace vocaloid {
 				reader_->Seek(time);
 			}
 
+			void Clear() override {
+				reader_->Clear();
+			}
 
 			// TODO: Loop and play in segments...
 			void Start(int64_t when, int64_t offset = 0, int64_t duration = 0) {
@@ -86,25 +98,29 @@ namespace vocaloid {
 				duration_ = duration;
 			}
 
-			void Initialize(int32_t sample_rate, int64_t frame_size) override {
+			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				SourceNode::Initialize(sample_rate, frame_size);
 				frame_size_ = frame_size;
-				auto ret = reader_->Open(path_.c_str());
-				if (ret < 0)throw "Can't read this file";
+				auto ret = SUCCEED;
+				if (need_update_) {
+					reader_->Dispose();
+					ret = reader_->Open(path_.c_str());
+					if (ret < 0) {
+						return CANT_DECODE;
+					}
+					need_update_ = false;
+				}
 				auto format = reader_->Format();
 				channels_ = format.channels;
 				bits_ = format.bits;
-#ifndef _WIN32 || _WIN64
-				cout << "Audio file channels: " << channels_ << endl;
-#endif
-				if (format.sample_rate == 0)throw "The Sample rate of file is zero!";
+				if (format.sample_rate == 0) {
+					return INVALIDATE_SOURCE;
+				}
 				resample_ratio_ = float(sample_rate) / format.sample_rate;
 				require_float_size_ = int64_t(float(frame_size_) / resample_ratio_);
 				require_buffer_size_ = require_float_size_ * format.block_align;
 				DeleteArray(&temp_buffer_);
 				AllocArray(require_buffer_size_, &temp_buffer_);
-
-				
 
 				began_ = false;
 				played_began_ = 0;
@@ -115,6 +131,7 @@ namespace vocaloid {
 					duration_point_ = reader_->FileLength() / (BITS_PER_SEC / 8) / channels_;
 				played_point_ = offset_point_;
 				summing_buffer_->sample_rate_ = format.sample_rate;
+				return SUCCEED;
 			}
 
 			int64_t ProcessFrame() override {
@@ -168,8 +185,8 @@ namespace vocaloid {
 				reader_->Stop();
 			}
 
-			void Close() override {
-				reader_->Close();
+			void Dispose() override {
+				reader_->Dispose();
 			}
 		};
 	}

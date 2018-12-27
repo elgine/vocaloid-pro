@@ -1,7 +1,28 @@
 #pragma once
 #include <string>
 #include <regex>
+#include <io.h>
+#include <sys/stat.h>
 using namespace std;
+
+bool IsPathDirectory(const char* path) {
+	struct stat s;
+	if (stat(path, &s) == 0) {
+		if (s.st_mode & S_IFDIR)return true;
+		else return false;
+	}
+	else {
+		return false;
+	}
+}
+
+bool IsFileExists(const char* path) {
+	return !(_access(path, 0) == -1);
+}
+
+bool IsFileReadable(const char* path) {
+	return !(_access(path, 4) == -1);
+}
 
 string GetExtension(const string path){
     auto last_dot_index = path.find_last_of(".");

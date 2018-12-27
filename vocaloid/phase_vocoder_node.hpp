@@ -18,7 +18,7 @@ namespace vocaloid {
 				overlap_ = 0.25f;
 			}
 
-			void Initialize(int32_t sample_rate, int64_t frame_size) {
+			int Initialize(int32_t sample_rate, int64_t frame_size) {
 				AudioNode::Initialize(sample_rate, frame_size);
 				for (int i = 0; i < channels_; i++) {
 					if (shifters_[i] == nullptr) {
@@ -26,6 +26,7 @@ namespace vocaloid {
 					}
 					shifters_[i]->Initialize(frame_size, overlap_);
 				}
+				return SUCCEED;
 			}
 
 			int64_t ProcessFrame() override {

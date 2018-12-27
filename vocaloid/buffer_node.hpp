@@ -36,7 +36,7 @@ namespace vocaloid {
 			void SetChannels(int16_t c) final {
 			}
 
-			void Initialize(int32_t sample_rate, int64_t frame_size) override {
+			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				channels_ = summing_buffer_->Channels();
 				SourceNode::Initialize(sample_rate, frame_size);
 				start_point_ = sample_rate * start_ * 0.001f;
@@ -48,6 +48,7 @@ namespace vocaloid {
 				began_ = false;
 				played_began_ = 0;
 				played_point_ = offset_point_;
+				return SUCCEED;
 			}
 
 			int64_t ProcessFrame() override {

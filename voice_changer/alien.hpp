@@ -15,6 +15,7 @@ namespace effect {
 		GainNode *osc_gain_;
 	public:
 		explicit Alien(AudioContext *ctx) :Effect(ctx) {
+			id_ = Effects::ALIEN;
 			delay_ = new DelayNode(ctx);
 			osc_ = new OscillatorNode(ctx);
 			osc_gain_ = new GainNode(ctx);
@@ -35,6 +36,25 @@ namespace effect {
 			Effect::SetOptions(options);
 			delay_->delay_time_->value_ = options.delay;
 			osc_->SetFrequency(options.frequency);
+		}
+
+		void Dispose() override {
+			if (delay_ != nullptr) {
+				delay_->Dispose();
+				delete delay_;
+				delay_ = nullptr;
+			}
+			if (osc_ != nullptr) {
+				osc_->Dispose();
+				delete osc_;
+				osc_ = nullptr;
+			}
+			if (osc_gain_ != nullptr) {
+				osc_gain_->Dispose();
+				delete osc_;
+				osc_gain_ = nullptr;
+			}
+			Effect::Dispose();
 		}
 	};
 }

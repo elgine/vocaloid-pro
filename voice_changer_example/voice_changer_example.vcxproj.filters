@@ -13,46 +13,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\effects">
-      <UniqueIdentifier>{c92d55ca-4ac1-4690-a710-ec2f3a950ab8}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="exports.def">
-      <Filter>源文件</Filter>
-    </None>
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="alien.hpp">
-      <Filter>头文件\effects</Filter>
-    </ClInclude>
-    <ClInclude Include="effect.hpp">
-      <Filter>头文件\effects</Filter>
-    </ClInclude>
-    <ClInclude Include="effects.h">
-      <Filter>头文件\effects</Filter>
-    </ClInclude>
-    <ClInclude Include="events.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="apis.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="player.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="factory.hpp">
-      <Filter>头文件\effects</Filter>
-    </ClInclude>
-    <ClInclude Include="status.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="apis.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

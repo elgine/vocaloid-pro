@@ -171,5 +171,11 @@
     <ClInclude Include="base_audio_context.h">
       <Filter>头文件\node</Filter>
     </ClInclude>
+    <ClInclude Include="events.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="status.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

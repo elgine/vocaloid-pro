@@ -14,9 +14,10 @@ namespace vocaloid {
 				context_->Connect(gain_, this);
 			}
 
-			void Initialize(int32_t sample_rate, int64_t frame_size) override {
+			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				gain_->Initialize(sample_rate_, frame_size);
+				return SUCCEED;
 			}
 
 			int64_t ProcessFrame() override {

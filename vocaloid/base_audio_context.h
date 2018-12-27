@@ -8,6 +8,11 @@ namespace vocaloid {
 			PLAYING
 		};
 
+		enum OutputType {
+			PLAYER,
+			RECORDER
+		};
+
 		class AudioNode;
 		class DestinationNode;
 		class BaseAudioContext {
@@ -25,8 +30,8 @@ namespace vocaloid {
 			virtual int Prepare() = 0;
 			virtual void Start() = 0;
 			virtual int Stop() = 0;
-			virtual int Close() = 0;
 			virtual void Reset() = 0;
+			virtual void Clear() = 0;
 			virtual void Dispose() = 0;
 			virtual void SetOutput(OutputType output, int32_t sample_rate, int16_t channels) = 0;
 			virtual void SetOutputFormat(int32_t sample_rate, int16_t channels) = 0;

@@ -27,9 +27,10 @@ namespace vocaloid {
 				gain_ = 0.5f;
 			}
 
-			void Initialize(int32_t sample_rate, int64_t frame_size) {
+			int Initialize(int32_t sample_rate, int64_t frame_size) {
 				WaveShaperNode::Initialize(sample_rate, frame_size);
 				BuiltCurve();
+				return SUCCEED;
 			}
 		};
 	}

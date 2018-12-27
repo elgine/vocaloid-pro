@@ -2,11 +2,6 @@
 #include "audio_node.hpp"
 namespace vocaloid {
 	namespace node {
-		enum OutputType {
-			PLAYER,
-			RECORDER
-		};
-
 		class DestinationNode : public AudioNode {
 		protected:
 			int32_t sample_rate_ = 44100;
@@ -18,6 +13,8 @@ namespace vocaloid {
 				sample_rate_ = sample_rate;
 				channels_ = channels;
 			}
+
+			virtual int64_t Processed() { return 0; }
 
 			OutputType OutputType() {
 				return output_type_;

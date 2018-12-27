@@ -82,7 +82,7 @@ namespace vocaloid {
 				return header_.size2;
 			}
 
-			void Close() override {
+			void Dispose() override {
 				out_.seekp(data_chunk_pos_ - 4);
 				Write(out_, header_.size2, 4);
 				out_.seekp(0 + 4);
@@ -199,6 +199,8 @@ namespace vocaloid {
 				
 			}
 
+			void Clear() override {}
+
 			void Flush(char *bytes, int64_t &byte_length) override {
 				byte_length = header_.size2 - pos_;
 				in_.read(bytes, byte_length);
@@ -209,7 +211,7 @@ namespace vocaloid {
 				return in_.eof() || header_.size2 - pos_ <= 0;
 			}
 
-			void Close() override {
+			void Dispose() override {
 				in_.close();
 			}
 

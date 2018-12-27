@@ -1,20 +1,23 @@
 #pragma once
 #include <map>
 #include <list>
+#include <functional>
 #include <string.h>
 #include <algorithm>
 using namespace std;
-typedef void(*callback)(void*);
+
+typedef void(*CallBack)(void*);
+
 class Emitter{
 
 private:
-	map<string, list<callback>> _handlers;
+	map<string, list<CallBack>> _handlers;
 
 public:
 
 	Emitter() {}
 
-	bool Contains(const string name, callback cb) {
+	bool Contains(const string name, CallBack cb) {
 		auto iter1 = _handlers.find(name);
 		if (iter1 == _handlers.end()) {
 			return false;
@@ -24,9 +27,9 @@ public:
 		return false;
 	}
 
-	int On(const string event, callback handler) {
+	int On(const string event, CallBack handler) {
 		auto iter1 = _handlers.find(event);
-		list<callback> callback_list;
+		list<CallBack> callback_list;
 		if (iter1 != _handlers.end()) {
 			callback_list = iter1->second;
 		}
@@ -45,7 +48,7 @@ public:
 		}
 	}
 
-	void off(const string event, callback cb) {
+	void off(const string event, CallBack cb) {
 		auto iter1 = _handlers.find(event);
 		if (iter1 != _handlers.end()) {
 			auto iter2 = find(iter1->second.begin(), iter1->second.end(), cb);

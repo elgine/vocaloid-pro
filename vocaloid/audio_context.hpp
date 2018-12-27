@@ -6,16 +6,17 @@
 #include "destination_node.hpp"
 #include "player_node.hpp"
 #include "file_writer_node.hpp"
+#include "../utility/emitter.hpp"
 using namespace std;
 namespace vocaloid {
 	namespace node {
-		class AudioContext: public BaseAudioContext {
+		class AudioContext: public BaseAudioContext, public Emitter{
 		protected:
 			map<int64_t, AudioNode*> nodes_;
 			map<int64_t, set<int64_t>> connections_;
 			DestinationNode *destination_;
 			atomic<AudioContextState> state_;
-			unique_ptr<thread> audio_render_thread_;
+			thread* audio_render_thread_;
 			mutex audio_render_thread_mutex_;
 			vector<int64_t> traversal_nodes_;
 			int64_t frame_size_;
@@ -132,14 +133,22 @@ namespace vocaloid {
 			}
 		public:
 
-			explicit AudioContext() {
+			explicit AudioContext(): Emitter() {
 				destination_ = nullptr;
 				state_ = AudioContextState::STOPPED;
 				frame_size_ = DEFAULT_FRAME_SIZE;
+				audio_render_thread_ = nullptr;
 			}
 
 			void SetOutput(OutputType output, int32_t sample_rate = 44100, int16_t channels = 2) override {
-				if (destination_ != nullptr && destination_->OutputType() != output) {
+				if (destination_ == nullptr) {
+					if (output == OutputType::PLAYER) {
+						destination_ = new PlayerNode(this);
+					}
+					else {
+						destination_ = new FileWriterNode(this);
+					}
+				}else if (destination_->OutputType() != output) {
 					vector<AudioNode*> inputs;
 					inputs.assign(destination_->Inputs().begin(), destination_->Inputs().end());
 					delete destination_;
@@ -229,15 +238,17 @@ namespace vocaloid {
 
 			int Prepare() override {
 				Traverse(traversal_nodes_);
+				int ret = 0;
 				for (auto node : traversal_nodes_) {
-					FindNode(node)->Initialize(SampleRate(), frame_size_);
+					ret = FindNode(node)->Initialize(SampleRate(), frame_size_);
+					if (ret < 0)return ret;
 				}
-				return 0;
+				return SUCCEED;
 			}
 
 			void Start() override {
 				state_ = AudioContextState::PLAYING;
-				audio_render_thread_ = make_unique<thread>(thread(&AudioContext::Run, this));
+				audio_render_thread_ = new thread(thread(&AudioContext::Run, this));
 			}
 
 			int Stop() override {
@@ -245,26 +256,25 @@ namespace vocaloid {
 					FindNode(node)->Stop();
 				}
 				state_ = AudioContextState::STOPPED;
-				if (audio_render_thread_->joinable())
+				if (audio_render_thread_ && audio_render_thread_->joinable())
 					audio_render_thread_->join();
 				return 0;
 			}
 
-			int Close() override {
-				Stop();
+			void Reset() override {
 				for (auto node : traversal_nodes_) {
-					FindNode(node)->Close();
+					FindNode(node)->Reset();
 				}
-				return 0;
 			}
 
-			void Reset() override {
-				for (auto node : nodes_) {
-					node.second->Reset();
+			void Clear() override {
+				for (auto node : traversal_nodes_) {
+					FindNode(node)->Clear();
 				}
 			}
 
 			void Dispose() override {
+				Stop();
 				for (auto connection : connections_) {
 					for (auto to : connection.second) {
 						Disconnect(connection.first, to);
@@ -273,6 +283,7 @@ namespace vocaloid {
 				}
 				connections_.clear();
 				for (auto node : nodes_) {
+					node.second->Dispose();
 					delete node.second;
 					node.second = nullptr;
 				}

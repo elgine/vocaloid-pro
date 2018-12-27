@@ -179,6 +179,13 @@ namespace vocaloid {
 			FFmpegFileReader(int64_t max_size = MAX_FFT_SIZE * 16) {
 				max_buffer_size_ = max_size;
 				buffer_ = new char[max_buffer_size_];
+				ctx_ = nullptr;
+				codec_ctx_ = nullptr;
+				packet_ = nullptr;
+				frame_ = nullptr;
+				decode_frame_ = nullptr;
+				swr_ctx_ = nullptr;
+				decode_thread_ = nullptr;
 			}
 
 			void SetMaxBufferSize(int64_t max_size) {
@@ -336,17 +343,23 @@ namespace vocaloid {
 				return ret;
 			}
 
+			void Clear() override {
+				unique_lock<mutex> lck(decode_mutex_); 
+				avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
+			}
+
 			void Stop() override {
 				{
 					unique_lock<mutex> lck(decode_mutex_);
 					decoding_ = false;
 					can_decode_.notify_all();
 				}
-				if (decode_thread_->joinable())
+				if (decode_thread_ != nullptr && decode_thread_->joinable())
 					decode_thread_->join();
 			}
 
-			void Close() override {
+			void Dispose() override {
+				Stop();
 				av_packet_free(&packet_);
 				av_frame_free(&frame_);
 				av_frame_free(&decode_frame_);
@@ -368,13 +381,15 @@ namespace vocaloid {
 			int64_t Seek(int64_t time) override {
 				{
 					unique_lock<mutex> lck(decode_mutex_);
-					//auto durationPerFrame = float(codec_ctx_->frame_size * AV_TIME_BASE) / codec_ctx_->sample_rate;
-					//av_seek_frame(ctx_, a_stream_index_, floor(time / durationPerFrame), AVSEEK_FLAG_ANY);
-					av_seek_frame(ctx_, a_stream_index_, int64_t(time * 0.001f / av_q2d(ctx_->streams[a_stream_index_]->time_base)), AVSEEK_FLAG_BACKWARD);
-					avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
-					if (is_end_) {
-						is_end_ = false;
-						has_begun_ = false;
+					if (ctx_ != nullptr) {
+						//auto durationPerFrame = float(codec_ctx_->frame_size * AV_TIME_BASE) / codec_ctx_->sample_rate;
+						//av_seek_frame(ctx_, a_stream_index_, floor(time / durationPerFrame), AVSEEK_FLAG_ANY);
+						av_seek_frame(ctx_, a_stream_index_, int64_t(time * 0.001f / av_q2d(ctx_->streams[a_stream_index_]->time_base)), AVSEEK_FLAG_BACKWARD);
+						avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
+						if (is_end_) {
+							is_end_ = false;
+							has_begun_ = false;
+						}
 					}
 				}
 				return time;
@@ -639,7 +654,7 @@ namespace vocaloid {
 				}
 			}
 
-			void Close() {
+			void Dispose() {
 				Flush();
 				av_write_trailer(ctx_);
 				avcodec_free_context(&codec_ctx_);

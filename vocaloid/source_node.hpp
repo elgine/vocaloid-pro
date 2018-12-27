@@ -11,10 +11,6 @@ namespace vocaloid {
 				played_ = false;
 			}
 
-			void Initialize(int32_t sample_rate, int64_t frame_size) override {
-				AudioNode::Initialize(sample_rate, frame_size);;
-			}
-
 			int64_t Process() override {
 				if (played_)
 					return ProcessFrame();

@@ -24,13 +24,14 @@ namespace vocaloid {
 				context_->Connect(delay_time_, this);
 			}
 
-			void Initialize(int32_t sample_rate, int64_t frame_size) override {
+			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				max_delay_size_ = int64_t((max_delay_time_ + 1) * sample_rate);
 				delay_time_->Initialize(sample_rate, frame_size);
 				for (auto i = 0; i < channels_; i++) {
 					buffers_[i].resize(max_delay_size_);
 				}
+				return SUCCEED;
 			}
 
 			int64_t ProcessFrame() override {

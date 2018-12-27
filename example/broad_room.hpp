@@ -7,6 +7,11 @@ using namespace vocaloid;
 using namespace vocaloid::node;
 using namespace vocaloid::io;
 
+void PrintTick(void *t) {
+	//int64_t* tick = (int64_t*)t;
+	//printf("%ld\n", *((int64_t*)t));
+}
+
 void Run() {
 	auto context = new AudioContext();
 	context->SetOutput(PLAYER, 44100, 2);
@@ -28,5 +33,5 @@ void Run() {
 	context->Start();
 	getchar();
 	context->Stop();
-	context->Close();
+	context->Dispose();
 }

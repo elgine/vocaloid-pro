@@ -35,5 +35,5 @@ void Run() {
 	context->Start();
 	getchar();
 	context->Stop();
-	context->Close();
+	context->Dispose();
 }

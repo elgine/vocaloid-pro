@@ -49,13 +49,10 @@ namespace vocaloid {
 			}
 
 			~PCMPlayer() {
-				free(wave_header_[0].lpData);
-				free(wave_header_[1].lpData);
-				free(caching_buf_);
-				CloseHandle(play_event_);
+				Dispose();
 			}
 
-			int Open(int32_t nSamplesPerSec, int16_t wBitsPerSample, int16_t nChannels) {
+			int Open(int32_t nSamplesPerSec, int16_t wBitsPerSample, int16_t nChannels) override {
 				WAVEFORMATEX wfx;
 				if (!caching_buf_ || !play_event_ || !wave_header_[0].lpData || !wave_header_[1].lpData) {
 					return -1;
@@ -68,12 +65,12 @@ namespace vocaloid {
 				wfx.nBlockAlign = (WORD)(wfx.wBitsPerSample * wfx.nChannels / 8);
 				wfx.nAvgBytesPerSec = wfx.nChannels * wfx.nSamplesPerSec * wfx.wBitsPerSample / 8;
 				if (waveOutOpen(&wave_out_, WAVE_MAPPER, &wfx, (DWORD_PTR)play_event_, 0, CALLBACK_EVENT)) {
-					return -1;
+					return UNKNOWN_EXCEPTION;
 				}
 				waveOutPrepareHeader(wave_out_, &wave_header_[0], sizeof(WAVEHDR));
 				waveOutPrepareHeader(wave_out_, &wave_header_[1], sizeof(WAVEHDR));
 				if (!(wave_header_[0].dwFlags & WHDR_PREPARED) || !(wave_header_[1].dwFlags & WHDR_PREPARED)) {
-					return -1;
+					return UNKNOWN_EXCEPTION;
 				}
 				buf_offset_ = 0;
 				play_index_ = 0;
@@ -81,14 +78,50 @@ namespace vocaloid {
 				return 0;
 			}
 
-			void Close() {
+			int64_t Played() override {
+				MMTIME time = {TIME_SAMPLES};
+				waveOutGetPosition(wave_out_, &time, sizeof(time));
+				return time.u.sample;
+			}
+
+			void Clear() override {
+				Reset();
+			}
+
+			void Resume() override {
+				Reset();
+			}
+
+			void Reset() override {
+				buf_offset_ = 0;
+				waveOutReset(wave_out_);
+			}
+
+			void Stop() override {
+				waveOutPause(wave_out_);
+			}
+
+			void Dispose() override {
+				if (wave_header_[0].lpData != nullptr) {
+					free(wave_header_[0].lpData);
+					wave_header_[0].lpData = nullptr;
+				}
+				if (wave_header_[1].lpData != nullptr) {
+					free(wave_header_[1].lpData);
+					wave_header_[1].lpData = nullptr;
+				}
+				if (caching_buf_ != nullptr) {
+					free(caching_buf_);
+					caching_buf_ = nullptr;
+				}
+				CloseHandle(play_event_);
 				waveOutUnprepareHeader(wave_out_, &wave_header_[0], sizeof(WAVEHDR));
 				waveOutUnprepareHeader(wave_out_, &wave_header_[1], sizeof(WAVEHDR));
 				waveOutClose(wave_out_);
 				wave_out_ = nullptr;
 			}
 
-			int Push(const char* buf, size_t size) {
+			int Push(const char* buf, size_t size) override {
 			again:
 				if (buf_offset_ + size < MAX_BUFFER_SIZE) {
 					memcpy(caching_buf_ + buf_offset_, buf, size);
@@ -121,7 +154,7 @@ namespace vocaloid {
 				return 0;
 			}
 
-			int Flush() {
+			int Flush() override {
 				if (buf_offset_ > 0 && Play(caching_buf_, buf_offset_) < 0) {
 					return -1;
 				}

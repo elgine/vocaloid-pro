@@ -1,0 +1,13 @@
+#pragma once
+#define NO_PERMISSION -500
+#define PATH_NOT_EXISTS -501
+#define PATH_NOT_FILE -502
+#define PATH_NOT_DIRECTORY -503
+#define FILE_NOT_READABLE -504
+#define FILE_NOT_WAV -505
+#define CANT_DECODE -506
+#define INVALIDATE_SOURCE -507
+
+
+#define UNKNOWN_EXCEPTION -1
+#define SUCCEED 0

@@ -19,36 +19,37 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E2BC80EA-38D1-443F-970A-EE131655F9FE}</ProjectGuid>
-    <RootNamespace>vocaloid</RootNamespace>
+    <ProjectGuid>{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>voice_changer_example</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -69,124 +70,101 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party\rapidjson;$(SolutionDir)third_party\rapidjson$(SolutionDir)third_party/ffmpeg/x86/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party/ffmpeg/x86/lib;$(VC_ReferencesPath_x86);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party/ffmpeg/x86/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
-    <TargetExt>.lib</TargetExt>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party\rapidjson;$(SolutionDir)third_party\rapidjson$(SolutionDir)third_party/ffmpeg/x86/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party/ffmpeg/x86/lib;$(VC_ReferencesPath_x86);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party/ffmpeg/x86/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
-    <TargetExt>.lib</TargetExt>
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party\rapidjson;$(SolutionDir)third_party\rapidjson$(SolutionDir)third_party/ffmpeg/x64/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party/ffmpeg/x64/lib;$(VC_ReferencesPath_x64);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party/ffmpeg/x64/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
-    <TargetExt>.lib</TargetExt>
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_ReferencesPath_x64);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)utility;$(SolutionDir)third_party\rapidjson;$(SolutionDir)third_party\rapidjson$(SolutionDir)third_party/ffmpeg/x64/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party/ffmpeg/x64/lib;$(VC_ReferencesPath_x64);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party/ffmpeg/x64/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
-    <TargetExt>.lib</TargetExt>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_ReferencesPath_x64);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="audio_context.hpp" />
-    <ClInclude Include="audio_node.hpp" />
-    <ClInclude Include="audio_param.hpp" />
-    <ClInclude Include="auto_wah.hpp" />
-    <ClInclude Include="base_audio_context.h" />
-    <ClInclude Include="biquad.hpp" />
-    <ClInclude Include="biquad_node.hpp" />
-    <ClInclude Include="buffer_node.hpp" />
-    <ClInclude Include="channel.h" />
-    <ClInclude Include="chorus.hpp" />
-    <ClInclude Include="convolution_node.hpp" />
-    <ClInclude Include="delay_node.hpp" />
-    <ClInclude Include="destination_node.hpp" />
-    <ClInclude Include="dft.hpp" />
-    <ClInclude Include="distortion.hpp" />
-    <ClInclude Include="dynamic_compressor_node.hpp" />
-    <ClInclude Include="composite.hpp" />
-    <ClInclude Include="equalizer_3_band.hpp" />
-    <ClInclude Include="events.h" />
-    <ClInclude Include="ffmpeg_io.hpp" />
-    <ClInclude Include="fft.hpp" />
-    <ClInclude Include="file.h" />
-    <ClInclude Include="file_reader_node.hpp" />
-    <ClInclude Include="file_writer_node.hpp" />
-    <ClInclude Include="audio_channel.hpp" />
-    <ClInclude Include="flanger.hpp" />
-    <ClInclude Include="gain_node.hpp" />
-    <ClInclude Include="lpc.hpp" />
-    <ClInclude Include="convolver.hpp" />
-    <ClInclude Include="oscillator_node.hpp" />
-    <ClInclude Include="overlap_add.hpp" />
-    <ClInclude Include="pcm_player.hpp" />
-    <ClInclude Include="jungle.hpp" />
-    <ClInclude Include="phase_vocoder_node.hpp" />
-    <ClInclude Include="phase_vocoder.hpp" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="player_node.hpp" />
-    <ClInclude Include="read_file_buffer.hpp" />
-    <ClInclude Include="source_node.hpp" />
-    <ClInclude Include="status.h" />
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="audio_timeline.hpp" />
-    <ClInclude Include="freq_2_note.hpp" />
-    <ClInclude Include="maths.hpp" />
-    <ClInclude Include="vibrato.hpp" />
-    <ClInclude Include="wav.hpp" />
-    <ClInclude Include="waveform.hpp" />
-    <ClInclude Include="wave_shaper_node.hpp" />
-    <ClInclude Include="wgn.hpp" />
-    <ClInclude Include="window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

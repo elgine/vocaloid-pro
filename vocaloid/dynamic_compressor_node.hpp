@@ -348,10 +348,11 @@ namespace vocaloid {
 				return m_knee_;
 			}
 
-			void Initialize(int32_t sample_rate, int64_t frame_size) override {
+			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				m_predelay_buffers_->Alloc(channels_, frame_size_);
 				Reset();
+				return SUCCEED;
 			}
 
 			void Reset() {

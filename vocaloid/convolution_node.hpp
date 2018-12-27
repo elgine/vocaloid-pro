@@ -52,7 +52,7 @@ namespace vocaloid {
 				normalize_ = true;
 			}
 
-			void Initialize(int32_t sample_rate, int64_t frame_size) override {
+			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				auto scale = normalize_?CalculateNormalizationScale(kernel_):1.0f;
 				if (kernel_ != nullptr) {
@@ -62,6 +62,7 @@ namespace vocaloid {
 						convolver_[i]->Initialize(frame_size, kernel_->Channel(i % kernel_channels)->Data(), kernel_->Size(), scale);
 					}
 				}
+				return SUCCEED;
 			}
 
 			int64_t ProcessFrame() override {

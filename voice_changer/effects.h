@@ -1,7 +1,6 @@
 #pragma once
 #include <map>
 using namespace std;
-#include "alien.hpp"
 namespace effect {
 	enum Effects {
 		// Character

@@ -1,6 +1,7 @@
 #pragma once
 #include "base_audio_context.h"
 #include "audio_channel.hpp"
+#include "status.h"
 namespace vocaloid {
 	namespace node {
 
@@ -68,13 +69,14 @@ namespace vocaloid {
 				input_ports_.erase(input->id_);
 			}
 
-			virtual void Initialize(int32_t sample_rate, int64_t frame_size) {
+			virtual int Initialize(int32_t sample_rate, int64_t frame_size) {
 				sample_rate_ = sample_rate;
 				frame_size_ = frame_size;
 				summing_buffer_->Alloc(channels_, frame_size_);
 				summing_buffer_->SetSize(frame_size_);
 				result_buffer_->Alloc(channels_, frame_size_);
 				result_buffer_->SetSize(frame_size_);
+				return SUCCEED;
 			}
 
 			virtual void SetChannels(int16_t c) {
@@ -114,9 +116,13 @@ namespace vocaloid {
 
 			virtual int64_t ProcessFrame() { return 0; }
 
-			virtual void Close() {}
+			virtual void Dispose() {
+				context_->RemoveNode(this);
+			}
 
 			virtual void Stop() {}
+
+			virtual void Clear() {}
 
 			virtual void Reset() {}
 
