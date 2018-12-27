@@ -9,7 +9,7 @@ using namespace vocaloid::io;
 
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\cpp\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
@@ -22,11 +22,11 @@ void Run() {
 	channel->FromBuffer(buf, format->bits, format->channels);
 	convolver->kernel_ = channel;
 	context->Connect(source, convolver);
-	context->Connect(convolver, player);
+	context->Connect(convolver, context->Destination());
 
 	context->Prepare();
 	context->Start();
 	getchar();
 	context->Stop();
-	context->Close();
+	context->Dispose();
 }

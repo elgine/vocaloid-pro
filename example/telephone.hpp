@@ -8,7 +8,7 @@ using namespace vocaloid::node;
 
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\cpp\\vocaloid\\samples\\speech.wav");
 
@@ -29,12 +29,12 @@ void Run() {
 	context->Connect(b2, b3);
 	context->Connect(b3, b4);
 	context->Connect(b4, compressor);
-	context->Connect(compressor, player);
+	context->Connect(compressor, context->Destination());
 
 	source->Start(0);
 
 	context->Prepare();
 	context->Start();
 	getchar();
-	context->Close();
+	context->Dispose();
 }

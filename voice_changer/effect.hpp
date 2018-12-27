@@ -4,9 +4,6 @@
 #include "effects.h"
 using namespace vocaloid::node;
 namespace effect {
-	struct EffectOptions {
-		float gain;
-	};
 	
 	class Effect {
 	protected:
@@ -19,8 +16,8 @@ namespace effect {
 			gain_ = new GainNode(ctx);
 		}
 
-		void SetOptions(EffectOptions options) {
-			gain_->gain_->value_ = options.gain;
+		void SetGain(float gain) {
+			gain_->gain_->value_ = gain;
 		}
 
 		virtual AudioNode* Input() {

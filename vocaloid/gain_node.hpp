@@ -31,6 +31,17 @@ namespace vocaloid {
 				}
 				return frame_size_;
 			}
+
+			void Clear() override {
+				gain_->Clear();
+			}
+
+			void Dispose() override {
+				gain_->Dispose();
+				delete gain_;
+				gain_ = nullptr;
+				AudioNode::Dispose();
+			}
 		};
 	}
 }

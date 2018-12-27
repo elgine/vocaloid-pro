@@ -11,7 +11,7 @@ using namespace vocaloid::node;
 using namespace vocaloid::dsp;
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto lowpass = new BiquadNode(context);
 	lowpass->frequency_->value_ = 4000;
 	auto pitch_shifter = new PhaseVocoderNode(context);
@@ -23,12 +23,12 @@ void Run() {
 	context->Connect(source, lowpass);
 	context->Connect(lowpass, pitch_shifter);
 	context->Connect(pitch_shifter, amplify);
-	context->Connect(amplify, player);
+	context->Connect(amplify, context->Destination());
 
 	source->Start(0);
 
 	context->Prepare();
 	context->Start();
 	getchar();
-	context->Close();
+	context->Dispose();
 }

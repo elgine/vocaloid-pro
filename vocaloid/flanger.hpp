@@ -50,6 +50,25 @@ namespace vocaloid {
 				osc_->Start();
 			}
 
+			void Dispose() override {
+				osc_->Dispose();
+				delete osc_;
+				osc_ = nullptr;
+
+				delay_->Dispose();
+				delete delay_;
+				delay_ = nullptr;
+
+				gain_->Dispose();
+				delete gain_;
+				gain_ = nullptr;
+
+				feedback_->Dispose();
+				delete feedback_;
+				feedback_ = nullptr;
+				Composite::Dispose();
+			}
+
 			void SetOptions(FlangerOptions options) {
 				osc_->SetFrequency(options.flanger_speed);
 				feedback_->gain_->value_ = options.flanger_feedback;

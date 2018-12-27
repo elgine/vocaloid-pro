@@ -7,7 +7,7 @@ using namespace vocaloid::node;
 
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER)
 	auto pitch_shifter = new PitchShifterNode(context);
 	pitch_shifter->pitch_ = 0.8;
 	auto source = new FileReaderNode(context);
@@ -15,10 +15,10 @@ void Run() {
 	source->Start(0);
 
 	context->Connect(source, pitch_shifter);
-	context->Connect(pitch_shifter, player);
+	context->Connect(pitch_shifter, context->Destination());
 
 	context->Prepare();
 	context->Start();
 	getchar();
-	context->Close();
+	context->Dispose();
 }

@@ -398,7 +398,7 @@ public:
 void Run() {
 	
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER, 44100, 2);
 	auto pitch_shifter = new NewPitchShifterNode(context);
 	pitch_shifter->pitch_ = 0.67;
 	auto source = new FileReaderNode(context);
@@ -407,16 +407,12 @@ void Run() {
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
 
-	context->On(AudioContext::ALL_INPUT_NOT_LOOP_FINISHED, [](void*){
-		printf("Finished");
-	});
-
 	context->Connect(source, pitch_shifter);
 	context->Connect(pitch_shifter, filter);
-	context->Connect(filter, player);
+	context->Connect(filter, context->Destination());
 
 	context->Prepare();
 	context->Start();
 	getchar();
-	context->Close();
+	context->Dispose();
 }

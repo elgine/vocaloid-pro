@@ -10,7 +10,7 @@ using namespace vocaloid::node;
 using namespace vocaloid::io;
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto convolution = new ConvolutionNode(context);
 	auto buffer = new Buffer<char>();
 	auto format = new AudioFormat();
@@ -18,12 +18,12 @@ void Run() {
 	fut.get();
 	auto kernel = new AudioChannel();
 	kernel->FromBuffer(buffer, format->bits, format->channels);
-	convolution->SetKernel(kernel->Channel(0)->Data(), kernel->Channel(0)->Size());
+	convolution->kernel_ = kernel;
 
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	context->Connect(source, convolution);
-	context->Connect(convolution, player);
+	context->Connect(convolution, context->Destination());
 
 	source->Start(0);
 
@@ -31,5 +31,5 @@ void Run() {
 	context->Start();
 	getchar();
 	context->Stop();
-	context->Close();
+	context->Dispose();
 }

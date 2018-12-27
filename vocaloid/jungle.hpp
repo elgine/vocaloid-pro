@@ -112,6 +112,15 @@ namespace vocaloid {
 				mod2->SetBuffer(shift_down_buffer);
 				mod3->SetBuffer(shift_up_buffer);
 				mod4->SetBuffer(shift_up_buffer);
+
+				shift_down_buffer->Dispose();
+				delete shift_down_buffer;
+				shift_down_buffer = nullptr;
+
+				shift_up_buffer->Dispose();
+				delete shift_up_buffer;
+				shift_up_buffer = nullptr;
+
 				mod1->loop_ = true;
 				mod2->loop_ = true;
 				mod3->loop_ = true;
@@ -147,6 +156,10 @@ namespace vocaloid {
 				fade2->SetBuffer(fade_buffer);
 				fade1->loop_ = true;
 				fade2->loop_ = true;
+
+				fade_buffer->Dispose();
+				delete fade_buffer;
+				fade_buffer = nullptr;
 
 				auto mix1 = new GainNode(ctx, 0);
 				auto mix2 = new GainNode(ctx, 0);
@@ -215,6 +228,65 @@ namespace vocaloid {
 
 			void SetOptions(JungleOptions options) {
 				SetPitchOffset(options.pitch_offset);
+			}
+
+			void Dispose() override {
+				mod1_->Dispose();
+				delete mod1_;
+				mod1_ = nullptr;
+
+				mod2_->Dispose();
+				delete mod2_;
+				mod2_ = nullptr;
+
+				mod3_->Dispose();
+				delete mod3_;
+				mod3_ = nullptr;
+
+				mod4_->Dispose();
+				delete mod4_;
+				mod4_ = nullptr;
+
+				mod1_gain_->Dispose();
+				mod2_gain_->Dispose();
+				mod3_gain_->Dispose();
+				mod4_gain_->Dispose();
+				delete mod1_gain_;
+				delete mod2_gain_;
+				delete mod3_gain_;
+				delete mod4_gain_;
+				mod1_gain_ = nullptr;
+				mod2_gain_ = nullptr;
+				mod3_gain_ = nullptr;
+				mod4_gain_ = nullptr;
+
+				mod_gain1_->Dispose();
+				mod_gain2_->Dispose();
+				delete mod_gain1_;
+				delete mod_gain2_;
+				mod_gain1_ = nullptr;
+				mod_gain2_ = nullptr;
+
+				fade1_->Dispose();
+				fade2_->Dispose();
+				delay1_->Dispose();
+				delay2_->Dispose();
+				mix1_->Dispose();
+				mix2_->Dispose();
+
+				delete fade1_;
+				fade1_ = nullptr;
+				delete fade2_;
+				fade2_ = nullptr;
+				delete delay1_;
+				delay1_ = nullptr;
+				delete delay2_;
+				delay2_ = nullptr;
+				delete mix1_;
+				mix1_ = nullptr;
+				delete mix2_;
+				mix2_ = nullptr;
+				Composite::Dispose();
 			}
 		};
 	}

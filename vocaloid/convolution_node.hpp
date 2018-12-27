@@ -73,6 +73,16 @@ namespace vocaloid {
 				}	
 				return frame_size_;
 			}
+
+			void Dispose() override {
+				for (auto i = 0; i < channels_; i++) {
+					if(convolver_[i] != nullptr){
+						convolver_[i]->Dispose();
+						delete convolver_[i];
+						convolver_[i] = nullptr;
+					}
+				}
+			}
 		};
 	}
 }

@@ -9,7 +9,7 @@ void Run() {
 	auto player = new PlayerNode(ctx);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 
-	ctx->Connect(source, player);
+	ctx->Connect(source, context->Destination());
 
 	source->Start(0, 5000);
 

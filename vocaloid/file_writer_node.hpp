@@ -32,6 +32,9 @@ namespace vocaloid {
 
 			void Dispose() override {
 				writer_->Dispose();
+				delete writer_;
+				writer_ = nullptr;
+				AudioNode::Dispose();
 			}
 
 			void SetPath(const char* p) {

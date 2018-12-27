@@ -20,7 +20,7 @@ float* MakeDistortionCurve(int16_t amount = 100, int32_t sample_rate = 44100, fl
 
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\cpp\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
@@ -51,7 +51,7 @@ void Run() {
 	context->Connect(hpf1, hpf2);
 	context->Connect(hpf2, wave_shaper);
 	context->Connect(wave_shaper, compressor);
-	context->Connect(compressor, player);
+	context->Connect(compressor, context->Destination());
 
 	context->Prepare();
 	context->Start();

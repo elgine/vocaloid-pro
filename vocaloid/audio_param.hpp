@@ -35,6 +35,15 @@ namespace vocaloid {
 				offset_ += frame_size_;
 				return frame_size_;
 			}
+
+			void Clear() override {
+				offset_ = 0;
+			}
+
+			void Dispose() override {
+				AudioNode::Dispose();
+				AudioTimeline::Dispose();
+			}
 		};
 	}
 }

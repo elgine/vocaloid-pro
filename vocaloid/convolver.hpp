@@ -354,14 +354,46 @@ namespace vocaloid {
 			void Stop() {
 				processing_ = false;
 				compose_condition_.notify_all();
-				if(compose_thread_ != nullptr && compose_thread_->joinable())
+				if(compose_thread_ != nullptr && compose_thread_->joinable()){
 					compose_thread_->join();
+					delete compose_thread_;
+					compose_thread_ = nullptr;
+				}
+					
 				for (auto thread : thread_pool_) {
 					if (thread->joinable()) {
 						thread->join();
 					}
+					delete thread;
+					thread = nullptr;
 				}
 				thread_pool_.clear();
+			}
+
+			void Dispose(){
+				Stop();
+				if (kernel_real_segs_ != nullptr && kernel_imag_segs_ != nullptr) {
+					for (auto i = 0; i < kernel_segments_; i++) {
+						DeleteArray(kernel_real_segs_ + i);
+						DeleteArray(kernel_imag_segs_ + i);
+					}
+					delete[] kernel_real_segs_;
+					kernel_real_segs_ = nullptr;
+					delete[] kernel_imag_segs_;
+					kernel_imag_segs_ = nullptr;
+				}
+
+				DeleteArray(&kernel_real_);
+				DeleteArray(&kernel_imag_);
+				DeleteArray(&main_real_);
+				DeleteArray(&main_imag_);
+				DeleteArray(&buffer_);
+
+				DeleteArray(&segment_);
+				DeleteArray(&segment_buffer_);
+
+				input_->Dispose();
+				output_->Dispose();
 			}
 		};
 	}

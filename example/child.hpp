@@ -27,9 +27,9 @@ void Run() {
 	ctx->Connect(equalizer->output_, pitch_shifter);
 	ctx->Connect(pitch_shifter, high_pass);
 	ctx->Connect(high_pass, gain);
-	ctx->Connect(gain, player);
+	ctx->Connect(gain, ctx->Destination());
 	ctx->Prepare();
 	ctx->Start();
 	getchar();
-	ctx->Close();
+	ctx->Dispose();
 }

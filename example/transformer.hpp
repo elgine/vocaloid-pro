@@ -6,11 +6,11 @@
 #include "../vocaloid/dynamic_compressor_node.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
-
+using namespace vocaloid::composite;
 void Run() {
 	
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
@@ -35,10 +35,10 @@ void Run() {
 	context->Connect(deep->output_, compressor);
 	context->Connect(deeper->output_, compressor);
 	context->Connect(deeperer->output_, compressor);
-	context->Connect(compressor, player);
+	context->Connect(compressor, context->Destination());
 
 	context->Prepare();
 	context->Start();
 	getchar();
-	context->Close();
+	context->Dispose();
 }

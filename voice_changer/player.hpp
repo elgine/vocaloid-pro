@@ -120,11 +120,14 @@ public:
 				ctx_->Connect(source_, ctx_->Destination());
 			}
 			source_->Start(0);
+			effect_->Start();
 			ctx_->Prepare();
 		}
 		else {
 			source_->Start(0);
+			effect_->Start();
 		}
+		
 		ctx_->Start();
 		state_ = PlayerState::PLAYER_PLAYING;
 		tick_condition_.notify_one();

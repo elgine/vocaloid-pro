@@ -46,6 +46,37 @@ namespace vocaloid {
 				return SUCCEED;
 			}
 
+			void Clear() override {
+				frequency_->Clear();
+				detune_->Clear();
+				Q_->Clear();
+				gain_->Clear();
+			}
+
+			void Dispose() override {
+				frequency_->Dispose();
+				delete frequency_;
+				frequency_ = nullptr;
+
+				detune_->Dispose();
+				delete detune_;
+				detune_ = nullptr;
+
+				Q_->Dispose();
+				delete Q_;
+				Q_ = nullptr;
+
+				Q_->Dispose();
+				delete Q_;
+				Q_ = nullptr;
+
+				gain_->Dispose();
+				delete gain_;
+				gain_ = nullptr;
+
+				AudioNode::Dispose();
+			}
+
 			int64_t ProcessFrame() override {
 				auto frequency_buffer = frequency_->GetResult()->Channel(0)->Data();
 				auto gain_buffer = gain_->GetResult()->Channel(0)->Data();

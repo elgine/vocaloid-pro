@@ -24,7 +24,7 @@ void MakeDistortionCurve(int amount, uint32_t samples, float *curve) {
 
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\cpp\\vocaloid\\samples\\speech.wav");
 	auto b1 = new BiquadNode(context);
@@ -55,7 +55,7 @@ void Run() {
 	context->Connect(b3, b4);
 	context->Connect(b4, b5);
 	context->Connect(b5, compressor);
-	context->Connect(compressor, player);
+	context->Connect(compressor, context->Destination());
 
 	source->Start(0);
 

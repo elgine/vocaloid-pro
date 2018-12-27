@@ -59,6 +59,21 @@ namespace vocaloid {
 				hi_->frequency_->value_ = options.high_frequency;
 				hi_->gain_->value_ = options.high_gain;
 			}
+
+			void Dispose() override {
+				hi_->Dispose();
+				delete hi_;
+				hi_ = nullptr;
+
+				lo_->Dispose();
+				delete lo_;
+				lo_ = nullptr;
+
+				mi_->Dispose();
+				delete mi_;
+				mi_ = nullptr;
+				Composite::Dispose();
+			}
 		};
 	}
 }

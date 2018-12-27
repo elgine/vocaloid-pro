@@ -11,7 +11,7 @@ using namespace vocaloid::io;
 
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
@@ -28,10 +28,10 @@ void Run() {
 
 	context->Connect(source, convolution);
 	context->Connect(convolution, amplify);
-	context->Connect(amplify, player);
+	context->Connect(amplify, context->Destination());
 
 	context->Prepare();
 	context->Start();
 	getchar();
-	context->Close();
+	context->Dispose();
 }

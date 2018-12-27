@@ -117,6 +117,13 @@ namespace vocaloid {
 			virtual int64_t ProcessFrame() { return 0; }
 
 			virtual void Dispose() {
+				summing_buffer_->Dispose();
+				delete summing_buffer_;
+				summing_buffer_ = nullptr;
+
+				result_buffer_->Dispose();
+				delete result_buffer_;
+				result_buffer_ = nullptr;
 				context_->RemoveNode(this);
 			}
 

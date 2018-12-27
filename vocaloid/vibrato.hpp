@@ -41,6 +41,16 @@ namespace vocaloid {
 				osc_->Start();
 			}
 
+			void Dispose() override {
+				osc_->Dispose();
+				delete osc_;
+				osc_ = nullptr;
+				delay_->Dispose();
+				delete delay_;
+				delay_ = nullptr;
+				Composite::Dispose();
+			}
+
 			void SetOptions(VibratoOptions options) {
 				delay_->delay_time_->value_ = options.vibrato_delay;
 				gain_->gain_->value_ = options.vibrato_depth;

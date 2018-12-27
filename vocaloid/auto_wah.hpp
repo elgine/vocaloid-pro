@@ -59,6 +59,25 @@ namespace vocaloid {
 				aw_depth_->gain_->value_ = pow(2, 10 + float(options.filter_depth));
 				aw_filter_->Q_->value_ = options.filter_Q;
 			}
+
+			void Dispose() override {
+				wave_shaper_->Dispose();
+				delete wave_shaper_;
+				wave_shaper_ = nullptr;
+
+				aw_follower_->Dispose();
+				delete aw_follower_;
+				aw_follower_ = nullptr;
+
+				aw_depth_->Dispose();
+				delete aw_depth_;
+				aw_depth_ = nullptr;
+
+				aw_filter_->Dispose();
+				delete aw_filter_;
+				aw_filter_ = nullptr;
+				Composite::Dispose();
+			}
 		};
 	}
 }

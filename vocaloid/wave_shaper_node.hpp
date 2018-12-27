@@ -10,10 +10,13 @@ namespace vocaloid {
 		public:
 			explicit WaveShaperNode(AudioContext *ctx) :AudioNode(ctx) {
 				curve_length_ = 0;
+				curve_ = nullptr;
 			}
 
 			void SetCurve(float *c, int64_t len) {
-				curve_ = c;
+				DeleteArray(&curve_);
+				AllocArray(len, &curve_);
+				memcpy(curve_, c, len * sizeof(float));
 				curve_length_ = len;
 			}
 
@@ -39,6 +42,11 @@ namespace vocaloid {
 					}
 				}
 				return frame_size_;
+			}
+
+			void Dispose() override {
+				DeleteArray(&curve_);
+				curve_length_ = 0;
 			}
 
 			int64_t CurveLength() {

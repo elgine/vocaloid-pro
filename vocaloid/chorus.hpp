@@ -46,6 +46,22 @@ namespace vocaloid {
 				osc_->Start();
 			}
 
+			void Dispose() override {
+				delay_->Dispose();
+				delete delay_;
+				delay_ = nullptr;
+
+				gain_->Dispose();
+				delete gain_;
+				gain_ = nullptr;
+
+				osc_->Dispose();
+				delete osc_;
+				osc_ = nullptr;
+
+				Composite::Dispose();
+			}
+
 			void SetOptions(ChorusOptions options) {
 				delay_->delay_time_->value_ = options.chorus_delay;
 				gain_->gain_->value_ = options.chorus_depth;

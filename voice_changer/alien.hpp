@@ -3,10 +3,6 @@
 #include "../vocaloid/oscillator_node.hpp"
 #include "effects.h"
 namespace effect {
-	struct AlienOptions: EffectOptions{
-		float delay;
-		float frequency;
-	};
 
 	class Alien : public Effect {
 	private:
@@ -22,6 +18,10 @@ namespace effect {
 			ctx->Connect(osc_, osc_gain_);
 			ctx->Connect(osc_gain_, delay_->delay_time_);
 			ctx->Connect(delay_, gain_);
+
+			osc_->SetFrequency(5.0f);
+			osc_gain_->gain_->value_ = 0.05f;
+			delay_->delay_time_->value_ = 0.05f;
 		}
 
 		void Start() override {
@@ -32,10 +32,16 @@ namespace effect {
 			return delay_;
 		}
 
-		void SetOptions(AlienOptions options) {
-			Effect::SetOptions(options);
-			delay_->delay_time_->value_ = options.delay;
-			osc_->SetFrequency(options.frequency);
+		void SetFrequency(float freq) {
+			ctx_->Lock();
+			osc_->SetFrequency(freq);
+			ctx_->Unlock();
+		}
+
+		void SetDelay(float delay) {
+			ctx_->Lock();
+			delay_->delay_time_->value_ = delay;
+			ctx_->Unlock();
 		}
 
 		void Dispose() override {

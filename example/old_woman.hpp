@@ -7,7 +7,7 @@
 using namespace vocaloid;
 using namespace vocaloid::node;
 using namespace vocaloid::dsp;
-
+using namespace vocaloid::composite;
 void Run() {
 	auto context = new AudioContext();
 	auto high_pass = new BiquadNode(context);
@@ -22,7 +22,7 @@ void Run() {
 		7.2f,
 	});
 	auto amplify = new GainNode(context, 2.5);
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 
@@ -31,11 +31,11 @@ void Run() {
 	context->Connect(pitch_shifter->output_, high_pass);
 	context->Connect(high_pass, vibrato->input_);
 	context->Connect(vibrato->output_, amplify);
-	context->Connect(amplify, player);
+	context->Connect(amplify, context->Destination());
 	source->Start(0);
 
 	context->Prepare();
 	context->Start();
 	getchar();
-	context->Close();
+	context->Dispose();
 }

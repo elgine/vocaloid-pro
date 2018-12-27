@@ -10,7 +10,7 @@ using namespace vocaloid::composite;
 
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
@@ -37,7 +37,7 @@ void Run() {
 	context->Connect(input_gain, wahwah->input_);
 	context->Connect(wahwah->output_, filter);
 	context->Connect(filter, compressor);
-	context->Connect(compressor, player);
+	context->Connect(compressor, context->Destination());
 
 	context->Connect(underwater, underwater_gain);
 	context->Connect(underwater_gain, compressor);
@@ -46,5 +46,5 @@ void Run() {
 	context->Start();
 	getchar();
 	context->Stop();
-	context->Close();
+	context->Dispose();
 }

@@ -17,7 +17,7 @@ using namespace vocaloid::dsp;
 
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
@@ -73,7 +73,7 @@ void Run() {
 	context->Connect(filter, no_conv_gain);
 	context->Connect(no_conv_gain, amplify);
 	
-	context->Connect(amplify, player);
+	context->Connect(amplify, context->Destination());
 	
 	context->On(AudioContext::ALL_INPUT_NOT_LOOP_FINISHED, [](void*) {
 		printf("End\n");
@@ -86,5 +86,5 @@ void Run() {
 	context->Start();
 	getchar();
 	context->Stop();
-	context->Close();
+	context->Dispose();
 }

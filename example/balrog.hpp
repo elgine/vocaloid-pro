@@ -66,7 +66,7 @@ void Run() {
 	auto no_conv_gain = new GainNode(context);
 	no_conv_gain->gain_->value_ = 0.9;
 
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 
 	auto amplify = new GainNode(context, 2.0f);
 
@@ -89,7 +89,7 @@ void Run() {
 	context->Connect(fire, fire_gain);
 	context->Connect(fire_gain, amplify);
 
-	context->Connect(amplify, player);
+	context->Connect(amplify, context->Destination());
 
 	source->Start(0);
 	fire->Start(0);
@@ -99,5 +99,5 @@ void Run() {
 	context->Start();
 	getchar();
 	context->Stop();
-	context->Close();
+	context->Dispose();
 }

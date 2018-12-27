@@ -15,7 +15,7 @@ using namespace vocaloid::dsp;
 
 void Run() {
 	auto context = new AudioContext();
-	auto player = new PlayerNode(context);
+	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
 	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
@@ -29,7 +29,7 @@ void Run() {
 	convolver->kernel_ = kernel;
 
 	context->Connect(source, convolver);
-	context->Connect(convolver, player);
+	context->Connect(convolver, context->Destination());
 
 	context->Prepare();
 	context->Start();

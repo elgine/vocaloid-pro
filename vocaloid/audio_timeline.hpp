@@ -110,6 +110,10 @@ namespace vocaloid {
 			return v;
 		}
 
+		void Dispose(){
+			value_list.clear();
+		}
+
 		bool TimelineEmpty() {
 			return value_list.empty();
 		}
