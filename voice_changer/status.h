@@ -1,2 +1,4 @@
 #pragma once
 #define NO_SUCH_EFFECT -10
+#define INVALIDATED_SEGEMENT_DATA -9
+#define NOT_IN_SEGMENTS -8

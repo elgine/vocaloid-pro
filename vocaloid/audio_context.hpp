@@ -3,14 +3,15 @@
 #include <thread>
 #include "stdafx.h"
 #include "audio_node.hpp"
+#include "source_node.hpp"
 #include "destination_node.hpp"
 #include "player_node.hpp"
 #include "file_writer_node.hpp"
-#include "../utility/emitter.hpp"
+#include "../utility/signal.hpp"
 using namespace std;
 namespace vocaloid {
 	namespace node {
-		class AudioContext: public BaseAudioContext, public Emitter{
+		class AudioContext: public BaseAudioContext{
 		protected:
 			map<int64_t, AudioNode*> nodes_;
 			map<int64_t, set<int64_t>> connections_;
@@ -115,29 +116,43 @@ namespace vocaloid {
 
 			void Run() {
 				bool all_input_eof = false;
-				int64_t processed_frames = 0;
+				int64_t processed_frames_ = 0, cur_processed_frames = 0;
 				while (state_ == AudioContextState::PLAYING) {
 					{
 						unique_lock<mutex> lck(audio_render_thread_mutex_);
 						if (!all_input_eof)all_input_eof = true;
 						for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
 							auto node = FindNode(*iter);
-							processed_frames = node->Process();
-							if (processed_frames != EOF && node->Type() == AudioNodeType::INPUT) {
+							int64_t frames = node->Process();
+							if (node->Type() == AudioNodeType::INPUT && 
+								!static_cast<SourceNode*>(node)->loop_ && 
+								frames != EOF) {
 								all_input_eof = false;
 							}
 						}
+						
 					}
+					if (!all_input_eof) {
+						processed_frames_ += cur_processed_frames;
+					}
+					on_tick_->Emit(processed_frames_);
 					this_thread::sleep_for(chrono::milliseconds(MINUS_SLEEP_UNIT));
+					if (all_input_eof)
+						on_end_->Emit(0);
 				}
 			}
 		public:
 
-			explicit AudioContext(): Emitter() {
+			Signal<int64_t> *on_tick_;
+			Signal<int> *on_end_;
+
+			explicit AudioContext(){
 				destination_ = nullptr;
 				state_ = AudioContextState::STOPPED;
 				frame_size_ = DEFAULT_FRAME_SIZE;
 				audio_render_thread_ = nullptr;
+				on_tick_ = new Signal<int64_t>();
+				on_end_ = new Signal<int>();
 			}
 
 			void SetOutput(OutputType output, int32_t sample_rate = 44100, int16_t channels = 2) override {
@@ -237,6 +252,7 @@ namespace vocaloid {
 			}
 
 			int Prepare() override {
+				Stop();
 				Traverse(traversal_nodes_);
 				int ret = 0;
 				for (auto node : traversal_nodes_) {
@@ -247,13 +263,21 @@ namespace vocaloid {
 			}
 
 			void Start() override {
+				if (state_ == AudioContextState::PLAYING) {
+					return;
+				}
 				state_ = AudioContextState::PLAYING;
-				audio_render_thread_ = new thread(thread(&AudioContext::Run, this));
+				if (audio_render_thread_ == nullptr) {
+					audio_render_thread_ = new thread(thread(&AudioContext::Run, this));
+				}
 			}
 
 			int Stop() override {
-				for (auto node : traversal_nodes_) {
-					FindNode(node)->Stop();
+				{
+					unique_lock<mutex> lck(audio_render_thread_mutex_);
+					for (auto node : traversal_nodes_) {
+						FindNode(node)->Stop();
+					}
 				}
 				state_ = AudioContextState::STOPPED;
 				if (audio_render_thread_ && audio_render_thread_->joinable())
@@ -262,14 +286,20 @@ namespace vocaloid {
 			}
 
 			void Reset() override {
-				for (auto node : traversal_nodes_) {
-					FindNode(node)->Reset();
+				{
+					unique_lock<mutex> lck(audio_render_thread_mutex_);
+					for (auto node : traversal_nodes_) {
+						FindNode(node)->Reset();
+					}
 				}
 			}
 
 			void Clear() override {
-				for (auto node : traversal_nodes_) {
-					FindNode(node)->Clear();
+				{
+					unique_lock<mutex> lck(audio_render_thread_mutex_);
+					for (auto node : traversal_nodes_) {
+						FindNode(node)->Clear();
+					}
 				}
 			}
 

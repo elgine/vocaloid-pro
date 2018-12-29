@@ -24,6 +24,7 @@ namespace vocaloid {
 				waveform_buffer_ = new Buffer<float>();
 				offset_ = 0;
 				detune_ = 0.0f;
+				loop_ = true;
 			}
 
 			void SetBuffer(float *buffer, int64_t len) {

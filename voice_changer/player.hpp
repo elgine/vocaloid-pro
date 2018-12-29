@@ -3,6 +3,7 @@
 #include <thread>
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/file_reader_node.hpp"
+#include "timeline.hpp"
 #include "effect.hpp"
 #include "effects.h"
 #include "events.h"
@@ -19,16 +20,13 @@ enum PlayerState {
 	PLAYER_DISPOSED
 };
 
-class Player: public Emitter{
+class Player{
 private:
 	FileReaderNode *source_;
 	AudioContext *ctx_;
 	Effect *effect_;
-
+	Timeline *timeline_;
 	atomic<PlayerState> state_;
-	
-	int64_t **segments_;
-	int segment_count_;
 
 	condition_variable tick_condition_;
 	mutex tick_mutex_;
@@ -43,52 +41,55 @@ private:
 				while (state_ == PlayerState::PLAYER_STOPPED)
 					tick_condition_.wait(lck);
 			}
-			timestamp = CalculateTimestamp(samples);
-			
-			Emit(TICK, &timestamp);
+
 			this_thread::sleep_for(chrono::milliseconds(20));
 		}
 	}
 
-	int64_t CalculateTimestamp(int64_t &samples) {
-		int64_t timestamp = 0;
+	void OnCtxTick(int64_t processed) {
+		int64_t timestamp;
 		ctx_->Lock();
-		samples = ctx_->Destination()->Processed();
-		timestamp = samples / ctx_->SampleRate();
+		timestamp = processed / ctx_->SampleRate() * 1000;
 		ctx_->Unlock();
-		return timestamp;
+		{
+			unique_lock<mutex> lck(tick_mutex_);
+			auto segment = timeline_->Seek(timestamp);
+			if (segment.start < 0 || segment.end < 0) {
+				auto ret = timeline_->Next();
+				if (ret < 0) {
+					
+				}
+			}
+		}
 	}
 
 public:
 
-	explicit Player(int32_t sample_rate = 44100, int16_t channels = 2): Emitter() {
+	explicit Player(int32_t sample_rate = 44100, int16_t channels = 2){
 		ctx_ = new AudioContext();
 		ctx_->SetOutput(OutputType::PLAYER, sample_rate, channels);
 		source_ = new FileReaderNode(ctx_);
 		effect_ = nullptr;
-		segments_ = nullptr;
 		tick_thread_ = nullptr;
+		timeline_ = new Timeline();
+		ctx_->on_tick_->On(bind(&Player::OnCtxTick, this));
 	}
 
 	void SetFormat(int32_t sample_rate, int16_t channels) {
 		ctx_->Destination()->SetFormat(sample_rate, channels);
 	}
 
-	void SetSegments(int64_t** segments, int segment_count) {
-		if (segments_ != nullptr) {
-			for (auto i = 0; i < segment_count_; i++) {
-				delete[] segments_[i];
-				segments_[i] = nullptr;
+	int SetSegments(int64_t** segments, int segment_count) {
+		if (segment_count > 0) {
+			if (sizeof(segments[0]) / sizeof(int64_t) < 2) {
+				return INVALIDATED_SEGEMENT_DATA;
 			}
-			delete[] segments_;
-			segments_ = nullptr;
 		}
-
-		segments_ = new int64_t*[segment_count];
-		for (auto i = 0; i < segment_count; i++) {
-			segments_[i] = new int64_t[2] {segments[i][0], segments[i][1]};
+		else {
+			return INVALIDATED_SEGEMENT_DATA;
 		}
-		segment_count_ = segment_count;
+		timeline_->Set(segments, segment_count);
+		return SUCCEED;
 	}
 
 	int SetSource(const char* source) {
@@ -110,6 +111,7 @@ public:
 	void Play(bool restart) {
 		if (restart) {
 			Stop();
+			timeline_->Reset();
 			source_->Reset();
 			ctx_->Destination()->Reset();
 			if (effect_ != nullptr) {
@@ -124,19 +126,24 @@ public:
 			ctx_->Prepare();
 		}
 		else {
-			source_->Start(0);
-			if(effect_ != nullptr)effect_->Start();
+			if (effect_ != nullptr)
+				effect_->Start();
 		}
-		
 		ctx_->Start();
 		state_ = PlayerState::PLAYER_PLAYING;
 		tick_condition_.notify_one();
 		if(tick_thread_ == nullptr)tick_thread_ = new thread(&Player::OnTick, this);
 	}
 
-	void Seek(int64_t time) {
+	int Seek(int64_t timestamp) {
+		auto segment = timeline_->Seek(timestamp);
+		if (segment.start < 0 || segment.end < 0) {
+			return NOT_IN_SEGMENTS;
+		}
 		ctx_->Clear();
-		source_->Seek(time);
+		ctx_->Lock();
+		source_->Seek(timestamp);
+		ctx_->Unlock();
 	}
 
 	void Stop() {

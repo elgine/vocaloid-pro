@@ -17,8 +17,6 @@ namespace vocaloid {
 			int64_t duration_point_;
 		public:
 
-			bool loop_;
-
 			explicit BufferNode(AudioContext *ctx):SourceNode(ctx) {
 				loop_ = false;
 				start_ = 0;
@@ -31,6 +29,7 @@ namespace vocaloid {
 
 			void SetBuffer(AudioChannel *b) {
 				summing_buffer_->Copy(b);
+				summing_buffer_->silence_ = false;
 			}
 
 			void SetChannels(int16_t c) final {
@@ -54,6 +53,7 @@ namespace vocaloid {
 			int64_t ProcessFrame() override {
 				if (played_point_ - offset_point_ >= duration_point_) {
 					if (!loop_) {
+						result_buffer_->silence_ = true;
 						return EOF;
 					}
 					else {

@@ -204,8 +204,11 @@ namespace vocaloid {
 
 			void Flush(char* data, int64_t& length) override {
 				unique_lock<mutex> lck(decode_mutex_);
-				memcpy(data, buffer_, buffer_size_);
-				length = buffer_size_;
+				length = min(buffer_size_, length);
+				if (length > 0) {
+					memcpy(data, buffer_, length);
+					buffer_size_ -= length;
+				}
 			}
 
 			int64_t ReadData(char* data, int64_t length) override {

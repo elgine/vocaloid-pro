@@ -14,7 +14,7 @@
 
 namespace vocaloid {
 	namespace node {
-		class FileReaderNode: public SourceNode {
+		class FileReaderNode: public SourceNode{
 		protected:
 			string path_;
 			io::AudioFileReader *reader_;
@@ -26,15 +26,15 @@ namespace vocaloid {
 			int16_t bits_;
 
 			int64_t played_began_;
-			int64_t played_point_;
 			bool began_;
-			int64_t start_point_;
-			int64_t offset_point_;
-			int64_t duration_point_;
-
 			int64_t start_;
 			int64_t offset_;
 			int64_t duration_;
+
+			int64_t start_point_;
+			int64_t played_point_;
+			int64_t offset_point_;
+			int64_t duration_point_;
 
 			bool need_update_;
 		public:
@@ -136,10 +136,8 @@ namespace vocaloid {
 
 			int64_t ProcessFrame() override {
 				int64_t size = 0;
-				if ((played_point_ - offset_point_ >= duration_point_) || (reader_->IsEnd() && !reader_->CapableToRead(require_buffer_size_))) {
+				if ((played_point_ - offset_point_ >= duration_point_)) {
 					if (!loop_) {
-						reader_->Flush(temp_buffer_, size);
-						memset(temp_buffer_ + size, 0, require_buffer_size_ - size);
 						return EOF;
 					}
 					else {
@@ -156,6 +154,21 @@ namespace vocaloid {
 					auto offset_time = offset_ + diff;
 					reader_->Seek(offset_time);
 					began_ = true;
+				}
+
+				if (reader_->IsEnd() && !reader_->CapableToRead(require_buffer_size_)) {
+					size = require_buffer_size_;
+					reader_->Flush(temp_buffer_, size);
+					if (size <= 0) {
+						if (!loop_) {
+							return EOF;
+						}
+						else {
+							reader_->Seek(int64_t(float(offset_point_) / sample_rate_ * 1000));
+						}
+					}else {
+						memset(temp_buffer_ + size, 0, require_buffer_size_ - size);
+					}
 				}
 				
 				size = reader_->ReadData(temp_buffer_, require_buffer_size_);

@@ -4,7 +4,7 @@
 #include "../vocaloid/file_reader_node.hpp"
 #include "effect.hpp"
 #include "effects.h"
-
+using namespace vocaloid::composite;
 namespace effect {
 	
 	class UnderWater : public Effect {

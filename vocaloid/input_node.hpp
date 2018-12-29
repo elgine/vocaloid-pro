@@ -1,15 +1,15 @@
 #pragma once
-#include "base_audio_context.h"
+#include "audio_node.hpp"
 namespace vocaloid {
 	namespace node {
-		class SourceNode : public AudioNode {
+		class InputNode : public AudioNode {
 		protected:
 			bool played_;
 		public:
 
 			bool loop_;
 
-			explicit SourceNode(BaseAudioContext *ctx) :AudioNode(ctx, AudioNodeType::INPUT, false, true) {
+			explicit InputNode(BaseAudioContext *ctx) :AudioNode(ctx, AudioNodeType::INPUT, false, true) {
 				played_ = false;
 			}
 
@@ -20,7 +20,7 @@ namespace vocaloid {
 			}
 
 			virtual void Seek(int64_t time) {}
-		
+
 			void Stop() override {
 				played_ = false;
 			}

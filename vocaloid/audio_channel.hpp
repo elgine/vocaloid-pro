@@ -102,7 +102,7 @@ namespace vocaloid {
 			}
 
 			void Mix(AudioChannel *in) {
-				silence_ = false;
+				silence_ &= in->silence_;
 				int16_t out_channels = channels_, in_channels = in->Channels();
 				int64_t size = in->Size();
 				Alloc(channels_, size);

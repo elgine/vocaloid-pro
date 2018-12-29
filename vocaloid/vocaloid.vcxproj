@@ -155,7 +155,6 @@
     <ClInclude Include="dynamic_compressor_node.hpp" />
     <ClInclude Include="composite.hpp" />
     <ClInclude Include="equalizer_3_band.hpp" />
-    <ClInclude Include="events.h" />
     <ClInclude Include="ffmpeg_io.hpp" />
     <ClInclude Include="fft.hpp" />
     <ClInclude Include="file.h" />
