@@ -115,17 +115,17 @@ public:
 			if (effect_ != nullptr) {
 				ctx_->Connect(source_, effect_->Input());
 				ctx_->Connect(effect_->Output(), ctx_->Destination());
+				effect_->Start();
 			}
 			else {
 				ctx_->Connect(source_, ctx_->Destination());
 			}
 			source_->Start(0);
-			effect_->Start();
 			ctx_->Prepare();
 		}
 		else {
 			source_->Start(0);
-			effect_->Start();
+			if(effect_ != nullptr)effect_->Start();
 		}
 		
 		ctx_->Start();
@@ -135,17 +135,13 @@ public:
 	}
 
 	void Seek(int64_t time) {
-		ctx_->Lock();
 		ctx_->Clear();
 		source_->Seek(time);
-		ctx_->Unlock();
 	}
 
 	void Stop() {
 		state_ = PlayerState::PLAYER_STOPPED;
-		ctx_->Lock();
 		ctx_->Stop();
-		ctx_->Unlock();	
 	}
 
 	void Dispose() {

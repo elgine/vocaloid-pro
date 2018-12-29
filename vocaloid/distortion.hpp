@@ -11,7 +11,8 @@ namespace vocaloid {
 			void BuiltCurve() {
 				auto gain = gain_ * 100;
 				curve_length_ = sample_rate_;
-				curve_ = new float[sample_rate_];
+				DeleteArray(&curve_);
+				AllocArray(sample_rate_, &curve_);
 				float deg = M_PI / 180;
 				for (auto i = 0; i < sample_rate_; ++i) {
 					auto x = i * 2.0f / sample_rate_ - 1.0f;

@@ -28,22 +28,19 @@ namespace vocaloid{
 			DeleteArray(&data_);
         }
 
-        void Fill(T v){
-           /* for(auto i = 0;i < size_;i++){
-                data_[i] = v;
-            }*/
-			memset(data_, v, size_ * sizeof(T));
-        }
-
         void Fill(T v, int64_t length, int64_t offset){
             if(max_size_ < length){
                 Alloc(length);
             }
             if(length > size_)size_ = length;
-            /*for(auto i = 0;i < length;i++){
-                data_[i + offset] = v;
-            }*/
-			memset(data_ + offset, v, length * sizeof(T));
+			if (v == 0) {
+				memset(data_ + offset, v, length * sizeof(T));
+			}
+			else {
+				for (auto i = 0; i < length; i++) {
+					data_[i + offset] = v;
+				}
+			}	
         }
 
         void Splice(int64_t len, int64_t offset = 0){
@@ -51,7 +48,7 @@ namespace vocaloid{
 			if (len <= 0)return;
 			int64_t end_index = offset + len;
 			int64_t count = max_size_ - offset - len;
-			memmove(data_ + offset, data_ + end_index, count * sizeof(T));
+			memcpy(data_ + offset, data_ + end_index, count * sizeof(T));
 			memset(data_ + end_index, 0, count * sizeof(T));
 			size_ -= len;
         }

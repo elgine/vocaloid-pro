@@ -91,24 +91,29 @@ namespace vocaloid {
 				summing_buffer_->Zero();
 				for (auto input : inputs_) {
 					if (input->type_ != AudioNodeType::PARAM) {
-						if (input->type_ == AudioNodeType::SPLITTER) {
-							auto input_buf = input->GetResult()->Channel(input_ports_[input->id_].from_channel)->Data();
-							auto output_buf = summing_buffer_->Channel(0)->Data();
-							for (auto i = 0; i < frame_size_; i++) {
-								output_buf[i] += input_buf[i];
+						if (!input->GetResult()->silence_) {
+							if (input->type_ == AudioNodeType::SPLITTER) {
+								auto input_buf = input->GetResult()->Channel(input_ports_[input->id_].from_channel)->Data();
+								auto output_buf = summing_buffer_->Channel(0)->Data();
+								for (auto i = 0; i < frame_size_; i++) {
+									output_buf[i] += input_buf[i];
+								}
+							}
+							else if (input->type_ == AudioNodeType::MERGER) {
+								auto input_buf = input->GetResult()->Channel(0)->Data();
+								auto output_buf = summing_buffer_->Channel(input_ports_[input->id_].to_channel)->Data();
+								for (auto i = 0; i < frame_size_; i++) {
+									output_buf[i] += input_buf[i];
+								}
+							}
+							else {
+								summing_buffer_->Mix(input->GetResult());
 							}
 						}
-						else if (input->type_ == AudioNodeType::MERGER) {
-							auto input_buf = input->GetResult()->Channel(0)->Data();
-							auto output_buf = summing_buffer_->Channel(input_ports_[input->id_].to_channel)->Data();
-							for (auto i = 0; i < frame_size_; i++) {
-								output_buf[i] += input_buf[i];
-							}
-						}
-						else {
-							summing_buffer_->Mix(input->GetResult());
-						}
-
+						summing_buffer_->silence_ &= input->GetResult()->silence_;
+					}
+					else {
+						summing_buffer_->silence_ = false;
 					}
 				}
 				result_buffer_->Copy(summing_buffer_);
@@ -135,7 +140,7 @@ namespace vocaloid {
 
 			virtual int64_t Process() {
 				PullBuffers();
-				if (enable_)
+				if (enable_ && (type_ != AudioNodeType::NORMAL || (type_ == AudioNodeType::NORMAL && !summing_buffer_->silence_)))
 					return ProcessFrame();
 				return 0;
 			}

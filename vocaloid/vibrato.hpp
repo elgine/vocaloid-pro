@@ -1,3 +1,4 @@
+#pragma once
 #include "composite.hpp"
 #include "oscillator_node.hpp"
 #include "delay_node.hpp"
@@ -8,6 +9,18 @@ namespace vocaloid {
 		using namespace vocaloid::node;
 		class Vibrato : public Composite {
 		public:
+			static float VIBRATO_DELAY_DEFAULT;
+			static float VIBRATO_DELAY_MIN;
+			static float VIBRATO_DELAY_MAX;
+
+			static float VIBRATO_DEPTH_DEFAULT;
+			static float VIBRATO_DEPTH_MIN;
+			static float VIBRATO_DEPTH_MAX;
+
+			static float VIBRATO_SPEED_DEFAULT;
+			static float VIBRATO_SPEED_MIN;
+			static float VIBRATO_SPEED_MAX;
+
 			struct VibratoOptions {
 				// 3.5, [0.5, 15]
 				float vibrato_delay;
@@ -21,7 +34,7 @@ namespace vocaloid {
 			DelayNode *delay_;
 			GainNode *gain_;
 
-			Vibrato(AudioContext *ctx) : Composite(ctx) {
+		    explicit Vibrato(AudioContext *ctx) : Composite(ctx) {
 				delay_ = new DelayNode(ctx);
 				osc_ = new OscillatorNode(ctx);
 				gain_ = new GainNode(ctx);
@@ -57,5 +70,15 @@ namespace vocaloid {
 				osc_->SetFrequency(options.vibrato_speed);
 			}
 		};
+
+		float Vibrato::VIBRATO_DELAY_DEFAULT = 3.5f;
+		float Vibrato::VIBRATO_DELAY_MIN = 0.5f;
+		float Vibrato::VIBRATO_DELAY_MAX = 15.0f;
+		float Vibrato::VIBRATO_DEPTH_DEFAULT = 0.03f;
+		float Vibrato::VIBRATO_DEPTH_MIN = 0.005f;
+		float Vibrato::VIBRATO_DEPTH_MAX = 0.055f;
+		float Vibrato::VIBRATO_SPEED_DEFAULT = 0.002f;
+		float Vibrato::VIBRATO_SPEED_MIN = 0.0005f;
+		float Vibrato::VIBRATO_SPEED_MAX = 0.004f;
 	}
 }

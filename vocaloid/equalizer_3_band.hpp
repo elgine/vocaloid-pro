@@ -10,21 +10,28 @@ namespace vocaloid {
 
 		class Equalizer3Band : public Composite {
 		public:
-			struct Equalizer3BandOptions {
-				float low_frequency;
-				float low_gain;
-				float middle_frequency;
-				float middle_gain;
-				float high_frequency;
-				float high_gain;
 
-				Equalizer3BandOptions(float lo_freq, float lo_gain, float mi_freq, float mi_gain, float hi_freq, float hi_gain) {
-					low_frequency = lo_freq;
-					low_gain = lo_gain;
-					middle_frequency = mi_freq;
-					middle_gain = mi_gain;
-					high_frequency = hi_freq;
-					high_gain = hi_gain;
+			static float LOWSHELF_GAIN_DEFAULT;
+			static float LOWSHELF_GAIN_MIN;
+			static float LOWSHELF_GAIN_MAX;
+
+			static float PEAKING_GAIN_DEFAULT;
+			static float PEAKING_GAIN_MIN;
+			static float PEAKING_GAIN_MAX;
+
+			static float HIGHSHELF_GAIN_DEFAULT;
+			static float HIGHSHELF_GAIN_MIN;
+			static float HIGHSHELF_GAIN_MAX;
+
+			struct Equalizer3BandOptions {
+				float peaking_gain;
+				float lowshelf_gain;
+				float highshelf_gain;
+
+				Equalizer3BandOptions(float lo_gain, float mi_gain, float hi_gain) {
+					peaking_gain = mi_gain;
+					lowshelf_gain = lo_gain;
+					highshelf_gain = hi_gain;
 				}
 			};
 
@@ -51,13 +58,22 @@ namespace vocaloid {
 				ctx->Connect(lo_, wet_);
 			}
 
+			void SetLsfFreq(float v) {
+				lo_->frequency_->value_ = v;
+			}
+
+			void SetHsfFreq(float v) {
+				hi_->frequency_->value_ = v;
+			}
+
+			void SetPfFreq(float v) {
+				mi_->frequency_->value_ = v;
+			}
+
 			void SetOptions(Equalizer3BandOptions options) {
-				lo_->frequency_->value_ = options.low_frequency;
-				lo_->gain_->value_ = options.low_gain;
-				mi_->frequency_->value_ = options.middle_frequency;
-				mi_->gain_->value_ = options.middle_gain;
-				hi_->frequency_->value_ = options.high_frequency;
-				hi_->gain_->value_ = options.high_gain;
+				lo_->gain_->value_ = options.lowshelf_gain;
+				mi_->gain_->value_ = options.peaking_gain;
+				hi_->gain_->value_ = options.highshelf_gain;
 			}
 
 			void Dispose() override {
@@ -75,5 +91,17 @@ namespace vocaloid {
 				Composite::Dispose();
 			}
 		};
+
+		float Equalizer3Band::LOWSHELF_GAIN_DEFAULT = 1.0f;
+		float Equalizer3Band::LOWSHELF_GAIN_MIN = -127.0f;
+		float Equalizer3Band::LOWSHELF_GAIN_MAX = 12.0f;
+
+		float Equalizer3Band::PEAKING_GAIN_DEFAULT = -7.0f;
+		float Equalizer3Band::PEAKING_GAIN_MIN = -127.0f;
+		float Equalizer3Band::PEAKING_GAIN_MAX = 12.0f;
+
+		float Equalizer3Band::HIGHSHELF_GAIN_DEFAULT = -10.0f;
+		float Equalizer3Band::HIGHSHELF_GAIN_MIN = -127.0f;
+		float Equalizer3Band::HIGHSHELF_GAIN_MAX = 12.0f;
 	}
 }

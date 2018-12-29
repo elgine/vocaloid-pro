@@ -7,7 +7,7 @@
 #include <thread>
 #include <atomic>
 using namespace std;
-// Segmented fft convolution
+// Segmented fft convolution in multi-threaded
 namespace vocaloid {
 	namespace dsp {
 		class Convolver {
@@ -39,40 +39,16 @@ namespace vocaloid {
 			atomic<float> normal_scale_;
 
 			vector<thread*> thread_pool_;
-			thread* compose_thread_;
-			mutex process_mutex_;
+			thread* overlap_add_thread_;
+			mutex compose_mutex_;
 			condition_variable compose_condition_;
 			condition_variable take_condition_;
 
-			void OverlapAddSegment(float *in, int index) {
-				for (int i = 0; i < seg_fft_size_; i++) {
-					segment_buffer_[i] += in[i];
-					if (isnan(segment_buffer_[i]) || isinf(segment_buffer_[i])) {
-						segment_buffer_[i] = 0.0f;
-					}
-				}
-				memcpy(segment_ + index * input_size_, segment_buffer_, input_size_ * sizeof(float));
-				// Move items left
-				for (int i = 0; i < seg_fft_size_; i++) {
-					if (i + input_size_ >= seg_fft_size_) {
-						segment_buffer_[i] = 0.0f;
-					}
-					else
-						segment_buffer_[i] = segment_buffer_[i + input_size_];
-				}
-			}
-
 			void OverlapAdd() {
-				// Do overlap add method
 				for (int i = 0; i < fft_size_; i++) {
 					buffer_[i] += segment_[i] * normal_scale_;
-					if (isnan(buffer_[i]) || isinf(buffer_[i])) {
-						//printf("invalidate data\n");
-						buffer_[i] = 0.0f;
-					}
 				}
 				output_->Add(buffer_, input_size_);
-				// Move items left
 				for (int i = 0; i < fft_size_; i++) {
 					if (i + input_size_ >= fft_size_) {
 						buffer_[i] = 0.0f;
@@ -85,7 +61,7 @@ namespace vocaloid {
 			int ExtractFrames(float *main_real, float *main_imag, float *kernel_real, float *kernel_imag) {
 				int index = -1;
 				{
-					unique_lock<mutex> lck(process_mutex_);
+					unique_lock<mutex> lck(compose_mutex_);
 					if (input_->Size() < input_size_ || seg_index_ < 0 || seg_index_ >= kernel_segments_) {
 						return -1;
 					}
@@ -100,25 +76,36 @@ namespace vocaloid {
 
 			void ComposeFrame(float *main_real, int index) {
 				{
-					unique_lock<mutex> lck(process_mutex_); 
+					unique_lock<mutex> lck(compose_mutex_);
 					if (!processing_)return;
 					while (compose_index_ < index) {
 						compose_condition_.wait(lck);
 					}
-					OverlapAddSegment(main_real, index);
+					for (int i = 0; i < seg_fft_size_; i++) {
+						segment_buffer_[i] += main_real[i];
+					}
+					memcpy(segment_ + index * input_size_, segment_buffer_, input_size_ * sizeof(float));
+					for (int i = 0; i < seg_fft_size_; i++) {
+						if (i + input_size_ >= seg_fft_size_) {
+							segment_buffer_[i] = 0.0f;
+						}
+						else
+							segment_buffer_[i] = segment_buffer_[i + input_size_];
+					}
 					if (compose_index_ < kernel_segments_ - 1)
 						compose_index_++;
 					compose_condition_.notify_all();
 				}
 			}
 
+
 			void OverlapAddLoop() {
 				while (true) {
 					bool has_frame = true;
 					{
-						unique_lock<mutex> lck(process_mutex_);
+						unique_lock<mutex> lck(compose_mutex_);
 						if (!processing_)break;
-						if (compose_index_ == kernel_segments_ - 1) {
+						if (compose_index_ >= kernel_segments_ - 1) {
 							OverlapAdd();
 							NextFrame();
 							take_condition_.notify_all();
@@ -151,7 +138,7 @@ namespace vocaloid {
 				int16_t index;
 				float *main_real = nullptr, *main_imag = nullptr, *kernel_real = nullptr, *kernel_imag = nullptr;
 				{
-					unique_lock<mutex> lck(process_mutex_);
+					unique_lock<mutex> lck(compose_mutex_);
 					fft_size = seg_fft_size_;
 					AllocArray(fft_size, &main_real);
 					AllocArray(fft_size, &main_imag);
@@ -160,7 +147,7 @@ namespace vocaloid {
 				}
 				while (true) {
 					{
-						unique_lock<mutex> lck(process_mutex_);
+						unique_lock<mutex> lck(compose_mutex_);
 						if (!processing_)break;
 					}
 					index = ExtractFrames(main_real, main_imag, kernel_real, kernel_imag);
@@ -182,7 +169,7 @@ namespace vocaloid {
 
 			void ProcessBackground(float *in, int64_t size) {
 				{
-					unique_lock<mutex> lck(process_mutex_);
+					unique_lock<mutex> lck(compose_mutex_);
 					input_->Add(in, size);
 					if (seg_index_ < 0)NextFrame();
 				}
@@ -191,7 +178,7 @@ namespace vocaloid {
 			int64_t PopFrame(float *out) {
 				int64_t len = 0;
 				{
-					unique_lock<mutex> lck(process_mutex_);
+					unique_lock<mutex> lck(compose_mutex_);
 					while (output_->Size() < input_size_) {
 						take_condition_.wait(lck);
 					}
@@ -222,14 +209,9 @@ namespace vocaloid {
 						out[i] = buffer_[i];
 					}
 				}
-				// Move items left
-				for (int i = 0; i < fft_size_; i++) {
-					if (i + input_size_ >= fft_size_) {
-						buffer_[i] = 0.0f;
-					}
-					else
-						buffer_[i] = buffer_[i + input_size_];
-				}
+				int64_t len = fft_size_ - input_size_;
+				memcpy(buffer_, buffer_ + input_size_, len * sizeof(float));
+				memset(buffer_ + input_size_, 0, len * sizeof(float));
 				return input_size_;
 			}
 
@@ -251,8 +233,8 @@ namespace vocaloid {
 				main_real_ = nullptr;
 				main_imag_ = nullptr;
 				segment_buffer_ = nullptr;
-				compose_thread_ = nullptr;
-				thread_count_ = 16;
+				overlap_add_thread_ = nullptr;
+				thread_count_ = 6;
 				seg_index_ = 0;
 				compose_index_ = 0;
 			}
@@ -277,6 +259,7 @@ namespace vocaloid {
 
 				DeleteArray(&segment_);
 				AllocArray(fft_size_, &segment_);
+
 				// Calculate segments divide kernel into
 				auto new_segments = fft_size_ / input_size_;
 				if (thread_count_ > max_thread_count_)
@@ -324,7 +307,7 @@ namespace vocaloid {
 							thread_pool_.emplace_back(new thread(&Convolver::ProcessInThread, this));
 						}
 					}
-					compose_thread_ = new thread(&Convolver::OverlapAddLoop, this);
+					overlap_add_thread_ = new thread(&Convolver::OverlapAddLoop, this);
 				}
 				else {
 					DeleteArray(&main_real_);
@@ -353,11 +336,10 @@ namespace vocaloid {
 
 			void Stop() {
 				processing_ = false;
-				compose_condition_.notify_all();
-				if(compose_thread_ != nullptr && compose_thread_->joinable()){
-					compose_thread_->join();
-					delete compose_thread_;
-					compose_thread_ = nullptr;
+				if(overlap_add_thread_ != nullptr && overlap_add_thread_->joinable()){
+					overlap_add_thread_->join();
+					delete overlap_add_thread_;
+					overlap_add_thread_ = nullptr;
 				}
 					
 				for (auto thread : thread_pool_) {

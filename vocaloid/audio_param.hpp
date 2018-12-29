@@ -29,8 +29,13 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() {
-				for (auto i = 0; i < frame_size_; i++) {
-					result_buffer_->Channel(0)->Data()[i] = summing_buffer_->Channel(0)->Data()[i] + GetValueAtTime(CalculatePlayedTime(sample_rate_, offset_ + i));
+				if (TimelineEmpty() && summing_buffer_->silence_) {
+					result_buffer_->Fill(value_);
+				}
+				else {
+					for (auto i = 0; i < frame_size_; i++) {
+						result_buffer_->Channel(0)->Data()[i] = summing_buffer_->Channel(0)->Data()[i] + GetValueAtTime(CalculatePlayedTime(sample_rate_, offset_ + i));
+					}
 				}
 				offset_ += frame_size_;
 				return frame_size_;

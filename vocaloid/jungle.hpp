@@ -72,6 +72,9 @@ namespace vocaloid {
 			float buffer_time_;
 			float fade_time_;
 		public:
+			static float PITCH_OFFSET_DEFAULT;
+			static float PITCH_OFFSET_MIN;
+			static float PITCH_OFFSET_MAX;
 			struct JungleOptions {
 				float pitch_offset;
 			};
@@ -289,5 +292,9 @@ namespace vocaloid {
 				Composite::Dispose();
 			}
 		};
+
+		float Jungle::PITCH_OFFSET_DEFAULT = 1.0f;
+		float Jungle::PITCH_OFFSET_MIN = -0.5f;
+		float Jungle::PITCH_OFFSET_MAX = 1.0f;
 	}
 }

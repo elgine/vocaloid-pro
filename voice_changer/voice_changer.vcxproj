@@ -24,13 +24,32 @@
   <ItemGroup>
     <ClInclude Include="alien.hpp" />
     <ClInclude Include="apis.h" />
+    <ClInclude Include="astronaut.hpp" />
+    <ClInclude Include="balrog.hpp" />
+    <ClInclude Include="big_guy.hpp" />
+    <ClInclude Include="broad_room.hpp" />
+    <ClInclude Include="cave.hpp" />
+    <ClInclude Include="child.hpp" />
     <ClInclude Include="effect.hpp" />
     <ClInclude Include="effects.h" />
     <ClInclude Include="events.h" />
     <ClInclude Include="factory.hpp" />
+    <ClInclude Include="female.hpp" />
+    <ClInclude Include="hall.hpp" />
+    <ClInclude Include="male.hpp" />
+    <ClInclude Include="megaphone.hpp" />
+    <ClInclude Include="muffler.hpp" />
+    <ClInclude Include="old_female.hpp" />
+    <ClInclude Include="old_male.hpp" />
+    <ClInclude Include="radio.hpp" />
+    <ClInclude Include="robot1.hpp" />
+    <ClInclude Include="robot2.hpp" />
     <ClInclude Include="status.h" />
     <ClInclude Include="player.hpp" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="telephone.hpp" />
+    <ClInclude Include="transformer.hpp" />
+    <ClInclude Include="under_water.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="apis.cpp" />

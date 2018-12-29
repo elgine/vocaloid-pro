@@ -1,3 +1,4 @@
+#pragma once
 #include "stdafx.h"
 #include "window.hpp"
 #include "../utility/buffer.hpp"

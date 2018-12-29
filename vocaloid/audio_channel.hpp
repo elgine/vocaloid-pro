@@ -95,17 +95,14 @@ namespace vocaloid {
 			}
 
 			void Fill(float v, int64_t len = 0, int64_t offset = 0) {
-				len = len <= 0 ? Size() : len;
+				len = len <= 0 ? MaxSize() : len;
 				for (auto i = 0; i < channels_; i++) {
 					data_[i]->Fill(v, len, offset);
-					/*for (auto j = 0; j < len; j++) {
-						data_[i]->Data()[j + offset] = v;
-					}*/
 				}
 			}
 
 			void Mix(AudioChannel *in) {
-				silence_ = silence_ && in->silence_;
+				silence_ = false;
 				int16_t out_channels = channels_, in_channels = in->Channels();
 				int64_t size = in->Size();
 				Alloc(channels_, size);
@@ -240,8 +237,14 @@ namespace vocaloid {
 			}
 
 			int64_t Size() {
-				if (channels_ > 0)
+				if (channels_ > 0 && data_ != nullptr && data_[0] != nullptr)
 					return data_[0]->Size();
+				return 0;
+			}
+
+			int64_t MaxSize() {
+				if (channels_ > 0 && data_ != nullptr && data_[0] != nullptr)
+					return data_[0]->MaxSize();
 				return 0;
 			}
 

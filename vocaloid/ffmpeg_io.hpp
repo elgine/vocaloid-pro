@@ -86,7 +86,8 @@ namespace vocaloid {
 			int Decode(AVPacket *packet, unique_lock<mutex> &lck) {
 				auto got_frame = 0;
 				auto ret = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet);
-				if (got_frame > 0 && frame_->nb_samples == codec_ctx_->frame_size) {
+				// && frame_->nb_samples == codec_ctx_->frame_size
+				if (got_frame > 0) {
 					frame_count_++;
 					Convert((const uint8_t**)frame_->data, frame_->nb_samples, lck);
 				}
@@ -296,13 +297,13 @@ namespace vocaloid {
 				}
 
 				// Prevent frame_size be zero
-				if (codec_ctx_->frame_size <= 0) {
+				/*if (codec_ctx_->frame_size <= 0) {
 					if (codec_ctx_->codec_id == AV_CODEC_ID_PCM_S24LE || 
 						codec_ctx_->codec_id == AV_CODEC_ID_PCM_S24BE) {
 						codec_ctx_->frame_size = 682;
 					}else
 						codec_ctx_->frame_size = 1024;
-				}	
+				}*/
 
 				swr_ctx_ = swr_alloc();
 				enum AVSampleFormat in_sample_fmt = codec_ctx_->sample_fmt;

@@ -1,3 +1,4 @@
+#pragma once
 #include "composite.hpp"
 #include "wave_shaper_node.hpp"
 #include "biquad_node.hpp"
@@ -11,6 +12,19 @@ namespace vocaloid {
 
 		class Chorus : public Composite {
 		public:
+
+			static float CHORUS_SPEED_DEFAULT;
+			static float CHORUS_SPEED_MIN;
+			static float CHORUS_SPEED_MAX;
+
+			static float CHORUS_DELAY_DEFAULT;
+			static float CHORUS_DELAY_MIN;
+			static float CHORUS_DELAY_MAX;
+
+			static float CHORUS_DEPTH_DEFAULT;
+			static float CHORUS_DEPTH_MIN;
+			static float CHORUS_DEPTH_MAX;
+
 			struct ChorusOptions {
 				// 3.5, [0.5, 15]
 				float chorus_speed;
@@ -68,5 +82,15 @@ namespace vocaloid {
 				osc_->SetFrequency(options.chorus_speed);
 			}
 		};
+
+		float Chorus::CHORUS_SPEED_DEFAULT = 3.5f;
+		float Chorus::CHORUS_SPEED_MIN = 0.5f;
+		float Chorus::CHORUS_SPEED_MAX = 15.0f;
+		float Chorus::CHORUS_DELAY_DEFAULT = 0.03f;
+		float Chorus::CHORUS_DELAY_MIN = 0.005f;
+		float Chorus::CHORUS_DELAY_MAX = 0.055f;
+		float Chorus::CHORUS_DEPTH_DEFAULT = 0.002f;
+		float Chorus::CHORUS_DEPTH_MIN = 0.0005f;
+		float Chorus::CHORUS_DEPTH_MAX = 0.004f;
 	}
 }

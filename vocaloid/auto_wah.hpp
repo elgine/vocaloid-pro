@@ -1,3 +1,4 @@
+#pragma once
 #include "composite.hpp"
 #include "wave_shaper_node.hpp"
 #include "biquad_node.hpp"
@@ -7,6 +8,19 @@ namespace vocaloid {
 		using namespace vocaloid::node;
 		class AutoWah : public Composite {
 		public:
+
+			static float ENVELOPE_FOLLOWER_FILTER_FREQUENCY_DEFAULT;
+			static float ENVELOPE_FOLLOWER_FILTER_FREQUENCY_MIN;
+			static float ENVELOPE_FOLLOWER_FILTER_FREQUENCY_MAX;
+
+			static float FILTER_DEPTH_DEFAULT;
+			static float FILTER_DEPTH_MIN;
+			static float FILTER_DEPTH_MAX;
+
+			static float FILTER_Q_DEFAULT;
+			static float FILTER_Q_MIN;
+			static float FILTER_Q_MAX;
+
 			struct AutoWahOptions {
 				// 10, [0.25, 20]
 				float envelope_follower_filter_frequency;
@@ -21,7 +35,7 @@ namespace vocaloid {
 			GainNode *aw_depth_;
 			BiquadNode *aw_filter_;
 
-			AutoWah(AudioContext *ctx):Composite(ctx) {
+			explicit AutoWah(AudioContext *ctx):Composite(ctx) {
 				wave_shaper_ = new WaveShaperNode(ctx);
 				aw_follower_ = new BiquadNode(ctx);
 				aw_follower_->frequency_->value_ = 10.0f;
@@ -30,9 +44,10 @@ namespace vocaloid {
 				for (auto i = -32768; i < 32768; i++) {
 					curve[i + 32768] = ((i > 0)?i:-i) / 32768.0f;
 				}
-
 				wave_shaper_->SetCurve(curve, 65536);
 				ctx->Connect(wave_shaper_, aw_follower_);
+				delete[] curve;
+				curve = nullptr;
 
 				aw_depth_ = new GainNode(ctx);
 				aw_depth_->gain_->value_ = 11585;
@@ -52,6 +67,18 @@ namespace vocaloid {
 					3.5f,
 					5.0f
 				});
+			}
+
+			void SetEnvelopeFollowerFilterFreq(float v) {
+				aw_follower_->frequency_->value_ = v;
+			}
+
+			void SetFilterDepth(float v) {
+				aw_depth_->gain_->value_ = pow(2, 10 + float(v));
+			}
+
+			void SetFilterQ(float v) {
+				aw_filter_->Q_->value_ = v;
 			}
 
 			void SetOptions(AutoWahOptions options) {
@@ -79,5 +106,15 @@ namespace vocaloid {
 				Composite::Dispose();
 			}
 		};
+
+		float AutoWah::ENVELOPE_FOLLOWER_FILTER_FREQUENCY_DEFAULT = 10.0f;
+		float AutoWah::ENVELOPE_FOLLOWER_FILTER_FREQUENCY_MIN = 0.25f;
+		float AutoWah::ENVELOPE_FOLLOWER_FILTER_FREQUENCY_MAX = 20.0f;
+		float AutoWah::FILTER_DEPTH_DEFAULT = 3.5f;
+		float AutoWah::FILTER_DEPTH_MIN = 0.0f;
+		float AutoWah::FILTER_DEPTH_MAX = 4.0f;
+		float AutoWah::FILTER_Q_DEFAULT = 5.0f;
+		float AutoWah::FILTER_Q_MIN = 0.0f;
+		float AutoWah::FILTER_Q_MAX = 20.0f;
 	}
 }

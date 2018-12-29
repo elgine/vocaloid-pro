@@ -135,12 +135,15 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() override {
-				if (played_point_ - offset_point_ >= duration_point_) {
+				int64_t size = 0;
+				if ((played_point_ - offset_point_ >= duration_point_) || (reader_->IsEnd() && !reader_->CapableToRead(require_buffer_size_))) {
 					if (!loop_) {
+						reader_->Flush(temp_buffer_, size);
+						memset(temp_buffer_ + size, 0, require_buffer_size_ - size);
 						return EOF;
 					}
 					else {
-						played_point_ = offset_point_ + (played_point_ - offset_point_) % duration_point_;
+						played_point_ = offset_point_;
 						reader_->Seek(int64_t(float(played_point_) / sample_rate_ * 1000));
 					}
 				}
@@ -154,20 +157,12 @@ namespace vocaloid {
 					reader_->Seek(offset_time);
 					began_ = true;
 				}
-
-				int64_t size = 0;
-				if (reader_->IsEnd() && !reader_->CapableToRead(require_buffer_size_)) {
-					reader_->Flush(temp_buffer_, size);
-					memset(temp_buffer_ + size, 0, require_buffer_size_ - size);
-					if (size <= 0 && !loop_) {
-						return EOF;
-					}
-				}else {
-					size = reader_->ReadData(temp_buffer_, require_buffer_size_);
-				}
+				
+				size = reader_->ReadData(temp_buffer_, require_buffer_size_);
 				if (size <= 0) {
 					return 0;
 				}
+				result_buffer_->silence_ = false;
 				if (resample_ratio_ != 1.0) {
 					summing_buffer_->FromByteArray(temp_buffer_, require_buffer_size_, bits_, channels_);
 					for (auto i = 0; i < channels_; i++) {
@@ -176,7 +171,6 @@ namespace vocaloid {
 				}
 				else
 					result_buffer_->FromByteArray(temp_buffer_, require_buffer_size_, bits_, channels_);
-				result_buffer_->silence_ = false;
 				played_point_ += frame_size_;
 				return frame_size_;
 			}

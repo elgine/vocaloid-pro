@@ -71,6 +71,7 @@ namespace vocaloid {
 				int64_t size = 0;
 				int64_t fill_size = 0;
 				int64_t buffer_size = summing_buffer_->Size();
+				result_buffer_->silence_ = false;
 				while (size < frame_size_) {
 					fill_size = min(frame_size_ - size, duration_point_ + offset_point_ - played_point_);
 					for (auto i = 0; i < channels_; i++)

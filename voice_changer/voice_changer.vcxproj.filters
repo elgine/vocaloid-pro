@@ -16,6 +16,15 @@
     <Filter Include="头文件\effects">
       <UniqueIdentifier>{c92d55ca-4ac1-4690-a710-ec2f3a950ab8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\effects\environment">
+      <UniqueIdentifier>{9f348d5a-7ba3-45fb-9e45-c9652400b1b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\effects\character">
+      <UniqueIdentifier>{c9ab1914-305e-47b1-9096-b1e045a02248}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\effects\tool">
+      <UniqueIdentifier>{3cc626f2-1606-42a5-807d-99e7369e5d45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def">
@@ -25,9 +34,6 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="alien.hpp">
-      <Filter>头文件\effects</Filter>
     </ClInclude>
     <ClInclude Include="effect.hpp">
       <Filter>头文件\effects</Filter>
@@ -49,6 +55,66 @@
     </ClInclude>
     <ClInclude Include="status.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="cave.hpp">
+      <Filter>头文件\effects\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="alien.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="astronaut.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="balrog.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="big_guy.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="child.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="female.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="male.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="old_female.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="old_male.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="robot1.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="robot2.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="transformer.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="broad_room.hpp">
+      <Filter>头文件\effects\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="under_water.hpp">
+      <Filter>头文件\effects\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="hall.hpp">
+      <Filter>头文件\effects\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="muffler.hpp">
+      <Filter>头文件\effects\tool</Filter>
+    </ClInclude>
+    <ClInclude Include="telephone.hpp">
+      <Filter>头文件\effects\tool</Filter>
+    </ClInclude>
+    <ClInclude Include="radio.hpp">
+      <Filter>头文件\effects\tool</Filter>
+    </ClInclude>
+    <ClInclude Include="megaphone.hpp">
+      <Filter>头文件\effects\tool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

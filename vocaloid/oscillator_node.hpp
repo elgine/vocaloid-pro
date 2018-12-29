@@ -32,6 +32,7 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() override {
+				result_buffer_->silence_ = false;
 				if (waveform_dirty_) {
 					auto freq = abs(frequency_) * pow(2, detune_ / 1200.0f);
 					auto size = int64_t(sample_rate_ / freq);

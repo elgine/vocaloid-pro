@@ -127,7 +127,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\example\ffmpeg_io.hpp" />
     <ClInclude Include="buffer.hpp" />
     <ClInclude Include="emitter.hpp" />
     <ClInclude Include="path.hpp" />

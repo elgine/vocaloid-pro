@@ -9,7 +9,7 @@
 //#include "male.hpp"
 //#include "old_male.hpp"
 //#include "old_woman.hpp"
-//#include "transformer.hpp"
+#include "transformer.hpp"
 //#include "balrog.hpp"
 ///#include "sauron.hpp"
 
@@ -19,7 +19,7 @@
 //#include "telephone.hpp"
 //#include "hall.hpp"
 //#include "radio.hpp"
-#include "broad_room.hpp"
+//#include "broad_room.hpp"
 //#include "underwater.hpp"
 //#include "megaphone.hpp"
 

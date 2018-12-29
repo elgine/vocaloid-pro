@@ -1,3 +1,4 @@
+#pragma once
 #include "effect.hpp"
 #include "../vocaloid/delay_node.hpp"
 #include "../vocaloid/oscillator_node.hpp"
@@ -10,6 +11,15 @@ namespace effect {
 		OscillatorNode *osc_;
 		GainNode *osc_gain_;
 	public:
+
+		static float LFO_FREQ_DEFAULT;
+		static float LFO_FREQ_MIN;
+		static float LFO_FREQ_MAX;
+
+		static float LFO_GAIN_DEFAULT;
+		static float LFO_GAIN_MIN;
+		static float LFO_GAIN_MAX;
+
 		explicit Alien(AudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::ALIEN;
 			delay_ = new DelayNode(ctx);
@@ -24,24 +34,20 @@ namespace effect {
 			delay_->delay_time_->value_ = 0.05f;
 		}
 
+		void SetLFOFrequency(float v) {
+			osc_->SetFrequency(v);
+		}
+
+		void SetLFOGain(float v) {
+			osc_gain_->gain_->value_ = v;
+		}
+
 		void Start() override {
 			osc_->Start();
 		}
 
 		AudioNode* Input() override {
 			return delay_;
-		}
-
-		void SetFrequency(float freq) {
-			ctx_->Lock();
-			osc_->SetFrequency(freq);
-			ctx_->Unlock();
-		}
-
-		void SetDelay(float delay) {
-			ctx_->Lock();
-			delay_->delay_time_->value_ = delay;
-			ctx_->Unlock();
 		}
 
 		void Dispose() override {
@@ -63,4 +69,12 @@ namespace effect {
 			Effect::Dispose();
 		}
 	};
+
+	float Alien::LFO_FREQ_DEFAULT = 5.0f;
+	float Alien::LFO_FREQ_MIN = 20.0f;
+	float Alien::LFO_FREQ_MAX = 40.0f;
+
+	float Alien::LFO_GAIN_DEFAULT = 0.05f;
+	float Alien::LFO_GAIN_MIN = 0.01f;
+	float Alien::LFO_GAIN_MAX = 0.05f;
 }
