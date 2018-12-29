@@ -174,5 +174,13 @@
     <ClInclude Include="status.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="timeline.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="input_node.hpp">
+      <Filter>头文件\node</Filter>
+    </Text>
   </ItemGroup>
 </Project>

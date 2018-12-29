@@ -112,8 +112,7 @@ public:
 		if (restart) {
 			Stop();
 			timeline_->Reset();
-			source_->Reset();
-			ctx_->Destination()->Reset();
+			ctx_->Destination()->Clear();
 			if (effect_ != nullptr) {
 				ctx_->Connect(source_, effect_->Input());
 				ctx_->Connect(effect_->Output(), ctx_->Destination());

@@ -116,6 +116,9 @@
     <ClInclude Include="megaphone.hpp">
       <Filter>头文件\effects\tool</Filter>
     </ClInclude>
+    <ClInclude Include="timeline.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="apis.cpp">

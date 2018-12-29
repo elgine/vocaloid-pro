@@ -3,7 +3,7 @@
 #include <thread>
 #include "stdafx.h"
 #include "audio_node.hpp"
-#include "source_node.hpp"
+#include "input_node.hpp"
 #include "destination_node.hpp"
 #include "player_node.hpp"
 #include "file_writer_node.hpp"
@@ -125,7 +125,7 @@ namespace vocaloid {
 							auto node = FindNode(*iter);
 							int64_t frames = node->Process();
 							if (node->Type() == AudioNodeType::INPUT && 
-								!static_cast<SourceNode*>(node)->loop_ && 
+								!static_cast<InputNode*>(node)->loop_ && 
 								frames != EOF) {
 								all_input_eof = false;
 							}
@@ -283,15 +283,6 @@ namespace vocaloid {
 				if (audio_render_thread_ && audio_render_thread_->joinable())
 					audio_render_thread_->join();
 				return 0;
-			}
-
-			void Reset() override {
-				{
-					unique_lock<mutex> lck(audio_render_thread_mutex_);
-					for (auto node : traversal_nodes_) {
-						FindNode(node)->Reset();
-					}
-				}
 			}
 
 			void Clear() override {

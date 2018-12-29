@@ -17,22 +17,11 @@ namespace vocaloid {
 			int64_t duration_point_;
 		public:
 
-			explicit BufferNode(AudioContext *ctx):SourceNode(ctx) {
-				loop_ = false;
-				start_ = 0;
-				offset_ = 0;
-				duration_ = 0;
-				played_began_ = 0;
-				start_point_ = offset_point_ = duration_point_ = 0;
-				began_ = false;
-			}
+			explicit BufferNode(AudioContext *ctx):SourceNode(ctx) {}
 
 			void SetBuffer(AudioChannel *b) {
 				summing_buffer_->Copy(b);
 				summing_buffer_->silence_ = false;
-			}
-
-			void SetChannels(int16_t c) final {
 			}
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
@@ -84,24 +73,6 @@ namespace vocaloid {
 					}
 				}
 				return size;
-			}
-
-			void Start(int64_t when, int64_t offset = 0, int64_t duration = 0) {
-				SourceNode::Start();
-				start_ = when;
-				offset_ = offset;
-				duration_ = duration;
-				auto sample_rate = context_->SampleRate();
-			}
-
-			void Reset() override {
-				played_point_ = 0;
-				played_began_ = 0;
-				began_ = false;
-			}
-
-			void Seek(int64_t time) override {
-				played_point_ = time * 0.001 * sample_rate_;
 			}
 		};
 	}

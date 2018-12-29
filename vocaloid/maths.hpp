@@ -20,8 +20,12 @@ namespace vocaloid {
 		return float(a - (int)(a / b) * b + M_PI);
 	}
 
-	int64_t CalculatePlayedTime(int32_t sample_rate, int64_t offset) {
+	int64_t BytesToMsec(int32_t sample_rate, int64_t offset) {
 		return int64_t((float)(offset) / float(sample_rate) * 1000.0f);
+	}
+
+	int64_t MsecToBytes(int32_t sample_rate, int64_t msec) {
+		return int64_t(msec * 0.001f * sample_rate);
 	}
 
 	template<typename T>

@@ -180,12 +180,16 @@
     <ClInclude Include="audio_timeline.hpp" />
     <ClInclude Include="freq_2_note.hpp" />
     <ClInclude Include="maths.hpp" />
+    <ClInclude Include="timeline.hpp" />
     <ClInclude Include="vibrato.hpp" />
     <ClInclude Include="wav.hpp" />
     <ClInclude Include="waveform.hpp" />
     <ClInclude Include="wave_shaper_node.hpp" />
     <ClInclude Include="wgn.hpp" />
     <ClInclude Include="window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="input_node.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

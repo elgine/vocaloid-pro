@@ -59,7 +59,7 @@ namespace vocaloid {
 				duration_point_ = 0;
 			}
 
-			int SetPath(const char* path) {
+			int Open(const char* path) {
 				if (path_ == path)return SUCCEED;
 				if (IsPathDirectory(path))
 					return PATH_NOT_FILE;
@@ -71,45 +71,21 @@ namespace vocaloid {
 				}
 #endif
 				path_ = path;
-				need_update_ = true;
-			}
-
-			void Reset() override {
-				played_point_ = 0;
-				played_began_ = 0;
-				began_ = false;
-				reader_->Seek(0);
-			}
-
-			void Seek(int64_t time) override {
-				played_point_ = time * 0.001 * sample_rate_;
-				reader_->Seek(time);
+				reader_->Dispose();
+				return reader_->Open(path_.c_str());
 			}
 
 			void Clear() override {
+				SourceNode::Clear();
 				reader_->Clear();
 			}
 
-			// TODO: Loop and play in segments...
-			void Start(int64_t when, int64_t offset = 0, int64_t duration = 0) {
-				SourceNode::Start();
-				start_ = when;
-				offset_ = offset;
-				duration_ = duration;
+			void Seek(int64_t time) override {
+				SourceNode::Seek(reader_->Seek(time));
 			}
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				SourceNode::Initialize(sample_rate, frame_size);
-				frame_size_ = frame_size;
-				auto ret = SUCCEED;
-				if (need_update_) {
-					reader_->Dispose();
-					ret = reader_->Open(path_.c_str());
-					if (ret < 0) {
-						return CANT_DECODE;
-					}
-					need_update_ = false;
-				}
 				auto format = reader_->Format();
 				channels_ = format.channels;
 				bits_ = format.bits;
@@ -189,10 +165,12 @@ namespace vocaloid {
 			}
 
 			void Stop() override {
+				SourceNode::Stop();
 				reader_->Stop();
 			}
 
 			void Dispose() override {
+				AudioNode::Dispose();
 				reader_->Dispose();
 			}
 		};

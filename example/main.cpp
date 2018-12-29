@@ -9,12 +9,12 @@
 //#include "male.hpp"
 //#include "old_male.hpp"
 //#include "old_woman.hpp"
-#include "transformer.hpp"
+//#include "transformer.hpp"
 //#include "balrog.hpp"
 ///#include "sauron.hpp"
 
 /// environment or tool
-//#include "muffler.hpp"
+#include "muffler.hpp"
 //#include "cave.hpp"
 //#include "telephone.hpp"
 //#include "hall.hpp"

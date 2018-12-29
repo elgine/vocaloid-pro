@@ -48,6 +48,7 @@
     <ClInclude Include="player.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="telephone.hpp" />
+    <ClInclude Include="timeline.hpp" />
     <ClInclude Include="transformer.hpp" />
     <ClInclude Include="under_water.hpp" />
   </ItemGroup>

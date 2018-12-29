@@ -1,32 +1,32 @@
 #pragma once
 #include "audio_node.hpp"
+#include "maths.hpp"
+#include "timeline.hpp"
 namespace vocaloid {
 	namespace node {
-		class InputNode : public AudioNode {
+		class InputNode : public AudioNode{
 		protected:
-			bool played_;
+			bool active_;
 		public:
 
 			bool loop_;
 
 			explicit InputNode(BaseAudioContext *ctx) :AudioNode(ctx, AudioNodeType::INPUT, false, true) {
-				played_ = false;
+				active_ = false;
 			}
 
 			int64_t Process() override {
-				if (!played_)return 0;
-				result_buffer_->Zero();
-				return ProcessFrame();
+				if (!active_)return 0;
+				return AudioNode::Process();
 			}
-
-			virtual void Seek(int64_t time) {}
 
 			void Stop() override {
-				played_ = false;
+				active_ = false;
 			}
 
-			void Start() {
-				played_ = true;
+			virtual int Start() {
+				active_ = true;
+				return SUCCEED;
 			}
 		};
 	}

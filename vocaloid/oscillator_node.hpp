@@ -1,13 +1,13 @@
 #pragma once
 #include <math.h>
-#include "source_node.hpp"
+#include "input_node.hpp"
 #include "waveform.hpp"
 #include "../utility/buffer.hpp"
 #include "maths.hpp"
 #include "audio_context.hpp"
 namespace vocaloid {
 	namespace node {
-		class OscillatorNode : public SourceNode {
+		class OscillatorNode : public InputNode {
 		private:
 			float frequency_;
 			float detune_;
@@ -17,7 +17,7 @@ namespace vocaloid {
 			int64_t offset_;
 
 		public:
-			explicit OscillatorNode(AudioContext *ctx) :SourceNode(ctx) {
+			explicit OscillatorNode(AudioContext *ctx) :InputNode(ctx) {
 				frequency_ = 440;
 				waveform_dirty_ = true;
 				type_ = dsp::WAVEFORM_TYPE::SINE;

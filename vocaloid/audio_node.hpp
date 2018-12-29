@@ -136,8 +136,6 @@ namespace vocaloid {
 
 			virtual void Clear() {}
 
-			virtual void Reset() {}
-
 			virtual int64_t Process() {
 				PullBuffers();
 				if (enable_ && (type_ != AudioNodeType::NORMAL || (type_ == AudioNodeType::NORMAL && !summing_buffer_->silence_)))
