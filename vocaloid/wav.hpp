@@ -184,15 +184,19 @@ namespace vocaloid {
 					pos_ = pos;
 					in_.seekg(pos_ + GetHeaderLength());
 				}
-				return pos_;
+				return time;
 			}
 
 			int64_t ReadData(char *bytes, int64_t byte_length) override {
-				if (IsEnd())return 0;
+				if (in_.eof() || pos_ >= FileLength())return 0;
 				byte_length = min(header_.size2 - pos_, byte_length);
 				in_.read(bytes, byte_length);
 				pos_ += byte_length;
 				return byte_length;
+			}
+
+			bool End() override {
+				return in_.eof() || pos_ >= FileLength();
 			}
 
 			void Stop() override {
@@ -205,10 +209,6 @@ namespace vocaloid {
 				byte_length = header_.size2 - pos_;
 				in_.read(bytes, byte_length);
 				pos_ += byte_length;
-			}
-
-			bool IsEnd() override {
-				return in_.eof() || header_.size2 - pos_ <= 0;
 			}
 
 			void Dispose() override {

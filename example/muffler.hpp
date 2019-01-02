@@ -13,8 +13,15 @@ void Run() {
 	auto context = new AudioContext();
 	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
-	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
-	source->Start(0, 10000);
+	source->Open("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
+
+	auto segments = new int64_t*[3]{
+		new int64_t[2]{0, 4000},
+		new int64_t[2]{ 20000, 30000},
+		new int64_t[2]{ 55000, 60000}
+	};
+	source->StartWithSegments(segments, 3);
+	source->loop_ = true;
 	auto convolution = new ConvolutionNode(context);
 	auto channel_data = new AudioChannel();
 	auto buffer = new Buffer<char>();

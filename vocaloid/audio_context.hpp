@@ -123,10 +123,10 @@ namespace vocaloid {
 						if (!all_input_eof)all_input_eof = true;
 						for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
 							auto node = FindNode(*iter);
-							int64_t frames = node->Process();
+							cur_processed_frames = node->Process();
 							if (node->Type() == AudioNodeType::INPUT && 
 								!static_cast<InputNode*>(node)->loop_ && 
-								frames != EOF) {
+								cur_processed_frames != EOF) {
 								all_input_eof = false;
 							}
 						}
@@ -135,10 +135,10 @@ namespace vocaloid {
 					if (!all_input_eof) {
 						processed_frames_ += cur_processed_frames;
 					}
-					on_tick_->Emit(processed_frames_);
+					//on_tick_->Emit(processed_frames_);
 					this_thread::sleep_for(chrono::milliseconds(MINUS_SLEEP_UNIT));
-					if (all_input_eof)
-						on_end_->Emit(0);
+					/*if (all_input_eof)
+						on_end_->Emit(0);*/
 				}
 			}
 		public:

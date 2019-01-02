@@ -17,7 +17,8 @@ namespace vocaloid {
 
 			int64_t Process() override {
 				if (!active_)return 0;
-				return AudioNode::Process();
+				result_buffer_->Zero();
+				return ProcessFrame();
 			}
 
 			void Stop() override {

@@ -57,7 +57,7 @@ namespace vocaloid {
 			}
 
 			template<typename T = const char* | vector<char>>
-			void FromByteArray(T byte_array, int64_t byte_length, int16_t bits, int16_t channels) {
+			void FromByteArray(T byte_array, int64_t byte_length, int16_t bits, int16_t channels, int64_t dst = 0) {
 				int16_t depth = bits / 8;
 				int16_t step = depth * channels;
 				int64_t len = byte_length / step;
@@ -71,7 +71,7 @@ namespace vocaloid {
 						for (int k = 1; k < depth; k++) {
 							value |= (long)(byte_array[offset + k] << (k * 8));
 						}
-						data_[j]->Data()[i / step] = value / max;
+						data_[j]->Data()[i / step + dst] = value / max;
 					}
 				}
 			}

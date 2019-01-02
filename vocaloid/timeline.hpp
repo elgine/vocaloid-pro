@@ -27,15 +27,19 @@ namespace vocaloid {
 
 			int SetSegments(int64_t **segments, int segment_count) {
 				if (segment_count <= 0)return INVALIDATE_SEGMENT_DATA;
-				auto segment_size = sizeof(segments[0]) / sizeof(int64_t);
-				if (segment_size <= 1)return INVALIDATE_SEGMENT_DATA;
 				Dispose();
+				int64_t last_timestamp = 0, start = 0, end = 0;
 				for (auto i = 0; i < segment_count; i++) {
-					if (segments[i][0] >= segments[i][1]) {
-						Dispose();
-						return INVALIDATE_SEGMENT_DATA;
+					start = segments[i][0];
+					end = segments[i][1];
+					if (start < last_timestamp) {
+						start = last_timestamp;
 					}
-					segments_.push_back({ segments[i][0], segments[i][1] });
+					if (end < start) {
+						end = start + 1;
+					}
+					segments_.push_back({ start, end });
+					last_timestamp = end;
 				}
 				return SUCCEED;
 			}
@@ -58,6 +62,9 @@ namespace vocaloid {
 							end = middle - 1;
 						}
 					}
+				}
+				else {
+					index = cur_index_;
 				}
 				return index;
 			}
@@ -83,8 +90,8 @@ namespace vocaloid {
 				cur_index_ = index;
 			}
 
-			int Next() {
-				if (cur_index_ + 1 >= segments_.size())return -1;
+			int Next(bool loop = false) {
+				if (!loop && cur_index_ == segments_.size() - 1)return -1;
 				cur_index_++;
 				return cur_index_;
 			}

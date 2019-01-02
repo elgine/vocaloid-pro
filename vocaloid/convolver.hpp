@@ -163,7 +163,7 @@ namespace vocaloid {
 						FFT(main_real, main_imag, fft_size, -1);
 						ComposeFrame(main_real, index);
 					}
-					this_thread::sleep_for(chrono::milliseconds(index < 0 ? MINUS_SLEEP_UNIT : 2));
+					this_thread::sleep_for(chrono::milliseconds(index < 0 ? MINUS_SLEEP_UNIT : 1));
 				}
 			}
 
@@ -234,7 +234,7 @@ namespace vocaloid {
 				main_imag_ = nullptr;
 				segment_buffer_ = nullptr;
 				overlap_add_thread_ = nullptr;
-				thread_count_ = 6;
+				thread_count_ = 8;
 				seg_index_ = 0;
 				compose_index_ = 0;
 			}

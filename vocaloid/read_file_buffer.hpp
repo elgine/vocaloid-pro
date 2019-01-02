@@ -31,7 +31,7 @@ namespace vocaloid {
 			int64_t sum = 0;
 			auto temp = new char[frame_size];
 
-			while (!reader->IsEnd() || reader->CapableToRead(frame_size)) {
+			while (!reader->End() || reader->CapableToRead(frame_size)) {
 				size = reader->ReadData(temp, frame_size);
 				if (size > 0) {
 					buffer->Add(temp, size);

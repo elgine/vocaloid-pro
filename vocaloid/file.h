@@ -16,8 +16,8 @@ namespace vocaloid {
 			virtual int16_t Open(const char* input_path) = 0;
 			virtual void Dispose() = 0;
 			virtual void Stop() = 0;
-			virtual bool IsEnd() = 0;
 			virtual void Clear() = 0;
+			virtual bool End() = 0;
 			virtual void Flush(char* data, int64_t& length) = 0;
 			virtual int64_t Seek(int64_t pos) = 0;
 			virtual AudioFormat Format() = 0;

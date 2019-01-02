@@ -1,6 +1,7 @@
 #pragma once
 #include "audio_node.hpp"
 #include "audio_timeline.hpp"
+#include "maths.hpp"
 namespace vocaloid {
 	namespace node {
 		enum AudioParamType {
@@ -34,7 +35,7 @@ namespace vocaloid {
 				}
 				else {
 					for (auto i = 0; i < frame_size_; i++) {
-						result_buffer_->Channel(0)->Data()[i] = summing_buffer_->Channel(0)->Data()[i] + GetValueAtTime(CalculatePlayedTime(sample_rate_, offset_ + i));
+						result_buffer_->Channel(0)->Data()[i] = summing_buffer_->Channel(0)->Data()[i] + GetValueAtTime(BytesToMsec(sample_rate_, offset_ + i));
 					}
 				}
 				offset_ += frame_size_;
