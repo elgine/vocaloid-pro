@@ -46,98 +46,28 @@ namespace vocaloid {
 					}
 					play_pos_ = SeekInternal(frames);
 				}
-				/*auto seg_index = Timeline::Seek(timestamp);
-				if (seg_index > -1) {
-					play_pos_ = timestamp * 0.001f * sample_rate_;
-					auto seg = Timeline::Segment(seg_index);
-					if (timestamp < seg.start || timestamp >= seg.end) {
-						Timeline::SetSegmentIndex(seg_index);
-					}
-					SeekInternal(timestamp);
-				}*/
 			}
 
 			virtual int64_t SeekInternal(int64_t frame_offset) { return frame_offset; }
 
 			int64_t ProcessFrame() override {
-				//auto byte_count = 0;
-				//if (!ready_to_play_) {
-				//	if (delay_pos_ + frame_size_ < delay_frames_) {
-				//		return 0;
-				//	}
-				//	else {
-				//		if (SegmentCount() <= 0)return EOF;
-				//		ready_to_play_ = true;
-				//		byte_count = delay_pos_ - delay_frames_;
-				//		Seek(Timeline::FirstSegment().start + BytesToMsec(sample_rate_, byte_count));
-				//	}
-				//}
-
-				//if (SegmentCount() <= 0)return EOF;
-
-				//int64_t played_timestamp = 0, byte_left = 0, count = 0;
-
-				//int32_t source_sample_rate = SourceSampleRate();
-				//int64_t prev_segment_index = Timeline::Index(), cur_segment_index = Timeline::Index();
-				//TimeSegment last_segment = Timeline::LastSegment(), first_segment = Timeline::FirstSegment(), cur_segment = Segment(cur_segment_index);
-
-				//while (byte_count < frame_size_) {
-				//	played_timestamp = BytesToMsec(source_sample_rate, play_pos_);
-				//	if (Timeline::IsEnd() && played_timestamp >= last_segment.end) {
-				//		if (loop_) {
-				//			Timeline::SetSegmentIndex(0);
-				//			play_pos_ = play_pos_ + MsecToBytes(source_sample_rate, -last_segment.end + first_segment.start);
-				//			played_timestamp = BytesToMsec(source_sample_rate, play_pos_);
-				//			cur_segment_index = 0;
-				//			SeekInternal(played_timestamp);
-				//		}
-				//		else {
-				//			break;
-				//		}
-				//	}
-				//	else {
-				//		cur_segment_index = Timeline::Seek(played_timestamp);
-				//		if (prev_segment_index != cur_segment_index || cur_segment_index == -1) {
-				//			play_pos_ -= MsecToBytes(source_sample_rate, cur_segment.end);
-				//			cur_segment_index = Timeline::Next();
-				//			if (cur_segment_index < 0)return EOF;
-				//			cur_segment = Timeline::Segment(cur_segment_index);
-				//			play_pos_ += MsecToBytes(source_sample_rate, cur_segment.start);
-				//			played_timestamp = BytesToMsec(source_sample_rate, play_pos_);
-				//			// Post update
-				//			played_timestamp = SeekInternal(played_timestamp);
-				//			play_pos_ = MsecToBytes(source_sample_rate, played_timestamp);
-				//		}
-				//	}
-				//	cur_segment = Timeline::Segment(cur_segment_index);
-				//	prev_segment_index = cur_segment_index;
-
-				//	byte_left = MsecToBytes(source_sample_rate, (cur_segment.end - played_timestamp));
-				//	count = min(frame_size_, byte_left);
-
-				//	count = GetBuffer(byte_count, count);
-				//	if (count <= 0)break;
-				//	byte_count += count;
-				//	play_pos_ += count;
-				//}
-				//return byte_count;
-
-				auto frame_count = 0;
-				if (!ready_to_play_){
-					if (delay_pos_ < delay_frames_) {
-						delay_pos_ += frame_size_;
-						return 0;
-					}
-					else {
-						if (SegmentCount() <= 0)return EOF;
-						ready_to_play_ = true;
-						frame_count = delay_pos_ - delay_frames_;
-						play_pos_ = frame_count + Timeline::FirstSegment().start;
-						SeekInternal(play_pos_);
-					}
-				}
-
 				if (SegmentCount() <= 0)return EOF;
+				auto frame_count = 0;
+				auto frame_index = 0;
+				auto frame_size = frame_size_;
+				if (!ready_to_play_){
+					if (delay_frames_ > 0) {
+						if (delay_pos_ + frame_size_ < delay_frames_) {
+							delay_pos_ += frame_size_;
+							return 0;
+						}
+						frame_size = (delay_pos_ + frame_size_) - delay_frames_;
+						frame_index = delay_frames_ - delay_pos_;
+					}
+					ready_to_play_ = true;
+					play_pos_ = Timeline::FirstSegment().start;
+					SeekInternal(play_pos_);
+				}
 
 				int64_t byte_left = 0, count = 0;
 				int64_t prev_segment_index = Timeline::Index(), cur_segment_index = Timeline::Index();
@@ -145,7 +75,7 @@ namespace vocaloid {
 					first_segment = Timeline::FirstSegment(), 
 					cur_segment = Segment(cur_segment_index);
 
-				while (frame_count < frame_size_) {
+				while (frame_count < frame_size) {
 					if (Timeline::IsEnd() && play_pos_ >= last_segment.end) {
 						if (loop_) {
 							Timeline::SetSegmentIndex(0);
@@ -173,15 +103,18 @@ namespace vocaloid {
 					prev_segment_index = cur_segment_index;
 					
 					byte_left = cur_segment.end - play_pos_;
-					count = min(frame_size_, byte_left);
+					count = min(frame_size, byte_left);
 
-					count = GetBuffer(frame_count, count);
+					count = GetBuffer(frame_index, count);
 					if (count <= 0) {
 						if (count == EOF)return EOF;
 						break;
 					}
-					frame_count += count;
-					play_pos_ += count;
+					if (frame_count + count <= frame_size) {
+						frame_count += count;
+						frame_index += count;
+						play_pos_ += count;
+					}
 				}
 				return frame_count;
 			}

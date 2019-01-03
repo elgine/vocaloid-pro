@@ -29,9 +29,6 @@ namespace vocaloid {
 						result_buffer_->Data()[i]->Set(summing_buffer_->Channel(i)->Data(), count, index, offset + bytes);
 					bytes += count;
 					index += count;
-					if (index >= all_count && !loop_) {
-						return EOF;
-					}
 					index %= all_count;
 				}
 				result_buffer_->silence_ = false;

@@ -12,7 +12,7 @@ void Run() {
 	auto context = new AudioContext();
 	context->SetOutput(OutputType::PLAYER);
 	auto source = new FileReaderNode(context);
-	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
+	source->Open("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 	source->Start(0);
 
 	auto compressor = new DynamicsCompressorNode(context);
@@ -25,6 +25,11 @@ void Run() {
 	deeper->SetPitchOffset(-0.4f);
 	auto deeperer = new Jungle(context);
 	deeperer->SetPitchOffset(-0.8f);
+
+	dee->Start();
+	deep->Start();
+	deeper->Start();
+	deeperer->Start();
 
 	context->Connect(source, dee->input_);
 	context->Connect(source, deep->input_);
