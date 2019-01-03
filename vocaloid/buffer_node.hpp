@@ -6,7 +6,7 @@ namespace vocaloid {
 		class BufferNode : public SourceNode {	
 		public:
 
-			explicit BufferNode(AudioContext *ctx):SourceNode(ctx) {}
+			explicit BufferNode(BaseAudioContext *ctx):SourceNode(ctx) {}
 
 			void SetBuffer(AudioChannel *b) {
 				summing_buffer_->Copy(b);
@@ -20,13 +20,26 @@ namespace vocaloid {
 			}
 
 			int64_t GetBuffer(int64_t offset, int64_t len) override {
-				for (auto i = 0; i < channels_; i++)
-					result_buffer_->Data()[i]->Set(summing_buffer_->Channel(i)->Data(), len, play_pos_, offset);
-				return len;
+				auto all_count = summing_buffer_->Size();
+				auto bytes = 0, count = 0;
+				auto index = play_pos_;
+				while (bytes < len) {
+					count = min(all_count, index + len) - index;
+					for (auto i = 0; i < channels_; i++)
+						result_buffer_->Data()[i]->Set(summing_buffer_->Channel(i)->Data(), count, index, offset + bytes);
+					bytes += count;
+					index += count;
+					if (index >= all_count && !loop_) {
+						return EOF;
+					}
+					index %= all_count;
+				}
+				result_buffer_->silence_ = false;
+				return bytes;
 			}
 
-			int64_t Duration() {
-				return summing_buffer_->Size() / sample_rate_ * 1000;
+			int64_t Duration() override {
+				return BytesToMsec(SourceSampleRate(), summing_buffer_->Size());
 			}
 
 			int32_t SourceSampleRate() override {

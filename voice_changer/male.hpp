@@ -10,6 +10,7 @@ namespace effect {
 	private:
 		BiquadNode *lowpass_;
 		Jungle *jungle_;
+		//PhaseVocoderNode *jungle_;
 	public:
 
 		static float LOWPASS_FREQ_DEFAULT;
@@ -23,12 +24,29 @@ namespace effect {
 		explicit Male(AudioContext* ctx) :Effect(ctx) {
 			id_ = Effects::MALE;
 			lowpass_ = new BiquadNode(ctx);
-			lowpass_->frequency_->value_ = 4500;
+			lowpass_->frequency_->value_ = LOWPASS_FREQ_MAX;
+			/*jungle_ = new PhaseVocoderNode(ctx);
+			jungle_->pitch_ = 0.9f;
+			ctx->Connect(lowpass_, jungle_);
+			ctx->Connect(jungle_, gain_);*/
 			jungle_ = new Jungle(ctx);
 			jungle_->SetPitchOffset(-0.1);
 
 			ctx->Connect(lowpass_, jungle_->input_);
 			ctx->Connect(jungle_->output_, gain_);
+		}
+
+		void SetOptions(float *options, int option_count) override {
+			if (option_count > 0) {
+				lowpass_->frequency_->value_ = Clamp(LOWPASS_FREQ_MIN, LOWPASS_FREQ_MAX, options[0]);
+			}
+			if (option_count > 1) {
+				//jungle_->pitch_ = 1.0f + Clamp(PITCH_OFFSET_MIN, PITCH_OFFSET_MAX, options[1]);
+				jungle_->SetPitchOffset(Clamp(PITCH_OFFSET_MIN, PITCH_OFFSET_MAX, options[1]));
+			}
+			if (option_count > 2) {
+				SetGain(options[2]);
+			}
 		}
 
 		AudioNode *Input() {
@@ -52,11 +70,11 @@ namespace effect {
 		}
 	};
 
-	float Male::LOWPASS_FREQ_DEFAULT = 2000.0f;
-	float Male::LOWPASS_FREQ_MIN = 500.0f;
-	float Male::LOWPASS_FREQ_MAX = 6000.0f;
+	float Male::LOWPASS_FREQ_DEFAULT = 4000.0f;
+	float Male::LOWPASS_FREQ_MIN = 2000.0f;
+	float Male::LOWPASS_FREQ_MAX = 20000.0f;
 
 	float Male::PITCH_OFFSET_DEFAULT = -0.1f;
-	float Male::PITCH_OFFSET_MIN = -0.8f;
-	float Male::PITCH_OFFSET_MAX = 0.0f;
+	float Male::PITCH_OFFSET_MIN = -0.5f;
+	float Male::PITCH_OFFSET_MAX = 2.0f;
 }

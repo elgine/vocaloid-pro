@@ -32,29 +32,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="effect.hpp">
       <Filter>头文件\effects</Filter>
     </ClInclude>
     <ClInclude Include="effects.h">
       <Filter>头文件\effects</Filter>
     </ClInclude>
-    <ClInclude Include="events.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="apis.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="player.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="factory.hpp">
       <Filter>头文件\effects</Filter>
-    </ClInclude>
-    <ClInclude Include="status.h">
-      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="cave.hpp">
       <Filter>头文件\effects\environment</Filter>
@@ -66,9 +51,6 @@
       <Filter>头文件\effects\character</Filter>
     </ClInclude>
     <ClInclude Include="balrog.hpp">
-      <Filter>头文件\effects\character</Filter>
-    </ClInclude>
-    <ClInclude Include="big_guy.hpp">
       <Filter>头文件\effects\character</Filter>
     </ClInclude>
     <ClInclude Include="child.hpp">
@@ -116,13 +98,14 @@
     <ClInclude Include="megaphone.hpp">
       <Filter>头文件\effects\tool</Filter>
     </ClInclude>
-    <ClInclude Include="timeline.hpp">
+    <ClInclude Include="voice_player.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="apis.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
+    <ClInclude Include="status.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="uncle.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

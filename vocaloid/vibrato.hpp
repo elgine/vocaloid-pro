@@ -8,6 +8,10 @@ namespace vocaloid {
 	namespace composite {
 		using namespace vocaloid::node;
 		class Vibrato : public Composite {
+		private:
+			OscillatorNode *osc_;
+			DelayNode *delay_;
+			GainNode *gain_;
 		public:
 			static float VIBRATO_DELAY_DEFAULT;
 			static float VIBRATO_DELAY_MIN;
@@ -30,10 +34,6 @@ namespace vocaloid {
 				float vibrato_speed;
 			};
 
-			OscillatorNode *osc_;
-			DelayNode *delay_;
-			GainNode *gain_;
-
 		    explicit Vibrato(AudioContext *ctx) : Composite(ctx) {
 				delay_ = new DelayNode(ctx);
 				osc_ = new OscillatorNode(ctx);
@@ -48,6 +48,18 @@ namespace vocaloid {
 					0.03f,
 					0.002f
 				});
+			}
+
+			void SetDelay(float v) {
+				delay_->delay_time_->value_ = Clamp(VIBRATO_DELAY_MIN, VIBRATO_DELAY_MAX, v);
+			}
+
+			void SetDepth(float v) {
+				gain_->gain_->value_ = Clamp(VIBRATO_DEPTH_MIN, VIBRATO_DELAY_MAX, v);
+			}
+
+			void SetSpeed(float v) {
+				osc_->SetFrequency(Clamp(VIBRATO_SPEED_MIN, VIBRATO_SPEED_MAX, v));
 			}
 
 			void Start() override {

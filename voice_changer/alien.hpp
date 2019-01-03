@@ -3,6 +3,7 @@
 #include "../vocaloid/delay_node.hpp"
 #include "../vocaloid/oscillator_node.hpp"
 #include "effects.h"
+using namespace vocaloid;
 namespace effect {
 
 	class Alien : public Effect {
@@ -34,12 +35,25 @@ namespace effect {
 			delay_->delay_time_->value_ = 0.05f;
 		}
 
+		// [lfo_freq, lfo_gain, gain]
+		void SetOptions(float *options, int option_count) override {
+			if (option_count > 0) {
+				SetLFOFrequency(options[0]);
+			}
+			if (option_count > 1) {
+				SetLFOGain(options[1]);
+			}
+			if (option_count > 2) {
+				SetGain(options[2]);
+			}
+		}
+
 		void SetLFOFrequency(float v) {
-			osc_->SetFrequency(v);
+			osc_->SetFrequency(Clamp(LFO_FREQ_MIN, LFO_FREQ_MAX, v));
 		}
 
 		void SetLFOGain(float v) {
-			osc_gain_->gain_->value_ = v;
+			osc_gain_->gain_->value_ = Clamp(LFO_GAIN_MIN, LFO_GAIN_MAX, v);
 		}
 
 		void Start() override {

@@ -130,15 +130,15 @@ namespace vocaloid {
 								all_input_eof = false;
 							}
 						}
-						
 					}
 					if (!all_input_eof) {
 						processed_frames_ += cur_processed_frames;
 					}
 					//on_tick_->Emit(processed_frames_);
 					this_thread::sleep_for(chrono::milliseconds(MINUS_SLEEP_UNIT));
-					/*if (all_input_eof)
-						on_end_->Emit(0);*/
+					/*if (all_input_eof) {
+						on_end_->Emit(0);
+					}*/
 				}
 			}
 		public:
@@ -156,27 +156,30 @@ namespace vocaloid {
 			}
 
 			void SetOutput(OutputType output, int32_t sample_rate = 44100, int16_t channels = 2) override {
-				if (destination_ == nullptr) {
-					if (output == OutputType::PLAYER) {
-						destination_ = new PlayerNode(this);
+				vector<AudioNode*> inputs;
+				{
+					if (destination_ == nullptr) {
+						if (output == OutputType::PLAYER) {
+							destination_ = new PlayerNode(this);
+						}
+						else {
+							destination_ = new FileWriterNode(this);
+						}
 					}
-					else {
-						destination_ = new FileWriterNode(this);
+					else if (destination_->OutputType() != output) {
+						inputs.assign(destination_->Inputs().begin(), destination_->Inputs().end());
+						delete destination_;
+						destination_ = nullptr;
+						if (output == OutputType::PLAYER) {
+							destination_ = new PlayerNode(this);
+						}
+						else {
+							destination_ = new FileWriterNode(this);
+						}
 					}
-				}else if (destination_->OutputType() != output) {
-					vector<AudioNode*> inputs;
-					inputs.assign(destination_->Inputs().begin(), destination_->Inputs().end());
-					delete destination_;
-					destination_ = nullptr;
-					if (output == OutputType::PLAYER) {
-						destination_ = new PlayerNode(this);
-					}
-					else {
-						destination_ = new FileWriterNode(this);
-					}
-					for (auto input : inputs) {
-						Connect(input, destination_);
-					}
+				}
+				for (auto input : inputs) {
+					Connect(input, destination_);
 				}
 				SetOutputFormat(sample_rate, channels);
 			}
@@ -253,8 +256,8 @@ namespace vocaloid {
 
 			int Prepare() override {
 				Stop();
-				Traverse(traversal_nodes_);
 				int ret = 0;
+				Traverse(traversal_nodes_);
 				for (auto node : traversal_nodes_) {
 					ret = FindNode(node)->Initialize(SampleRate(), frame_size_);
 					if (ret < 0)return ret;
@@ -263,6 +266,7 @@ namespace vocaloid {
 			}
 
 			void Start() override {
+				unique_lock<mutex> lck(audio_render_thread_mutex_);
 				if (state_ == AudioContextState::PLAYING) {
 					return;
 				}

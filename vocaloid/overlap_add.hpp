@@ -16,6 +16,11 @@ namespace vocaloid {
 			float *buffer_;
 			float *frame_;
 			float *win_;
+
+			virtual void PushToOutputQueue(float *b, int64_t len) {
+				output_queue_->Add(b, len);
+			}
+
 		public:
 
 			OverlapAdd():hop_ana_(0), hop_syn_(0){
@@ -41,7 +46,7 @@ namespace vocaloid {
 				GenerateWin(win_type, frame_size, win_);
 
 				input_queue_->Alloc(frame_size * 2);
-				input_queue_->SetSize(frame_size);
+				input_queue_->SetSize(hop_ana_);
 				output_queue_->Alloc(frame_size * 2);
 			}
 
@@ -73,7 +78,7 @@ namespace vocaloid {
 					for (int i = 0; i < frame_size_; i++) {
 						buffer_[i] += frame_[i] * win_[i];
 					}
-					output_queue_->Add(buffer_, hop_syn_);
+					PushToOutputQueue(buffer_, hop_syn_);
 					for (int i = 0; i < frame_size_; i++) {
 						if (i + hop_syn_ >= frame_size_) {
 							buffer_[i] = 0.0f;

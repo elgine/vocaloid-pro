@@ -178,13 +178,17 @@ namespace vocaloid {
 				return header_.size2;
 			}
 
-			int64_t Seek(int64_t time) override {
-				auto pos = time * 0.001 * header_.samples_per_sec * header_.block_align;
+			int64_t Duration() override {
+				return float(FileLength()) / header_.block_align / header_.samples_per_sec * 1000.0f;
+			}
+
+			int64_t Seek(int64_t frame_offset) override {
+				auto pos = frame_offset * header_.block_align;
 				if (pos < header_.size2 && pos > 0) {
 					pos_ = pos;
 					in_.seekg(pos_ + GetHeaderLength());
 				}
-				return time;
+				return frame_offset;
 			}
 
 			int64_t ReadData(char *bytes, int64_t byte_length) override {

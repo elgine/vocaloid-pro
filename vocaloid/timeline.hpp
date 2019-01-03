@@ -16,46 +16,45 @@ namespace vocaloid {
 			int64_t cur_index_;
 		public:
 
-			explicit Timeline() {}
+			explicit Timeline() {
+				cur_index_ = 0;
+			}
 
-			int SetSegment(int64_t start, int64_t end) {
-				if (start >= end)return INVALIDATE_SEGMENT_DATA;
-				Dispose();
-				segments_.push_back({ start, end });
-				return SUCCEED;
+			void AddSegment(int64_t s, int64_t e) {
+				segments_.push_back({ s, e });
 			}
 
 			int SetSegments(int64_t **segments, int segment_count) {
 				if (segment_count <= 0)return INVALIDATE_SEGMENT_DATA;
 				Dispose();
-				int64_t last_timestamp = 0, start = 0, end = 0;
+				int64_t last = 0, start = 0, end = 0;
 				for (auto i = 0; i < segment_count; i++) {
 					start = segments[i][0];
 					end = segments[i][1];
-					if (start < last_timestamp) {
-						start = last_timestamp;
+					if (start < last) {
+						start = last;
 					}
 					if (end < start) {
 						end = start + 1;
 					}
-					segments_.push_back({ start, end });
-					last_timestamp = end;
+					AddSegment(start, end);
+					last = end;
 				}
 				return SUCCEED;
 			}
 
-			int Seek(int64_t timestamp) {
+			int Seek(int64_t bytes) {
 				int64_t index = -1;
-				if (timestamp < segments_[cur_index_].start || timestamp >= segments_[cur_index_].end) {
+				if (bytes < segments_[cur_index_].start || bytes >= segments_[cur_index_].end) {
 					int64_t start = 0, end = segments_.size() - 1, middle = 0;
 					if (end <= 0)return -1;
 					while (start <= end) {
 						middle = (start + end) / 2;
-						if (timestamp >= segments_[middle].start && timestamp < segments_[middle].end) {
+						if (bytes >= segments_[middle].start && bytes < segments_[middle].end) {
 							index = middle;
 							break;
 						}
-						else if (timestamp >= segments_[middle].end) {
+						else if (bytes >= segments_[middle].end) {
 							start = middle + 1;
 						}
 						else {

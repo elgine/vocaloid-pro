@@ -5,7 +5,7 @@
 #include "robot1.hpp"
 #include "robot2.hpp"
 #include "astronaut.hpp"
-#include "big_guy.hpp"
+#include "uncle.hpp"
 #include "female.hpp"
 #include "child.hpp"
 #include "male.hpp"
@@ -29,7 +29,7 @@ namespace effect {
 		case Effects::ROBOT1:return new Robot1(ctx);
 		case Effects::ROBOT2:return new Robot2(ctx);
 		case Effects::ASTRONAUT:return new Astronaut(ctx);
-		case Effects::BIG_GUY:return new BigGuy(ctx);
+		case Effects::UNCLE:return new Uncle(ctx);
 		case Effects::FEMALE:return new Female(ctx);
 		case Effects::CHILD:return new Child(ctx);
 		case Effects::MALE:return new Male(ctx);

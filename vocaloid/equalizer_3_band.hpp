@@ -58,22 +58,22 @@ namespace vocaloid {
 				ctx->Connect(lo_, wet_);
 			}
 
-			void SetLsfFreq(float v) {
-				lo_->frequency_->value_ = v;
+			void SetLowShelfGain(float v) {
+				lo_->gain_->value_ = Clamp(LOWSHELF_GAIN_MIN, LOWSHELF_GAIN_MAX, v);
 			}
 
-			void SetHsfFreq(float v) {
-				hi_->frequency_->value_ = v;
+			void SetHighShelfGain(float v) {
+				hi_->gain_->value_ = Clamp(HIGHSHELF_GAIN_MIN, HIGHSHELF_GAIN_MAX, v);
 			}
 
-			void SetPfFreq(float v) {
-				mi_->frequency_->value_ = v;
+			void SetPeakingGain(float v) {
+				mi_->gain_->value_ = Clamp(PEAKING_GAIN_MIN, PEAKING_GAIN_MAX, v);
 			}
 
 			void SetOptions(Equalizer3BandOptions options) {
-				lo_->gain_->value_ = options.lowshelf_gain;
-				mi_->gain_->value_ = options.peaking_gain;
-				hi_->gain_->value_ = options.highshelf_gain;
+				SetLowShelfGain(options.lowshelf_gain);
+				SetHighShelfGain(options.peaking_gain);
+				SetPeakingGain(options.highshelf_gain);
 			}
 
 			void Dispose() override {

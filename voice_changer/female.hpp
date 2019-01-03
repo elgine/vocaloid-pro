@@ -24,6 +24,15 @@ namespace effect {
 			ctx_->Connect(compressor_, gain_);
 		}
 
+		void SetOptions(float *options, int option_count) override {
+			if (option_count > 0) {
+				jungle_->SetPitchOffset(Clamp(PITCH_OFFSET_MIN, PITCH_OFFSET_MAX, options[0]));
+			}
+			if (option_count > 1) {
+				SetGain(options[1]);
+			}
+		}
+
 		void Start() override {
 			jungle_->Start();
 		}

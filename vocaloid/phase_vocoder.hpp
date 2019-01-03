@@ -54,6 +54,16 @@ namespace vocaloid {
 				stretch_ = float(hop_syn_) / hop_ana_;
 			}
 
+		protected:
+
+			void PushToOutputQueue(float *b, int64_t len) override {
+				auto frame_len = round(hop_ana_ * tempo_);
+				out_->Alloc(frame_len);
+				out_->SetSize(frame_len);
+				Resample(b, len, frame_len, out_->Data());
+				OverlapAdd::PushToOutputQueue(out_->Data(), frame_len);
+			}
+
 		public:
 
 			explicit PhaseVocoder():stretch_(1.0f),
@@ -93,9 +103,9 @@ namespace vocaloid {
 				for (int i = 0; i < fft_size; i++) {
 					omega_[i] = (float)(M_PI * 2.0f * hop_ana_ * i / fft_size);
 				}
-				input_queue_->Alloc(fft_size * 2);
-				input_queue_->SetSize(fft_size);
-				output_queue_->Alloc(fft_size * 2);
+				//input_queue_->Alloc(fft_size * 2);
+				//input_queue_->SetSize(fft_size);
+				//output_queue_->Alloc(fft_size * 2);
 			}
 
 			void Analyse() override {
@@ -127,17 +137,18 @@ namespace vocaloid {
 
 			int64_t Process(float *in, int64_t len, float *out) {
 				OverlapAdd::Process(in, len);
-				return PopFrame(out, len);
+				//return PopFrame(out, len);
+				return OverlapAdd::Pop(out, len);
 			}
 
-			int64_t PopFrame(float *frame, int64_t len) {
+			/*int64_t PopFrame(float *frame, int64_t len) {
 				auto frame_len = int64_t(len * stretch_);
 				out_->Alloc(frame_len);
 				out_->SetSize(frame_len);
 				frame_len = OverlapAdd::Pop(out_, frame_len);
 				if (frame_len <= 0)return 0;
 				return Resample(out_->Data(), frame_len, len, frame);
-			}
+			}*/
 
 			void SetPitch(float v) {
 				if (pitch_ == v)return;

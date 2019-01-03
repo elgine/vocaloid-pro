@@ -75,9 +75,11 @@ namespace vocaloid {
 			}
 
 			int64_t GetBuffer(int64_t offset, int64_t len) override {
-				auto buf_size = len * BITS_PER_SEC / 8 * channels_;
+				auto frame_size = BITS_PER_SEC / 8 * channels_;
+				auto buf_size = len * frame_size;
 				auto size = reader_->ReadData(temp_buffer_, buf_size);
 				if (size <= 0) {
+					if (reader_->End())return loop_?len:EOF;
 					return 0;
 				}
 				result_buffer_->silence_ = false;
@@ -89,19 +91,19 @@ namespace vocaloid {
 				}
 				else
 					result_buffer_->FromByteArray(temp_buffer_, buf_size, bits_, channels_, offset);
-				return size / (BITS_PER_SEC / 8 * channels_);
+				return float(size) / frame_size;
 			}
 
-			int64_t SeekInternal(int64_t timestamp) override {
-				return reader_->Seek(timestamp);
+			int64_t SeekInternal(int64_t frame_offset) override {
+				return reader_->Seek(frame_offset);
 			}
 
 			int32_t SourceSampleRate() override {
-				return reader_->Format().sample_rate;
+				return summing_buffer_->sample_rate_;
 			}
 
 			int64_t Duration() {
-				return reader_->FileLength() / (BITS_PER_SEC / 8 * channels_) / summing_buffer_->sample_rate_ * 1000;
+				return reader_->Duration();
 			}
 
 			void Stop() override {

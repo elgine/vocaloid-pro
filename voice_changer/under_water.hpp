@@ -48,7 +48,7 @@ namespace effect {
 			compressor_ = new DynamicsCompressorNode(ctx);
 
 			underwater_ = new FileReaderNode(ctx);
-			underwater_->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\underwater.mp3");
+			underwater_->Open("G:\\Projects\\VSC++\\vocaloid\\samples\\underwater.mp3");
 			underwater_->loop_ = true;
 			underwater_gain_ = new GainNode(ctx, 0.3f);
 

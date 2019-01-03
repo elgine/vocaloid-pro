@@ -85,7 +85,7 @@ namespace vocaloid {
 				float max = powf(2.0f, (float)bits - 1) - 1.0f;
 				for (int i = 0; i < buffer_size; i++) {
 					for (int j = 0; j < channels_; j++) {
-						float clipped = Clamp(-0.98f, 0.98f, data_[j]->Data()[i]);
+						float clipped = Clamp(-1.0f, 1.0f, data_[j]->Data()[i]);
 						auto value = (long)(clipped * max);
 						for (int k = 0; k < depth; k++) {
 							byte_array[i * step + j * depth + k] = (char)((value >> 8 * k) & 0xFF);

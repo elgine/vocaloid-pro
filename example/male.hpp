@@ -9,14 +9,15 @@ using namespace vocaloid::dsp;
 using namespace vocaloid::composite;
 void Run() {
 	auto context = new AudioContext();
+	context->SetOutput(OutputType::PLAYER, 44100, 2);
 	auto low_pass = new BiquadNode(context);
 	low_pass->frequency_->value_ = 4500;
 	auto pitch_shifter = new Jungle(context);
 	pitch_shifter->SetPitchOffset(-0.1);
 	auto amplify = new GainNode(context, 1.1);
-	context->SetOutput(OutputType::PLAYER);
+	
 	auto source = new FileReaderNode(context);
-	source->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
+	source->Open("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
 
 	context->Connect(source, low_pass);
 	context->Connect(low_pass, pitch_shifter->input_);

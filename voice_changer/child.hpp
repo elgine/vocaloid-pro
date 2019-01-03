@@ -34,6 +34,25 @@ namespace effect {
 		static float HIGHPASS_MIN;
 		static float HIGHPASS_MAX;
 
+		// [pitch, lowshelf_gain, peaking_gain, highshelf_gain, highpass]
+		void SetOptions(float *options, int option_count) override {
+			if (option_count > 0) {
+				phase_vocoder_->pitch_ = Clamp(PITCH_MIN, PITCH_MAX, options[0]);
+			}
+			if (option_count > 1) {
+				equalizer_->SetLowShelfGain(options[1]);
+			}
+			if (option_count > 2) {
+				equalizer_->SetPeakingGain(options[2]);
+			}
+			if (option_count > 3) {
+				equalizer_->SetHighShelfGain(options[3]);
+			}
+			if (option_count > 4) {
+				SetGain(options[4]);
+			}
+		}
+
 		explicit Child(AudioContext *ctx): Effect(ctx) {
 			id_ = Effects::CHILD;
 			phase_vocoder_ = new PhaseVocoderNode(ctx);

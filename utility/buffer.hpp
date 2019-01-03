@@ -44,12 +44,10 @@ namespace vocaloid{
         }
 
         void Splice(int64_t len, int64_t offset = 0){
-			len = min(offset + len, max_size_) - offset;
-			if (len <= 0)return;
-			int64_t end_index = offset + len;
-			int64_t count = max_size_ - offset - len;
-			memcpy(data_ + offset, data_ + end_index, count * sizeof(T));
-			memset(data_ + end_index, 0, count * sizeof(T));
+			if (len >= size_)return;
+			auto count = size_ - len - offset;
+			memcpy(data_ + offset, data_ + offset + len, count * sizeof(T));
+			memset(data_ + offset + count, 0, (max_size_ - count - offset) * sizeof(T));
 			size_ -= len;
         }
 

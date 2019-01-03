@@ -42,7 +42,7 @@ namespace vocaloid {
 			}
 
 			int64_t ProcessFrame() override {
-				if (player_ == nullptr)return 0;
+				if (player_ == nullptr || summing_buffer_->silence_)return 0;
 				int64_t size = 0;
 				summing_buffer_->ToByteArray(BITS_PER_SEC, bytes_->Data(), size);
 				player_->Push(bytes_->Data(), size);

@@ -14,7 +14,7 @@
 ///#include "sauron.hpp"
 
 /// environment or tool
-#include "muffler.hpp"
+//#include "muffler.hpp"
 //#include "cave.hpp"
 //#include "telephone.hpp"
 //#include "hall.hpp"

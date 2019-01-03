@@ -66,6 +66,42 @@ namespace effect {
 		static float FIRE_GAIN_MIN;
 		static float FIRE_GAIN_MAX;
 
+		// [lfo_freq, lfo_gain, delay, high_shelf, 
+		// compressor_threshold, compressor_ratio, 
+		// echo_gain, main_gain, fire_gain , gain]
+		void SetOptions(float *options, int option_count) override {
+			if (option_count > 0) {
+				osc_->SetFrequency(Clamp(LFO_FREQ_MIN, LFO_FREQ_MAX, options[0]));
+			}
+			if (option_count > 1) {
+				osc_gain_->gain_->value_ = Clamp(LFO_GAIN_MIN, LFO_GAIN_MAX, options[1]);
+			}
+			if (option_count > 2) {
+				delay_->delay_time_->value_ = Clamp(DELAY_MIN, DELAY_MAX, options[2]);
+			}
+			if (option_count > 3) {
+				filter_->frequency_->value_ = Clamp(HIGHSHELF_FREQ_MIN, HIGHSHELF_FREQ_MAX, options[3]);
+			}
+			if (option_count > 4) {
+				compressor_->threshold_ = Clamp(COMPRESSOR_THRESHOLD_MIN, COMPRESSOR_THRESHOLD_MAX, options[4]);
+			}
+			if (option_count > 5) {
+				compressor_->ratio_ = Clamp(COMPRESSOR_RATIO_MIN, COMPRESSOR_RATIO_MAX, options[5]);
+			}
+			if (option_count > 6) {
+				convolver_gain_->gain_->value_ = Clamp(ECHO_GAIN_MIN, ECHO_GAIN_MAX, options[6]);
+			}
+			if (option_count > 7) {
+				no_conv_gain_->gain_->value_ = Clamp(MAIN_GAIN_MIN, MAIN_GAIN_MAX, options[7]);
+			}
+			if (option_count > 8) {
+				fire_gain_->gain_->value_ = Clamp(FIRE_GAIN_MIN, FIRE_GAIN_MAX, options[8]);
+			}
+			if (option_count > 9) {
+				SetGain(options[9]);
+			}
+		}
+
 		explicit Balrog(AudioContext *ctx) : Effect(ctx) {
 			id_ = Effects::BALROG;
 			filter_ = new BiquadNode(ctx);
@@ -99,7 +135,7 @@ namespace effect {
 			convolver_gain_->gain_->value_ = 0.5;
 
 			fire_ = new FileReaderNode(ctx);
-			fire_->SetPath("G:\\Projects\\VSC++\\vocaloid\\samples\\fire.mp3");
+			fire_->Open("G:\\Projects\\VSC++\\vocaloid\\samples\\fire.mp3");
 			fire_gain_ = new GainNode(ctx);
 			fire_gain_->gain_->value_ = 0.1;
 			fire_->loop_ = true;

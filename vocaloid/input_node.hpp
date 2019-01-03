@@ -15,6 +15,14 @@ namespace vocaloid {
 				active_ = false;
 			}
 
+			int Initialize(int32_t sample_rate, int64_t frame_size) override {
+				sample_rate_ = sample_rate;
+				frame_size_ = frame_size;
+				result_buffer_->Alloc(channels_, frame_size_);
+				result_buffer_->SetSize(frame_size_);
+				return SUCCEED;
+			}
+
 			int64_t Process() override {
 				if (!active_)return 0;
 				result_buffer_->Zero();

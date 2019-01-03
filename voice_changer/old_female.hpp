@@ -9,7 +9,7 @@ namespace effect {
 	class OldFemale : public Effect {
 	private:
 		BiquadNode *highpass_;
-		Jungle *jungle_;
+		PhaseVocoderNode *jungle_;
 		composite::Vibrato *vibrato_;
 	public:
 
@@ -17,9 +17,13 @@ namespace effect {
 		static float HIGHPASS_FREQ_MIN;
 		static float HIGHPASS_FREQ_MAX;
 
-		static float PITCH_OFFSET_DEFAULT;
-		static float PITCH_OFFSET_MIN;
-		static float PITCH_OFFSET_MAX;
+		static float PITCH_DEFAULT;
+		static float PITCH_MIN;
+		static float PITCH_MAX;
+
+		static float TEMPO_DEFAULT;
+		static float TEMPO_MIN;
+		static float TEMPO_MAX;
 
 		static float VIBRATO_DELAY_DEFAULT;
 		static float VIBRATO_DELAY_MIN;
@@ -37,27 +41,50 @@ namespace effect {
 			id_ = Effects::OLD_FEMALE;
 			highpass_ = new BiquadNode(ctx);
 			highpass_->type_ = BIQUAD_TYPE::HIGH_PASS;
-			highpass_->frequency_->value_ = 1250;
-			jungle_ = new Jungle(ctx);
-			jungle_->SetPitchOffset(0.25f);
+			highpass_->frequency_->value_ = HIGHPASS_FREQ_DEFAULT;
+			jungle_ = new PhaseVocoderNode(ctx);
+			jungle_->pitch_ = PITCH_DEFAULT;
+			jungle_->tempo_ = TEMPO_DEFAULT;
 			vibrato_ = new composite::Vibrato(ctx);
 			vibrato_->SetOptions({
-				0.05f,
-				0.001f,
-				7.2f,
+				VIBRATO_DELAY_DEFAULT,
+				VIBRATO_DEPTH_DEFAULT,
+				VIBRATO_SPEED_DEFAULT,
 			});
-
-			ctx->Connect(jungle_->output_, highpass_);
+			ctx->Connect(jungle_, highpass_);
 			ctx->Connect(highpass_, vibrato_->input_);
 			ctx->Connect(vibrato_->output_, gain_);
 		}
+		
+		void SetOptions(float *options, int option_count) override {
+			if (option_count > 0) {
+				highpass_->frequency_->value_ = Clamp(HIGHPASS_FREQ_MIN, HIGHPASS_FREQ_MAX, options[0]);
+			}
+			if (option_count > 1) {
+				jungle_->pitch_ = Clamp(PITCH_MIN, PITCH_MAX, options[1]);
+			}
+			if (option_count > 2) {
+				jungle_->tempo_ = Clamp(TEMPO_MIN, TEMPO_MAX, options[2]);
+			}
+			if (option_count > 3) {
+				vibrato_->SetDelay(options[3]);
+			}
+			if (option_count > 4) {
+				vibrato_->SetDepth(options[4]);
+			}
+			if (option_count > 5) {
+				vibrato_->SetSpeed(options[5]);
+			}
+			if (option_count > 6) {
+				SetGain(options[5]);
+			}
+		}
 
 		AudioNode *Input() {
-			return jungle_->input_;
+			return jungle_;
 		}
 
 		void Start() override {
-			jungle_->Start();
 			vibrato_->Start();
 		}
 
@@ -78,13 +105,17 @@ namespace effect {
 		}
 	};
 
-	float OldFemale::HIGHPASS_FREQ_DEFAULT = 1250.0f;
-	float OldFemale::HIGHPASS_FREQ_MIN = 500.0f;
-	float OldFemale::HIGHPASS_FREQ_MAX = 8000.0f;
+	float OldFemale::HIGHPASS_FREQ_DEFAULT = 120.0f;
+	float OldFemale::HIGHPASS_FREQ_MIN = 100.0f;
+	float OldFemale::HIGHPASS_FREQ_MAX = 4000.0f;
 
-	float OldFemale::PITCH_OFFSET_DEFAULT = 0.25f;
-	float OldFemale::PITCH_OFFSET_MIN = 0.0f;
-	float OldFemale::PITCH_OFFSET_MAX = 0.5f;
+	float OldFemale::PITCH_DEFAULT = 1.3f;
+	float OldFemale::PITCH_MIN = 1.0f;
+	float OldFemale::PITCH_MAX = 2.0f;
+
+	float OldFemale::TEMPO_DEFAULT = 1.2f;
+	float OldFemale::TEMPO_MIN = 1.0f;
+	float OldFemale::TEMPO_MAX = 1.5f;
 
 	float OldFemale::VIBRATO_DELAY_DEFAULT = Vibrato::VIBRATO_DELAY_DEFAULT;
 	float OldFemale::VIBRATO_DELAY_MIN = Vibrato::VIBRATO_DELAY_MIN;

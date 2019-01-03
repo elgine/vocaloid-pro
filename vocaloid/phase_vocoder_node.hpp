@@ -16,6 +16,7 @@ namespace vocaloid {
 				pitch_ = 1.0f;
 				tempo_ = 1.0f;
 				overlap_ = 0.25f;
+				channels_ = 1;
 			}
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) {

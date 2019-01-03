@@ -200,7 +200,14 @@ namespace vocaloid {
 				unique_lock<mutex> lck(decode_mutex_);
 				auto audio_stream = ctx_->streams[a_stream_index_];
 				auto duration = audio_stream->duration * av_q2d(audio_stream->time_base);
-				return duration * codec_ctx_->sample_rate * codec_ctx_->channels * BITS_PER_SEC/8;
+				return duration * codec_ctx_->sample_rate * codec_ctx_->channels * BITS_PER_SEC / 8;
+
+			}
+
+			int64_t Duration() override {
+				unique_lock<mutex> lck(decode_mutex_);
+				auto audio_stream = ctx_->streams[a_stream_index_];
+				return audio_stream->duration * av_q2d(audio_stream->time_base) * 1000.0f;
 			}
 
 			void Flush(char* data, int64_t& length) override {
@@ -383,11 +390,11 @@ namespace vocaloid {
 				return buffer_size_ >= len;
 			}
 
-			int64_t Seek(int64_t time) override {
+			int64_t Seek(int64_t frame_offset) override {
 				{
 					unique_lock<mutex> lck(decode_mutex_);
 					if (ctx_ != nullptr) {
-						av_seek_frame(ctx_, a_stream_index_, int64_t(time * 0.001f / av_q2d(ctx_->streams[a_stream_index_]->time_base)), AVSEEK_FLAG_BACKWARD);
+						av_seek_frame(ctx_, a_stream_index_, frame_offset, AVSEEK_FLAG_BACKWARD);
 						avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
 						FlushConvertor(lck);
 						buffer_size_ = 0;
@@ -403,10 +410,9 @@ namespace vocaloid {
 								is_end_ = true;
 								break;
 							}
-							else{
+							else {
 								if (packet_->duration <= 0)break;
-								int64_t packet_timestamp = float(packet_->pts) * av_q2d(ctx_->streams[a_stream_index_]->time_base) * 1000;
-								if (packet_timestamp >= time) {
+								if (packet_->pts >= frame_offset) {
 									auto decoded = 0, got_frame = 0;
 									while (packet_->size > 0) {
 										decoded = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet_);
@@ -428,7 +434,7 @@ namespace vocaloid {
 											break;
 										}
 									}
-									time = packet_timestamp;
+									frame_offset = packet_->pts;
 									break;
 								}
 							}
@@ -436,8 +442,64 @@ namespace vocaloid {
 						}
 					}
 				}
-				return time;
+				return frame_offset;
 			}
+
+			//int64_t Seek(int64_t time) override {
+			//	{
+			//		unique_lock<mutex> lck(decode_mutex_);
+			//		if (ctx_ != nullptr) {
+			//			av_seek_frame(ctx_, a_stream_index_, int64_t(time * 0.001f / av_q2d(ctx_->streams[a_stream_index_]->time_base)), AVSEEK_FLAG_BACKWARD);
+			//			avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
+			//			FlushConvertor(lck);
+			//			buffer_size_ = 0;
+			//			is_end_ = false;
+			//			has_begun_ = false;
+
+			//			// Read frame util it's timestamp reach time or EOF
+			//			while (true) {
+			//				auto ret = av_read_frame(ctx_, packet_);
+			//				if (ret == AVERROR_EOF) {
+			//					packet_->data = nullptr;
+			//					packet_->size = 0;
+			//					is_end_ = true;
+			//					break;
+			//				}
+			//				else{
+			//					if (packet_->duration <= 0)break;
+			//					int64_t packet_timestamp = float(packet_->pts) * av_q2d(ctx_->streams[a_stream_index_]->time_base) * 1000;
+			//					if (packet_timestamp >= time) {
+			//						auto decoded = 0, got_frame = 0;
+			//						while (packet_->size > 0) {
+			//							decoded = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet_);
+			//							if (got_frame > 0) {
+			//								auto samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples,
+			//									(const uint8_t**)frame_->data, frame_->nb_samples);
+			//								if (samples > 0) {
+			//									memcpy(buffer_ + buffer_size_, decode_frame_->data[0], samples * decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format)));
+			//									buffer_size_ += output_frame_size_;
+			//								}
+			//							}
+			//							if (decoded < 0)break;
+			//							decoded = FFMIN(decoded, packet_->size);
+			//							if (packet_->size - decoded >= 0) {
+			//								packet_->data += decoded;
+			//								packet_->size -= decoded;
+			//							}
+			//							else {
+			//								break;
+			//							}
+			//						}
+			//						time = packet_timestamp;
+			//						break;
+			//					}
+			//				}
+			//				av_packet_unref(packet_);
+			//			}
+			//		}
+			//	}
+			//	return time;
+			//}
 
 			AudioFormat Format() override {
 				unique_lock<mutex> lck(decode_mutex_);
