@@ -30,7 +30,7 @@ void main() {
 
 	set_extract_temp_path_fn("C:\\Users\\Elgine\\Desktop");
 	open_fn("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
-	set_effect_fn(15);
+	set_effect_fn(14);
 	set_loop_fn(true);
 	play_fn();
 	getchar();

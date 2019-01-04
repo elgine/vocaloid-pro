@@ -36,8 +36,10 @@ string ExtractResource(int res_id, WCHAR* res_type) {
 		result = resources[res_id];
 	}
 	else {
-		wstring res_name = MAKEINTRESOURCE(LPCTSTR(res_id));
-		wstring file_path = temp_path + res_name;
+		wstring res_name;
+		_itow(res_id, (wchar_t*)res_name.data(), 10);
+		wstring file_path = temp_path;
+		file_path += res_name;
 		if (ExtractResource(file_path.data(), res_type, res_name.data())) {
 			resources[res_id] = file_path;
 			result = file_path;

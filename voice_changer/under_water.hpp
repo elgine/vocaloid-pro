@@ -50,7 +50,7 @@ namespace effect {
 			compressor_ = new DynamicsCompressorNode(ctx);
 
 			underwater_ = new FileReaderNode(ctx);
-			underwater_->Open(ExtractResource(IDR_UNDERWATER, L"mp3").data());
+			underwater_->Open(ExtractResource(IDR_UNDERWATER, L"MP3").data());
 			underwater_->loop_ = true;
 			underwater_gain_ = new GainNode(ctx, UNDER_WATER_BACKGROUND_GAIN_DEFAULT);
 

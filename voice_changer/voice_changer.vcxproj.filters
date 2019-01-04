@@ -155,9 +155,6 @@
     <Media Include="..\samples\radio.wav">
       <Filter>资源文件</Filter>
     </Media>
-    <Media Include="..\samples\speech.wav">
-      <Filter>资源文件</Filter>
-    </Media>
     <Media Include="..\samples\spring.wav">
       <Filter>资源文件</Filter>
     </Media>

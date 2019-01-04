@@ -68,7 +68,6 @@
     <Media Include="..\samples\muffler.wav" />
     <Media Include="..\samples\parking.wav" />
     <Media Include="..\samples\radio.wav" />
-    <Media Include="..\samples\speech.wav" />
     <Media Include="..\samples\spring.wav" />
     <Media Include="..\samples\telephone.wav" />
     <Media Include="..\samples\underwater.mp3" />
