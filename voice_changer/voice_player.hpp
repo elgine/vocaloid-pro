@@ -2,9 +2,12 @@
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/file_reader_node.hpp"
 #include "../vocaloid/player_node.hpp"
+#include "../utility/signal.hpp"
 #include "effect.hpp"
 #include "factory.hpp"
 #include "status.h"
+#include <sstream>
+using namespace std;
 using namespace vocaloid;
 using namespace vocaloid::node;
 using namespace effect;
@@ -29,17 +32,28 @@ private:
 	void OnTick() {
 		int64_t last = 0, cur = 0;
 		while (true) {
-			//{
-			//	unique_lock<mutex> lck(tick_mutex_);
-			//	cur = player_->Processed();
-			//	if (state_ == VoicePlayerState::PLAYER_STOP && cur == last) {
-			//		break;
-			//	}
-			//	// Emit client to update timestamp
-			//	last = cur;
-			//}
+			{
+				unique_lock<mutex> lck(tick_mutex_);
+				ctx_->Lock();
+				cur = player_->Processed();
+				ctx_->Unlock();
+				if (state_ == VoicePlayerState::PLAYER_STOP && cur == last) {
+					break;
+				}
+				last = cur;
+			}
+			on_tick_->Emit(BuildTickMsg(cur));
 			this_thread::sleep_for(chrono::milliseconds(20));
 		}
+	}
+
+	string BuildTickMsg(int64_t timestamp) {
+		string output;
+		std::stringstream ss(output);
+		ss << "{\n"
+			<< "\timestamp\: " << timestamp << ", \n"
+			<< "}\n";
+		return output;
 	}
 
 	void Join() {
@@ -51,11 +65,15 @@ private:
 	}
 
 public:
+
+	Signal<string> *on_tick_;
+
 	explicit VoicePlayer(int32_t sample_rate = 44100, int16_t channels = 2) {
 		ctx_ = new AudioContext();
 		ctx_->SetOutput(OutputType::PLAYER, sample_rate, channels);
 		player_ = static_cast<PlayerNode*>(ctx_->Destination());
 		source_reader_ = new FileReaderNode(ctx_);
+		on_tick_ = new Signal<string>();
 		effect_ = nullptr;
 		tick_thread_ = nullptr;
 		inited_ = false;
@@ -130,6 +148,7 @@ public:
 				ctx_->Connect(source_reader_, player_);
 			}
 		}
+		if (source_reader_->SegmentCount() == 0)PlayAll();
 		if (effect_) {
 			effect_->Start();
 		}

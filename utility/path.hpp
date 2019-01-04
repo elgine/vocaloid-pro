@@ -2,6 +2,7 @@
 #include <string>
 #include <regex>
 #include <io.h>
+#include <direct.h>
 #include <sys/stat.h>
 using namespace std;
 
@@ -22,6 +23,22 @@ bool IsFileExists(const char* path) {
 
 bool IsFileReadable(const char* path) {
 	return !(_access(path, 4) == -1);
+}
+
+bool CreateDirectoryRecursivly(const char* path) {
+	string all_path = path;
+	string dir;
+	auto offset = 0;
+	auto pos = all_path.find("\\", offset);
+	while (pos != -1) {
+		dir = all_path.substr(0, pos);
+		if (_access(dir.data(), 0) < 0) {
+			if (mkdir(dir.data()) < 0)return false;
+		}
+		offset = pos + 1;
+		pos = all_path.find("\\", offset);
+	}
+	return true;
 }
 
 string GetExtension(const string path){

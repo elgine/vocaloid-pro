@@ -131,6 +131,7 @@
     <ClInclude Include="emitter.hpp" />
     <ClInclude Include="path.hpp" />
     <ClInclude Include="signal.hpp" />
+    <ClInclude Include="string_wstring.hpp" />
     <ClInclude Include="str_num.hpp" />
     <ClInclude Include="thread_pool.hpp" />
     <ClInclude Include="ticker.hpp" />

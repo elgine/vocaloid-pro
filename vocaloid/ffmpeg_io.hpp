@@ -83,24 +83,29 @@ namespace vocaloid {
 			// The max buffer size
 			int64_t max_buffer_size_;
 
-			int Decode(AVPacket *packet, unique_lock<mutex> &lck) {
+			int Decode(AVPacket *packet) {
 				auto got_frame = 0;
 				auto ret = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet);
 				// && frame_->nb_samples == codec_ctx_->frame_size
 				if (got_frame > 0) {
 					frame_count_++;
-					Convert((const uint8_t**)frame_->data, frame_->nb_samples, lck);
+					Convert((const uint8_t**)frame_->data, frame_->nb_samples);
 				}
-				FlushConvertor(lck);
+				FlushConvertor();
 				return ret;
 			}
 
-			int Convert(const uint8_t** frame_data, int64_t nb_samples, unique_lock<mutex> &lck) {
+			int Convert(const uint8_t** frame_data, int64_t nb_samples) {
 				auto samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples,
 					frame_data, nb_samples);
 				if (samples > 0) {
-					while (!EnableToDecode())
-						can_decode_.wait(lck);
+					if (!EnableToDecode()) {
+						char* new_buf;
+						AllocArray(buffer_size_ + output_frame_size_, &new_buf);
+						memcpy(new_buf, buffer_, buffer_size_);
+						DeleteArray(&buffer_);
+						buffer_ = new_buf;
+					}
 					memcpy(buffer_ + buffer_size_, decode_frame_->data[0], samples * decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format)));
 					buffer_size_ += output_frame_size_;
 				}
@@ -111,10 +116,10 @@ namespace vocaloid {
 			// larger than output size, it would cache in it's inner
 			// buffer queue. So, use swr_get_out_samples to get the 
 			// queue size, if it's capable for output, pop buffer and loop.
-			void FlushConvertor(unique_lock<mutex> &lck) {
+			void FlushConvertor() {
 				int fifo_size = swr_get_out_samples(swr_ctx_, 0);
 				while (fifo_size >= decode_frame_->nb_samples) {
-					auto samples = Convert(nullptr, 0, lck);
+					auto samples = Convert(nullptr, 0);
 					fifo_size -= samples;
 				}
 			}
@@ -122,10 +127,10 @@ namespace vocaloid {
 			// Some audio decoders decode only part of the packet, and have to be
 			// called again with the remainder of the packet data.
 			// Also, some decoders might over-read the packet.
-			void DecodePacket(AVPacket *packet, unique_lock<mutex> &lck) {
+			void DecodePacket(AVPacket *packet) {
 				auto decoded = 0;
 				while (packet->size > 0) {
-					decoded = Decode(packet, lck);
+					decoded = Decode(packet);
 					if (decoded < 0)break;
 					decoded = FFMIN(decoded, packet->size);
 					if (packet->size - decoded >= 0) {
@@ -153,14 +158,14 @@ namespace vocaloid {
 						if (ret == AVERROR_EOF) {
 							packet_->data = nullptr;
 							packet_->size = 0;
-							Decode(packet_, lck);
+							Decode(packet_);
 							is_end_ = true;
 							// has_begun_ = false;
 							break;
 						}
 						else if(ret >= 0){
 							if (packet_->stream_index == a_stream_index_) {
-								DecodePacket(packet_, lck);
+								DecodePacket(packet_);
 							}
 						}
 						av_packet_unref(packet_);
@@ -364,8 +369,8 @@ namespace vocaloid {
 				{
 					unique_lock<mutex> lck(decode_mutex_);
 					decoding_ = false;
-					can_decode_.notify_all();
 				}
+				can_decode_.notify_all();
 				if (decode_thread_ != nullptr && decode_thread_->joinable())
 					decode_thread_->join();
 			}
@@ -396,7 +401,7 @@ namespace vocaloid {
 					if (ctx_ != nullptr) {
 						av_seek_frame(ctx_, a_stream_index_, frame_offset, AVSEEK_FLAG_BACKWARD);
 						avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
-						FlushConvertor(lck);
+						FlushConvertor();
 						buffer_size_ = 0;
 						is_end_ = false;
 						has_begun_ = false;

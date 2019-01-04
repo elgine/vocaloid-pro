@@ -9,7 +9,8 @@
 #include "../vocaloid/file_reader_node.hpp"
 #include "effects.h"
 #include "effect.hpp"
-
+#include "extract_resource.hpp"
+#include "resource.h"
 namespace effect {
 
 	class Balrog : public Effect {
@@ -135,7 +136,7 @@ namespace effect {
 			convolver_ = new ConvolutionNode(ctx);
 			auto buf = new vocaloid::Buffer<char>();
 			auto format = new vocaloid::io::AudioFormat();
-			ReadFileBuffer("G:\\Projects\\VSC++\\vocaloid\\samples\\large-wide-echo-hall.wav", format, buf);
+			ReadFileBuffer(ExtractResource(IDR_LARGE_WIDE_ECHO_HALL, L"wav").data(), format, buf);
 			auto channel = new AudioChannel();
 			channel->FromBuffer(buf, format->bits, format->channels);
 			convolver_->kernel_ = channel;
@@ -145,7 +146,7 @@ namespace effect {
 			convolver_gain_->gain_->value_ = ECHO_GAIN_DEFAULT;
 
 			fire_ = new FileReaderNode(ctx);
-			fire_->Open("G:\\Projects\\VSC++\\vocaloid\\samples\\fire.mp3");
+			fire_->Open(ExtractResource(IDR_FIRE, L"mp3").data());
 			fire_gain_ = new GainNode(ctx);
 			fire_gain_->gain_->value_ = FIRE_GAIN_DEFAULT;
 			fire_->loop_ = true;

@@ -117,9 +117,10 @@ namespace vocaloid {
 			void Run() {
 				bool all_input_eof = false;
 				int64_t processed_frames_ = 0, cur_processed_frames = 0;
-				while (state_ == AudioContextState::PLAYING) {
+				while (true) {
 					{
 						unique_lock<mutex> lck(audio_render_thread_mutex_);
+						if (state_ != AudioContextState::PLAYING)break;
 						if (!all_input_eof)all_input_eof = true;
 						for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
 							auto node = FindNode(*iter);
@@ -134,11 +135,11 @@ namespace vocaloid {
 					if (!all_input_eof) {
 						processed_frames_ += cur_processed_frames;
 					}
-					//on_tick_->Emit(processed_frames_);
+					on_tick_->Emit(processed_frames_);
 					this_thread::sleep_for(chrono::milliseconds(MINUS_SLEEP_UNIT));
-					/*if (all_input_eof) {
+					if (all_input_eof) {
 						on_end_->Emit(0);
-					}*/
+					}
 				}
 			}
 		public:

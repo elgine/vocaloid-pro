@@ -1,2 +1,10 @@
 LIBRARY VoiceChanger
 EXPORTS
+SetExtractTempPath
+SetEffect
+SetLoop
+SetPlaySegments
+Open
+SetOptions
+Play
+StopPlaying

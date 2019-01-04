@@ -23,8 +23,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="alien.hpp" />
+    <ClInclude Include="ane.h" />
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="balrog.hpp" />
+    <ClInclude Include="voice_renderer.hpp" />
+    <ClInclude Include="interface.h" />
+    <ClInclude Include="extract_resource.hpp" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="uncle.hpp" />
     <ClInclude Include="broad_room.hpp" />
     <ClInclude Include="cave.hpp" />
@@ -47,6 +52,26 @@
     <ClInclude Include="transformer.hpp" />
     <ClInclude Include="under_water.hpp" />
     <ClInclude Include="voice_player.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="interface.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="voice_changer.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\samples\church.wav" />
+    <Media Include="..\samples\female-voice.wav" />
+    <Media Include="..\samples\fire.mp3" />
+    <Media Include="..\samples\large-long-echo-hall.wav" />
+    <Media Include="..\samples\large-wide-echo-hall.wav" />
+    <Media Include="..\samples\muffler.wav" />
+    <Media Include="..\samples\parking.wav" />
+    <Media Include="..\samples\radio.wav" />
+    <Media Include="..\samples\speech.wav" />
+    <Media Include="..\samples\spring.wav" />
+    <Media Include="..\samples\telephone.wav" />
+    <Media Include="..\samples\underwater.mp3" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AECEBFF0-24F0-4923-BA88-6F05306F33E7}</ProjectGuid>
@@ -101,27 +126,31 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_ReferencesPath_x86);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_ReferencesPath_x64);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_ReferencesPath_x86);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_ReferencesPath_x64);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

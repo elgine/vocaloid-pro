@@ -4,6 +4,8 @@
 #include "../utility/buffer.hpp"
 #include "effect.hpp"
 #include "effects.h"
+#include "extract_resource.hpp"
+#include "resource.h"
 namespace effect {
 
 	class Radio : public Effect {
@@ -16,7 +18,7 @@ namespace effect {
 			auto channel_data = new AudioChannel();
 			auto buffer = new vocaloid::Buffer<char>();
 			auto format = new vocaloid::io::AudioFormat();
-			ReadFileBuffer("G:\\Projects\\VSC++\\vocaloid\\samples\\radio.wav", format, buffer);
+			ReadFileBuffer(ExtractResource(IDR_RADIO, L"wav").data(), format, buffer);
 			channel_data->FromBuffer(buffer, format->bits, format->channels);
 			convolution_->kernel_ = channel_data;
 			ctx->Connect(convolution_, gain_);
@@ -30,7 +32,6 @@ namespace effect {
 			convolution_->Dispose();
 			delete convolution_;
 			convolution_ = nullptr;
-
 			Effect::Dispose();
 		}
 	};

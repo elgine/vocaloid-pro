@@ -107,5 +107,68 @@
     <ClInclude Include="uncle.hpp">
       <Filter>头文件\effects\character</Filter>
     </ClInclude>
+    <ClInclude Include="ane.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="interface.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="extract_resource.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="voice_renderer.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="interface.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="voice_changer.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\samples\church.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\female-voice.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\large-long-echo-hall.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\large-wide-echo-hall.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\muffler.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\parking.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\radio.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\speech.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\spring.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\telephone.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\fire.mp3">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\underwater.mp3">
+      <Filter>资源文件</Filter>
+    </Media>
   </ItemGroup>
 </Project>
