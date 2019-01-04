@@ -2,24 +2,25 @@
 #include "../vocaloid/maths.hpp"
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/biquad_node.hpp"
-#include "../vocaloid/phase_vocoder_node.hpp"
+#include "../vocaloid/jungle.hpp"
 #include "effects.h"
 #include "effect.hpp"
 using namespace vocaloid;
+using namespace vocaloid::composite;
 namespace effect {
 	class Uncle : public Effect {
 	private:
 		BiquadNode *lowpass_;
-		PhaseVocoderNode *phase_vocoder_;
+		Jungle *jungle_;
 	public:
 
 		static float LOWPASS_FREQ_DEFAULT;
 		static float LOWPASS_FREQ_MIN;
 		static float LOWPASS_FREQ_MAX;
 
-		static float PITCH_DEFAULT;
-		static float PITCH_MIN;
-		static float PITCH_MAX;
+		static float PITCH_OFFSET_DEFAULT;
+		static float PITCH_OFFSET_MIN;
+		static float PITCH_OFFSET_MAX;
 
 		// [lowpass_freq, pitch, gain]
 		void SetOptions(float *options, int option_count) override {
@@ -38,11 +39,11 @@ namespace effect {
 			id_ = Effects::UNCLE;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;
-			phase_vocoder_ = new PhaseVocoderNode(ctx);
-			phase_vocoder_->pitch_ = PITCH_DEFAULT;
+			jungle_ = new Jungle(ctx);
+			jungle_->SetPitchOffset(PITCH_OFFSET_DEFAULT);
 
-			ctx->Connect(lowpass_, phase_vocoder_);
-			ctx->Connect(phase_vocoder_, gain_);
+			ctx->Connect(lowpass_, jungle_->input_);
+			ctx->Connect(jungle_->output_, gain_);
 		}
 
 		void SetLowpassFrequency(float freq) {
@@ -50,7 +51,7 @@ namespace effect {
 		}
 
 		void SetPitch(float v) {
-			phase_vocoder_->pitch_ = Clamp(PITCH_MIN, PITCH_MAX, v);
+			jungle_->SetPitchOffset(Clamp(PITCH_OFFSET_MIN, PITCH_OFFSET_MAX, v));
 		}
 
 		void Dispose() override {
@@ -58,9 +59,9 @@ namespace effect {
 			delete lowpass_;
 			lowpass_ = nullptr;
 
-			phase_vocoder_->Dispose();
-			delete phase_vocoder_;
-			phase_vocoder_ = nullptr;
+			jungle_->Dispose();
+			delete jungle_;
+			jungle_ = nullptr;
 
 			Effect::Dispose();
 		}
@@ -74,7 +75,7 @@ namespace effect {
 	float Uncle::LOWPASS_FREQ_MIN = 500;
 	float Uncle::LOWPASS_FREQ_MAX = 20000;
 
-	float Uncle::PITCH_DEFAULT = 0.7f;
-	float Uncle::PITCH_MIN = 0.5f;
-	float Uncle::PITCH_MAX = 1.0f;
+	float Uncle::PITCH_OFFSET_DEFAULT = -0.3f;
+	float Uncle::PITCH_OFFSET_MIN = -1.0f;
+	float Uncle::PITCH_OFFSET_MAX = 0.0f;
 }

@@ -24,13 +24,13 @@ namespace effect {
 		explicit Male(AudioContext* ctx) :Effect(ctx) {
 			id_ = Effects::MALE;
 			lowpass_ = new BiquadNode(ctx);
-			lowpass_->frequency_->value_ = LOWPASS_FREQ_MAX;
+			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;
 			/*jungle_ = new PhaseVocoderNode(ctx);
 			jungle_->pitch_ = 0.9f;
 			ctx->Connect(lowpass_, jungle_);
 			ctx->Connect(jungle_, gain_);*/
 			jungle_ = new Jungle(ctx);
-			jungle_->SetPitchOffset(-0.1);
+			jungle_->SetPitchOffset(PITCH_OFFSET_DEFAULT);
 
 			ctx->Connect(lowpass_, jungle_->input_);
 			ctx->Connect(jungle_->output_, gain_);

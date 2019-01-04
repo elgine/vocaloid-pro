@@ -19,7 +19,7 @@ namespace effect {
 			id_ = Effects::FEMALE;
 			compressor_ = new DynamicsCompressorNode(ctx);
 			jungle_ = new Jungle(ctx);
-			jungle_->SetPitchOffset(0.45);
+			jungle_->SetPitchOffset(PITCH_OFFSET_DEFAULT);
 			ctx_->Connect(jungle_->output_, compressor_);
 			ctx_->Connect(compressor_, gain_);
 		}

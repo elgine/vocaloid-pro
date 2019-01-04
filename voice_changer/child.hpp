@@ -56,10 +56,10 @@ namespace effect {
 		explicit Child(AudioContext *ctx): Effect(ctx) {
 			id_ = Effects::CHILD;
 			phase_vocoder_ = new PhaseVocoderNode(ctx);
-			phase_vocoder_->pitch_ = 1.5f;
+			phase_vocoder_->pitch_ = PITCH_DEFAULT;
 			equalizer_ = new Equalizer3Band(ctx);
 			highpass_ = new BiquadNode(ctx);
-			highpass_->frequency_->value_ = 120;
+			highpass_->frequency_->value_ = HIGHPASS_DEFAULT;
 			highpass_->type_ = BIQUAD_TYPE::HIGH_PASS;
 
 			ctx->Connect(equalizer_->output_, phase_vocoder_);

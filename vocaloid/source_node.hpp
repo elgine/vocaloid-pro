@@ -54,6 +54,7 @@ namespace vocaloid {
 				if (SegmentCount() <= 0)return EOF;
 				auto frame_count = 0;
 				auto frame_index = 0;
+				auto silence_frames = 0;
 				auto frame_size = frame_size_;
 				if (!ready_to_play_){
 					if (delay_frames_ > 0) {
@@ -62,7 +63,7 @@ namespace vocaloid {
 							return 0;
 						}
 						frame_size = (delay_pos_ + frame_size_) - delay_frames_;
-						frame_index = delay_frames_ - delay_pos_;
+						silence_frames = frame_index = delay_frames_ - delay_pos_;
 					}
 					ready_to_play_ = true;
 					play_pos_ = Timeline::FirstSegment().start;
@@ -103,18 +104,16 @@ namespace vocaloid {
 					prev_segment_index = cur_segment_index;
 					
 					byte_left = cur_segment.end - play_pos_;
-					count = min(frame_size, byte_left);
+					count = min(frame_size - frame_count, byte_left);
 
 					count = GetBuffer(frame_index, count);
 					if (count <= 0) {
 						if (count == EOF)return EOF;
 						break;
 					}
-					if (frame_count + count <= frame_size) {
-						frame_count += count;
-						frame_index += count;
-						play_pos_ += count;
-					}
+					frame_count += count;
+					frame_index += count;
+					play_pos_ += count;
 				}
 				return frame_count;
 			}
@@ -158,12 +157,6 @@ namespace vocaloid {
 				Timeline::Dispose();
 				AddSegment(start_bytes, end_bytes);
 				return SUCCEED;
-				/*auto ret = InputNode::Start();
-				if (ret < 0)return ret;
-				delay_ = delay;
-				start = Clamp(int64_t(0), Duration(), start);
-				AddSegment(start, (duration <= 0 || (start + duration) > Duration()) ? (Duration() - start) : duration);
-				return SUCCEED;*/
 			}
 
 			void Clear() override {

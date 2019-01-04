@@ -46,6 +46,10 @@ namespace effect {
 		static float HIGHSHELF_GAIN_MIN;
 		static float HIGHSHELF_GAIN_MAX;
 
+		static float LOWPASS_FREQ_DEFAULT;
+		static float LOWPASS_FREQ_MIN;
+		static float LOWPASS_FREQ_MAX;
+
 		static float COMPRESSOR_THRESHOLD_DEFAULT;
 		static float COMPRESSOR_THRESHOLD_MIN;
 		static float COMPRESSOR_THRESHOLD_MAX;
@@ -83,22 +87,28 @@ namespace effect {
 				filter_->frequency_->value_ = Clamp(HIGHSHELF_FREQ_MIN, HIGHSHELF_FREQ_MAX, options[3]);
 			}
 			if (option_count > 4) {
-				compressor_->threshold_ = Clamp(COMPRESSOR_THRESHOLD_MIN, COMPRESSOR_THRESHOLD_MAX, options[4]);
+				filter_->gain_->value_ = Clamp(HIGHSHELF_GAIN_MIN, HIGHSHELF_GAIN_MAX, options[4]);
 			}
 			if (option_count > 5) {
-				compressor_->ratio_ = Clamp(COMPRESSOR_RATIO_MIN, COMPRESSOR_RATIO_MAX, options[5]);
+				filter2_->frequency_->value_ = Clamp(LOWPASS_FREQ_MIN, LOWPASS_FREQ_MAX, options[5]);
 			}
 			if (option_count > 6) {
-				convolver_gain_->gain_->value_ = Clamp(ECHO_GAIN_MIN, ECHO_GAIN_MAX, options[6]);
+				compressor_->threshold_ = Clamp(COMPRESSOR_THRESHOLD_MIN, COMPRESSOR_THRESHOLD_MAX, options[6]);
 			}
 			if (option_count > 7) {
-				no_conv_gain_->gain_->value_ = Clamp(MAIN_GAIN_MIN, MAIN_GAIN_MAX, options[7]);
+				compressor_->ratio_ = Clamp(COMPRESSOR_RATIO_MIN, COMPRESSOR_RATIO_MAX, options[7]);
 			}
 			if (option_count > 8) {
-				fire_gain_->gain_->value_ = Clamp(FIRE_GAIN_MIN, FIRE_GAIN_MAX, options[8]);
+				convolver_gain_->gain_->value_ = Clamp(ECHO_GAIN_MIN, ECHO_GAIN_MAX, options[8]);
 			}
 			if (option_count > 9) {
-				SetGain(options[9]);
+				no_conv_gain_->gain_->value_ = Clamp(MAIN_GAIN_MIN, MAIN_GAIN_MAX, options[9]);
+			}
+			if (option_count > 10) {
+				fire_gain_->gain_->value_ = Clamp(FIRE_GAIN_MIN, FIRE_GAIN_MAX, options[10]);
+			}
+			if (option_count > 11) {
+				SetGain(options[11]);
 			}
 		}
 
@@ -106,21 +116,21 @@ namespace effect {
 			id_ = Effects::BALROG;
 			filter_ = new BiquadNode(ctx);
 			filter_->type_ = BIQUAD_TYPE::HIGH_SHELF;
-			filter_->frequency_->value_ = 1000;
-			filter_->gain_->value_ = 10;
+			filter_->frequency_->value_ = HIGHSHELF_FREQ_DEFAULT;
+			filter_->gain_->value_ = HIGHSHELF_GAIN_DEFAULT;
 
 			compressor_ = new DynamicsCompressorNode(ctx);
-			compressor_->threshold_ = -50;
-			compressor_->ratio_ = 16;
+			compressor_->threshold_ = COMPRESSOR_THRESHOLD_DEFAULT;
+			compressor_->ratio_ = COMPRESSOR_RATIO_DEFAULT;
 
 			delay_ = new DelayNode(ctx);
-			delay_->delay_time_->value_ = 0.01;
+			delay_->delay_time_->value_ = DELAY_DEFAULT;
 
 			osc_ = new OscillatorNode(ctx);
 			osc_->SetWaveformType(WAVEFORM_TYPE::SAWTOOTH);
-			osc_->SetFrequency(50);
+			osc_->SetFrequency(LFO_FREQ_DEFAULT);
 			osc_gain_ = new GainNode(ctx);
-			osc_gain_->gain_->value_ = 0.004;
+			osc_gain_->gain_->value_ = LFO_GAIN_DEFAULT;
 
 			convolver_ = new ConvolutionNode(ctx);
 			auto buf = new vocaloid::Buffer<char>();
@@ -132,20 +142,20 @@ namespace effect {
 			buf->Dispose();
 
 			convolver_gain_ = new GainNode(ctx);
-			convolver_gain_->gain_->value_ = 0.5;
+			convolver_gain_->gain_->value_ = ECHO_GAIN_DEFAULT;
 
 			fire_ = new FileReaderNode(ctx);
 			fire_->Open("G:\\Projects\\VSC++\\vocaloid\\samples\\fire.mp3");
 			fire_gain_ = new GainNode(ctx);
-			fire_gain_->gain_->value_ = 0.1;
+			fire_gain_->gain_->value_ = FIRE_GAIN_DEFAULT;
 			fire_->loop_ = true;
 
 			filter2_ = new BiquadNode(ctx);
 			filter2_->type_ = vocaloid::dsp::BIQUAD_TYPE::LOW_PASS;
-			filter2_->frequency_->value_ = 2000;
+			filter2_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;
 
 			no_conv_gain_ = new GainNode(ctx);
-			no_conv_gain_->gain_->value_ = 2.0;
+			no_conv_gain_->gain_->value_ = MAIN_GAIN_DEFAULT;
 
 			ctx->Connect(osc_, osc_gain_);
 			ctx->Connect(osc_gain_, delay_->delay_time_);
@@ -228,6 +238,10 @@ namespace effect {
 	float Balrog::HIGHSHELF_GAIN_DEFAULT = 10.0f;
 	float Balrog::HIGHSHELF_GAIN_MIN = -40.0f;
 	float Balrog::HIGHSHELF_GAIN_MAX = 40.0f;
+
+	float Balrog::LOWPASS_FREQ_DEFAULT = 2000.0f;
+	float Balrog::LOWPASS_FREQ_MIN = 500.0f;
+	float Balrog::LOWPASS_FREQ_MAX = 20000.0f;
 
 	float Balrog::COMPRESSOR_THRESHOLD_DEFAULT = -50.0f;
 	float Balrog::COMPRESSOR_THRESHOLD_MIN = -100.0f;

@@ -139,12 +139,12 @@ public:
 		}
 		inited_ = true;
 		ctx_->Start();
-		/*Join();
+		Join();
 		{
 			unique_lock<mutex> lck(tick_mutex_);
 			state_ = VoicePlayerState::PLAYER_PLAYING;
 		}
-		tick_thread_ = new thread(&VoicePlayer::OnTick, this);*/
+		tick_thread_ = new thread(&VoicePlayer::OnTick, this);
 		return ret;
 	}
 
@@ -157,12 +157,12 @@ public:
 		if (playing)return SUCCEED; 
 		if (inited_) {
 			ctx_->Start();
-			/*Join();
+			Join();
 			{
 				unique_lock<mutex> lck(tick_mutex_);
 				state_ = VoicePlayerState::PLAYER_PLAYING;
 			}
-			tick_thread_ = new thread(&VoicePlayer::OnTick, this);*/
+			tick_thread_ = new thread(&VoicePlayer::OnTick, this);
 			return SUCCEED;
 		}
 		return HAVE_NOT_STARTED;

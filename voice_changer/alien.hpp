@@ -30,8 +30,8 @@ namespace effect {
 			ctx->Connect(osc_gain_, delay_->delay_time_);
 			ctx->Connect(delay_, gain_);
 
-			osc_->SetFrequency(5.0f);
-			osc_gain_->gain_->value_ = 0.05f;
+			osc_->SetFrequency(LFO_FREQ_DEFAULT);
+			osc_gain_->gain_->value_ = LFO_GAIN_DEFAULT;
 			delay_->delay_time_->value_ = 0.05f;
 		}
 

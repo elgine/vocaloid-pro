@@ -19,7 +19,7 @@ namespace effect {
 
 		explicit Effect(AudioContext *ctx) {
 			ctx_ = ctx;
-			gain_ = new GainNode(ctx, 1.0f);
+			gain_ = new GainNode(ctx, GAIN_DEFAULT);
 		}
 
 		void SetGain(float gain) {

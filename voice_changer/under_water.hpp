@@ -44,22 +44,22 @@ namespace effect {
 		explicit UnderWater(AudioContext *ctx) : Effect(ctx) {
 			id_ = Effects::UNDER_WATER;
 			lowpass_ = new BiquadNode(ctx);
-			lowpass_->frequency_->value_ = 500.0f;
+			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;
 			compressor_ = new DynamicsCompressorNode(ctx);
 
 			underwater_ = new FileReaderNode(ctx);
 			underwater_->Open("G:\\Projects\\VSC++\\vocaloid\\samples\\underwater.mp3");
 			underwater_->loop_ = true;
-			underwater_gain_ = new GainNode(ctx, 0.3f);
+			underwater_gain_ = new GainNode(ctx, UNDER_WATER_BACKGROUND_GAIN_DEFAULT);
 
 			wahwah_ = new vocaloid::composite::AutoWah(ctx);
 			wahwah_->SetOptions({
-				10,
-				3.5,
-				20
+				ENVELOPE_FOllOWER_FILTER_FREQ_DEFAULT,
+				FILTER_DEPTH_DEFAULT,
+				FILTER_Q_DEFAULT
 			});
 
-			input_gain_ = new GainNode(ctx, 0.5f);
+			input_gain_ = new GainNode(ctx, INPUT_GAIN_DEFAULT);
 
 			ctx->Connect(input_gain_, wahwah_->input_);
 			ctx->Connect(wahwah_->output_, lowpass_);
@@ -70,27 +70,27 @@ namespace effect {
 		}
 
 		void SetLowpassFrequency(float v) {
-			lowpass_->frequency_->value_ = v;
+			lowpass_->frequency_->value_ = Clamp(LOWPASS_FREQ_MIN, LOWPASS_FREQ_MAX, v);
 		}
 
 		void SetEnvelopeFollowerFilterFrequency(float v) {
-			wahwah_->SetEnvelopeFollowerFilterFreq(v);
+			wahwah_->SetEnvelopeFollowerFilterFreq(Clamp(ENVELOPE_FOllOWER_FILTER_FREQ_MIN, ENVELOPE_FOllOWER_FILTER_FREQ_MAX, v));
 		}
 
 		void SetFilterDepth(float v) {
-			wahwah_->SetFilterDepth(v);
+			wahwah_->SetFilterDepth(Clamp(FILTER_DEPTH_MIN, FILTER_DEPTH_MAX, v));
 		}
 
 		void SetFilterQ(float v) {
-			wahwah_->SetFilterQ(v);
+			wahwah_->SetFilterQ(Clamp(FILTER_Q_MIN, FILTER_Q_MAX, v));
 		}
 
 		void SetInputGain(float v) {
-			input_gain_->gain_->value_ = v;
+			input_gain_->gain_->value_ = Clamp(INPUT_GAIN_MIN, INPUT_GAIN_MAX, v);
 		}
 
 		void SetUnderWaterBackgroundGain(float v) {
-			underwater_gain_->gain_->value_ = v;
+			underwater_gain_->gain_->value_ = Clamp(UNDER_WATER_BACKGROUND_GAIN_MIN, UNDER_WATER_BACKGROUND_GAIN_MAX, v);
 		}
 
 		AudioNode *Input() {
