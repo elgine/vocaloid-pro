@@ -23,7 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="alien.hpp" />
-    <ClInclude Include="ane.h" />
+    <ClInclude Include="ane_helper.hpp" />
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="balrog.hpp" />
     <ClInclude Include="render_list.hpp" />

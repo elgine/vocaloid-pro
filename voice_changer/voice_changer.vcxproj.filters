@@ -107,9 +107,6 @@
     <ClInclude Include="uncle.hpp">
       <Filter>头文件\effects\character</Filter>
     </ClInclude>
-    <ClInclude Include="ane.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="interface.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -123,6 +120,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="render_list.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ane_helper.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,6 +15,10 @@ extern "C" {
 		DisposeAllTempResources();
 	}
 
+	void Seek(int64_t timestamp) {
+		player->Seek(timestamp);
+	}
+
 	void SetPreviewLoop(bool v) {
 		player->Loop(v);
 	}

@@ -9,6 +9,7 @@ OpenPreview
 SetPreviewEffectOptions
 StartPreview
 StopPreview
+Seek
 Render
 StopRender
 StopRenderAll

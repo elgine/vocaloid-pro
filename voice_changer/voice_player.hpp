@@ -43,18 +43,9 @@ private:
 				}
 				last = cur;
 			}
-			on_tick_->Emit(BuildTickMsg(cur));
+			//on_tick_->Emit(BuildTickMsg(cur));
 			this_thread::sleep_for(chrono::milliseconds(20));
 		}
-	}
-
-	string BuildTickMsg(int64_t timestamp) {
-		string output;
-		std::stringstream ss(output);
-		ss << "{\n"
-			<< "\timestamp\: " << timestamp << ", \n"
-			<< "}\n";
-		return output;
 	}
 
 	void Join() {
@@ -210,9 +201,10 @@ public:
 			return SUCCEED;
 	}
 
-	void Clear() {
-		source_reader_->Clear();
-		ctx_->Clear();
+	void Seek(int64_t timestamp) {
+		if (source_reader_) {
+			source_reader_->Seek(timestamp);
+		}
 	}
 
 	string Path() {
