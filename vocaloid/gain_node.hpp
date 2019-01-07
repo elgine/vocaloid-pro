@@ -37,9 +37,10 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
-				gain_->Dispose();
-				delete gain_;
-				gain_ = nullptr;
+				if (gain_) {
+					delete gain_;
+					gain_ = nullptr;
+				}
 				AudioNode::Dispose();
 			}
 		};

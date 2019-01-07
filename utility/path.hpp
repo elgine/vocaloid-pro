@@ -21,6 +21,11 @@ bool IsFileExists(const char* path) {
 	return !(_access(path, 0) == -1);
 }
 
+bool RemoveFile(const char *path) {
+	if (!IsFileExists(path))return true;
+	return remove(path) >= 0;
+}
+
 bool IsFileReadable(const char* path) {
 	return !(_access(path, 4) == -1);
 }

@@ -57,6 +57,10 @@ namespace vocaloid {
 				result_buffer_ = new AudioChannel(channels_, frame_size_);
 			}
 
+			~AudioNode() {
+				Dispose();
+			}
+
 			virtual void ConnectFrom(AudioNode* input, Channel from, Channel to) {
 				if (can_be_connected_) {
 					inputs_.insert(input);
@@ -122,13 +126,14 @@ namespace vocaloid {
 			virtual int64_t ProcessFrame() { return 0; }
 
 			virtual void Dispose() {
-				summing_buffer_->Dispose();
-				delete summing_buffer_;
-				summing_buffer_ = nullptr;
-
-				result_buffer_->Dispose();
-				delete result_buffer_;
-				result_buffer_ = nullptr;
+				if (summing_buffer_) {
+					delete summing_buffer_;
+					summing_buffer_ = nullptr;
+				};
+				if (result_buffer_) {
+					delete result_buffer_;
+					result_buffer_ = nullptr;
+				}
 				context_->RemoveNode(this);
 			}
 

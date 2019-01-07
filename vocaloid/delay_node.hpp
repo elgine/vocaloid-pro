@@ -64,9 +64,10 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
-				delay_time_->Dispose();
-				delete delay_time_;
-				delay_time_ = nullptr;
+				if (delay_time_) {
+					delete delay_time_;
+					delay_time_ = nullptr;
+				}
 				AudioNode::Dispose();
 			}
 		};

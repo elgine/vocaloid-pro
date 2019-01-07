@@ -26,6 +26,7 @@
     <ClInclude Include="ane.h" />
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="balrog.hpp" />
+    <ClInclude Include="render_list.hpp" />
     <ClInclude Include="voice_renderer.hpp" />
     <ClInclude Include="interface.h" />
     <ClInclude Include="extract_resource.hpp" />

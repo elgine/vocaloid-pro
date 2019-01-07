@@ -85,7 +85,7 @@ namespace vocaloid {
 							play_pos_ = SeekInternal(play_pos_);
 						}
 						else {
-							break;
+							return EOF;
 						}
 					}
 					else {
@@ -160,6 +160,7 @@ namespace vocaloid {
 			}
 
 			void Clear() override {
+				Timeline::Clear();
 				play_pos_ = 0;
 				delay_pos_ = 0;
 			}

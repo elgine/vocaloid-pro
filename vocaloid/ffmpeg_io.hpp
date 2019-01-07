@@ -195,6 +195,10 @@ namespace vocaloid {
 				decode_thread_ = nullptr;
 			}
 
+			~FFmpegFileReader() {
+				Dispose();
+			}
+
 			void SetMaxBufferSize(int64_t max_size) {
 				max_buffer_size_ = max_size;
 				DeleteArray(&buffer_);
@@ -203,6 +207,7 @@ namespace vocaloid {
 
 			int64_t FileLength() override {
 				unique_lock<mutex> lck(decode_mutex_);
+				if (ctx_ == nullptr)return HAVE_NOT_DEFINED_SOURCE;
 				auto audio_stream = ctx_->streams[a_stream_index_];
 				auto duration = audio_stream->duration * av_q2d(audio_stream->time_base);
 				return duration * codec_ctx_->sample_rate * codec_ctx_->channels * BITS_PER_SEC / 8;
@@ -211,6 +216,7 @@ namespace vocaloid {
 
 			int64_t Duration() override {
 				unique_lock<mutex> lck(decode_mutex_);
+				if (ctx_ == nullptr)return HAVE_NOT_DEFINED_SOURCE;
 				auto audio_stream = ctx_->streams[a_stream_index_];
 				return audio_stream->duration * av_q2d(audio_stream->time_base) * 1000.0f;
 			}
@@ -362,7 +368,9 @@ namespace vocaloid {
 
 			void Clear() override {
 				unique_lock<mutex> lck(decode_mutex_); 
-				avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
+				if (ctx_) {
+					avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
+				}
 			}
 
 			void Stop() override {
@@ -508,6 +516,7 @@ namespace vocaloid {
 
 			AudioFormat Format() override {
 				unique_lock<mutex> lck(decode_mutex_);
+				if (decode_frame_ == nullptr)return{0, 0, 0, 0};
 				int16_t bits = 16;
 				int32_t sample_rate = decode_frame_->sample_rate;
 				int16_t channels = decode_frame_->channels;
@@ -600,6 +609,13 @@ namespace vocaloid {
 			FFmpegFileWriter(int64_t init_size = 16384) {
 				buffer_ = new char[init_size];
 				max_buffer_size_ = init_size;
+				ctx_ = nullptr;
+				codec_ctx_ = nullptr;
+				swr_ctx_ = nullptr;
+				packet_ = nullptr;
+				frame_ = nullptr;
+				enc_frame_ = nullptr;
+				frame_buf_ = nullptr;
 				buffer_size_ = 0;
 			}
 
@@ -765,14 +781,16 @@ namespace vocaloid {
 				}
 			}
 
-			void Dispose() {
-				Flush();
-				av_write_trailer(ctx_);
-				avcodec_free_context(&codec_ctx_);
-				av_packet_free(&packet_);
-				av_frame_free(&enc_frame_);
-				avio_close(ctx_->pb);
-				//avformat_free_context(ctx_);
+			void Dispose() override {
+				if (ctx_ != nullptr) {
+					av_write_trailer(ctx_);
+					av_packet_free(&packet_);
+					av_frame_free(&enc_frame_);
+					avio_close(ctx_->pb);
+					avformat_free_context(ctx_);
+					ctx_ = nullptr;
+					codec_ctx_ = nullptr;
+				}
 			}
 		};
 	}

@@ -54,26 +54,26 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
-				frequency_->Dispose();
-				delete frequency_;
-				frequency_ = nullptr;
+				if (frequency_) {
+					delete frequency_;
+					frequency_ = nullptr;
+				}
+				
+				if (detune_) {
+					delete detune_;
+					detune_ = nullptr;
+				}
 
-				detune_->Dispose();
-				delete detune_;
-				detune_ = nullptr;
+				if (Q_) {
+					delete Q_;
+					Q_ = nullptr;
+				}
 
-				Q_->Dispose();
-				delete Q_;
-				Q_ = nullptr;
-
-				Q_->Dispose();
-				delete Q_;
-				Q_ = nullptr;
-
-				gain_->Dispose();
-				delete gain_;
-				gain_ = nullptr;
-
+				if (gain_) {
+					delete gain_;
+					gain_ = nullptr;
+				}
+				
 				AudioNode::Dispose();
 			}
 

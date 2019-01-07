@@ -23,6 +23,10 @@ namespace vocaloid {
 				Alloc(channels, max_size);
 			}
 
+			~AudioChannel() {
+				Dispose();
+			}
+
 			void Copy(AudioChannel *b, int64_t size = 0, int64_t offset = 0, int64_t dst = 0) {
 				if (size <= 0)size = b->Size();
 				if (offset + size > b->Size())size = b->Size() - offset;

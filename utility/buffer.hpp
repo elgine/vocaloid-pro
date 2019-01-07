@@ -25,7 +25,6 @@ namespace vocaloid{
 
         ~Buffer(){
             Dispose();
-			DeleteArray(&data_);
         }
 
         void Fill(T v, int64_t length, int64_t offset){

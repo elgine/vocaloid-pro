@@ -47,6 +47,7 @@ namespace vocaloid {
 			void Dispose() override {
 				DeleteArray(&curve_);
 				curve_length_ = 0;
+				AudioNode::Dispose();
 			}
 
 			int64_t CurveLength() {

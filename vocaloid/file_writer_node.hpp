@@ -24,6 +24,10 @@ namespace vocaloid {
 				buf_ = new Buffer<char>();
 			}
 
+			~FileWriterNode() {
+				Dispose();
+			}
+
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				DestinationNode::Initialize(sample_rate, frame_size);
 				processed_ = 0;
@@ -31,10 +35,18 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
-				writer_->Dispose();
-				delete writer_;
-				writer_ = nullptr;
+				Close();
+				if (writer_) {
+					delete writer_;
+					writer_ = nullptr;
+				}
 				AudioNode::Dispose();
+			}
+
+			void Close() override {
+				if (writer_) {
+					writer_->Dispose();
+				}
 			}
 
 			void SetPath(const char* p) {

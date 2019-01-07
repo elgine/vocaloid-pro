@@ -107,6 +107,7 @@ namespace vocaloid {
 
 			void Clear() {
 				cur_index_ = 0;
+				segments_.clear();
 			}
 
 			void Dispose() {

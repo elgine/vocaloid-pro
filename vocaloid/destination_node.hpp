@@ -16,6 +16,10 @@ namespace vocaloid {
 
 			virtual int64_t Processed() { return 0; }
 
+			virtual int64_t Flush() { return 0; }
+
+			virtual void Close() {}
+
 			OutputType OutputType() {
 				return output_type_;
 			}

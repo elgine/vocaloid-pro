@@ -1,40 +1,148 @@
 #pragma once
 #include "../vocaloid/audio_context.hpp"
+#include "../vocaloid/file_reader_node.hpp"
+#include "../vocaloid/file_writer_node.hpp"
 #include "effect.hpp"
 #include "factory.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
 
-struct RenderData {
-	char *file;
-	AudioContext *ctx;
+enum VoiceRendererState {
+	RENDERER_STOP,
+	RENDERER_RENDERING,
+	RENDERER_FREE
 };
 
 class VoiceRenderer {
 
 private:
-	map<string, RenderData> data_;
-	thread *progress_thread_;
-	mutex progress_mutex_;
+	Effect *effect_;
+	AudioContext *ctx_;
+	FileWriterNode *writer_;
+	FileReaderNode *source_reader_;
+	string path_;
+
+	VoiceRendererState state_;
 public:
 
-	void Render(const char* file, int effect_id, float* options) {
-		
+	explicit VoiceRenderer(int32_t sample_rate = 44100, int16_t channels = 2) {
+		ctx_ = new AudioContext();
+		ctx_->SetOutput(OutputType::RECORDER, sample_rate, channels);
+		writer_ = static_cast<FileWriterNode*>(ctx_->Destination());
+		source_reader_ = new FileReaderNode(ctx_);
+		source_reader_->watched_ = true;
+		state_ = VoiceRendererState::RENDERER_FREE;
+		effect_ = nullptr;
 	}
 
-	void Render(const char** files, int* effect_ids, float** effect_options, int count) {
-		
+	int SetEffect(Effects id) {
+		if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
+			Effect* new_effect = EffectFactory(id, ctx_);
+			if (new_effect == nullptr)return NO_SUCH_EFFECT;
+			if (effect_ != nullptr) {
+				effect_->Dispose();
+				delete effect_;
+				effect_ = nullptr;
+			}
+			effect_ = new_effect;
+		}
+		return SUCCEED;
 	}
 
-	void CancelRender(int index) {
-		
+	void SetDest(const char* path) {
+		writer_->SetPath(path);
 	}
 
-	void CancelRender(const char* file) {
-		
+	int Open(const char* path) {
+		Stop();
+		auto ret = source_reader_->Open(path);
+		if (ret < 0)return ret;
+		path_ = path;
+		return ret;
 	}
 
-	void CancelRenderAll() {
-		
+	void SetOptions(float* options, int option_count) {
+		ctx_->Lock();
+		if (effect_) {
+			effect_->SetOptions(options, option_count);
+		}
+		ctx_->Unlock();
+	}
+
+	int RenderAll() {
+		ctx_->Lock();
+		auto ret = source_reader_->Start();
+		ctx_->Unlock();
+		return ret;
+	}
+
+	int RenderSegments(int64_t **segments, int segment_count) {
+		ctx_->Lock();
+		auto ret = source_reader_->StartWithSegments(segments, segment_count);
+		ctx_->Unlock();
+		return ret;
+	}
+
+	int Start() {
+		Stop();
+		ctx_->stop_eof_ = true; 
+		auto ret = SUCCEED;
+		if (effect_) {
+			ctx_->Connect(source_reader_, effect_->Input());
+			ctx_->Connect(effect_->Output(), writer_);
+		}
+		else {
+			ctx_->Connect(source_reader_, writer_);
+		}
+		if (source_reader_->SegmentCount() == 0)
+			RenderAll();
+		if (effect_) {
+			effect_->Start();
+		}
+		ret = ctx_->Prepare();
+		if (ret < 0)return ret;
+		state_ = VoiceRendererState::RENDERER_RENDERING;
+		ctx_->Start();
+		return ret;
+	}
+
+	void Resume() {
+		if (state_ != VoiceRendererState::RENDERER_STOP)return;
+		state_ = VoiceRendererState::RENDERER_RENDERING;
+		ctx_->Start();
+	}
+
+	VoiceRendererState State() {
+		return state_;
+	}
+
+	string Path() {
+		return path_;
+	}
+
+	void Close() {
+		Stop();
+		ctx_->Close();
+		Clear();
+		state_ = VoiceRendererState::RENDERER_FREE;
+	}
+
+	void Dispose() {
+		Close();
+		ctx_->Dispose();
+	}
+
+	void Clear() {
+		ctx_->Clear();
+	}
+
+	void Stop() {
+		if (state_ != VoiceRendererState::RENDERER_RENDERING)return;
+		state_ = VoiceRendererState::RENDERER_STOP;
+		ctx_->Stop();
+	}
+
+	bool IsEnd() {
+		return ctx_->SourceEof();
 	}
 };

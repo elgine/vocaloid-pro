@@ -39,6 +39,16 @@ namespace vocaloid {
 				}
 				return processed;
 			}
+
+			void Dispose() override {
+				for (int i = 0; i < channels_; i++) {
+					if (shifters_[i]) {
+						delete shifters_[i];
+						shifters_[i] = nullptr;
+					}
+				}
+				AudioNode::Dispose();
+			}
 		};
 	}
 }

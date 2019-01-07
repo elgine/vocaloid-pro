@@ -9,10 +9,16 @@ namespace vocaloid {
 			bool active_;
 		public:
 
+			// Loop bytes
 			bool loop_;
+
+			// Watched for detecting source's eof
+			bool watched_;
 
 			explicit InputNode(BaseAudioContext *ctx) :AudioNode(ctx, AudioNodeType::INPUT, false, true) {
 				active_ = false;
+				loop_ = false;
+				watched_ = false;
 			}
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {

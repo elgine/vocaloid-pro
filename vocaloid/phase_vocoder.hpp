@@ -82,6 +82,10 @@ namespace vocaloid {
 				imag_ = nullptr;
 			}
 
+			~PhaseVocoder() {
+				Dispose();
+			}
+
 			void Initialize(int64_t fft_size, float overlap, WINDOW_TYPE win = WINDOW_TYPE::HAMMING, int64_t sample_rate = 44100) {
 				OverlapAdd::Initialize(fft_size, fft_size * overlap, fft_size * overlap, win);
 				sample_rate_ = sample_rate;
@@ -171,7 +175,7 @@ namespace vocaloid {
 			}
 
 			void Dispose() {
-				Dispose();
+				OverlapAdd::Dispose();
 				DeleteArray(&win_);
 				DeleteArray(&buffer_);
 				DeleteArray(&out_);

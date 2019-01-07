@@ -22,6 +22,8 @@ namespace vocaloid {
 			vector<int64_t> traversal_nodes_;
 			int64_t frame_size_;
 
+			atomic<bool> source_eof_;
+
 			void FindCircleEnd(int64_t id, vector<int64_t> &path, map<int64_t, set<int64_t>> &circles) {
 				if (!path.empty()) {
 					// Exist circle
@@ -117,6 +119,7 @@ namespace vocaloid {
 			void Run() {
 				bool all_input_eof = false;
 				int64_t processed_frames_ = 0, cur_processed_frames = 0;
+				int64_t sleep = destination_ && destination_->OutputType() == OutputType::PLAYER ? MINUS_SLEEP_UNIT : 2;
 				while (true) {
 					{
 						unique_lock<mutex> lck(audio_render_thread_mutex_);
@@ -125,27 +128,36 @@ namespace vocaloid {
 						for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
 							auto node = FindNode(*iter);
 							cur_processed_frames = node->Process();
-							if (node->Type() == AudioNodeType::INPUT && 
-								!static_cast<InputNode*>(node)->loop_ && 
-								cur_processed_frames != EOF) {
-								all_input_eof = false;
+							if (node->Type() == AudioNodeType::INPUT) {
+								auto in_node = static_cast<InputNode*>(node);
+								if (in_node->watched_ && (in_node->loop_ || (!in_node->loop_ && cur_processed_frames != EOF))) {
+									all_input_eof = false;
+								}
 							}
+						}
+						if (all_input_eof) {
+							destination_->Flush();
+							source_eof_ = all_input_eof;
 						}
 					}
 					if (!all_input_eof) {
 						processed_frames_ += cur_processed_frames;
 					}
 					on_tick_->Emit(processed_frames_);
-					this_thread::sleep_for(chrono::milliseconds(MINUS_SLEEP_UNIT));
-					if (all_input_eof) {
+					this_thread::sleep_for(chrono::milliseconds(sleep));
+					if (source_eof_) {
 						on_end_->Emit(0);
+						if (stop_eof_)break;
 					}
 				}
 			}
+
 		public:
 
 			Signal<int64_t> *on_tick_;
 			Signal<int> *on_end_;
+
+			atomic<bool> stop_eof_;
 
 			explicit AudioContext(){
 				destination_ = nullptr;
@@ -154,6 +166,8 @@ namespace vocaloid {
 				audio_render_thread_ = nullptr;
 				on_tick_ = new Signal<int64_t>();
 				on_end_ = new Signal<int>();
+				stop_eof_ = false;
+				source_eof_ = true;
 			}
 
 			void SetOutput(OutputType output, int32_t sample_rate = 44100, int16_t channels = 2) override {
@@ -256,7 +270,8 @@ namespace vocaloid {
 			}
 
 			int Prepare() override {
-				Stop();
+				unique_lock<mutex> lck(audio_render_thread_mutex_);
+				source_eof_ = true;
 				int ret = 0;
 				Traverse(traversal_nodes_);
 				for (auto node : traversal_nodes_) {
@@ -271,6 +286,7 @@ namespace vocaloid {
 				if (state_ == AudioContextState::PLAYING) {
 					return;
 				}
+				source_eof_ = false;
 				state_ = AudioContextState::PLAYING;
 				if (audio_render_thread_ == nullptr) {
 					audio_render_thread_ = new thread(thread(&AudioContext::Run, this));
@@ -285,8 +301,11 @@ namespace vocaloid {
 					}
 				}
 				state_ = AudioContextState::STOPPED;
-				if (audio_render_thread_ && audio_render_thread_->joinable())
+				if (audio_render_thread_ && audio_render_thread_->joinable()) {
 					audio_render_thread_->join();
+					delete audio_render_thread_;
+					audio_render_thread_ = nullptr;
+				}	
 				return 0;
 			}
 
@@ -299,8 +318,15 @@ namespace vocaloid {
 				}
 			}
 
+			void Close() override {
+				if (destination_) {
+					destination_->Close();
+				}
+			}
+
 			void Dispose() override {
 				Stop();
+				Close();
 				for (auto connection : connections_) {
 					for (auto to : connection.second) {
 						Disconnect(connection.first, to);
@@ -309,11 +335,15 @@ namespace vocaloid {
 				}
 				connections_.clear();
 				for (auto node : nodes_) {
-					node.second->Dispose();
 					delete node.second;
 					node.second = nullptr;
 				}
 				nodes_.clear();
+			}
+
+			bool SourceEof() {
+				unique_lock<mutex> lck(audio_render_thread_mutex_);
+				return source_eof_;
 			}
 
 			AudioContextState State() {

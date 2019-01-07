@@ -28,6 +28,7 @@ private:
 	atomic<VoicePlayerState> state_;
 	thread *tick_thread_;
 	mutex tick_mutex_;
+	string path_;
 
 	void OnTick() {
 		int64_t last = 0, cur = 0;
@@ -77,6 +78,7 @@ public:
 		effect_ = nullptr;
 		tick_thread_ = nullptr;
 		inited_ = false;
+		state_ = VoicePlayerState::PLAYER_STOP;
 	}
 
 	void Loop(bool v) {
@@ -102,7 +104,10 @@ public:
 	int Open(const char* path) {
 		auto ret = Stop();
 		if (ret < 0)return ret;
-		return source_reader_->Open(path);
+		ret = source_reader_->Open(path);
+		if (ret < 0)return ret;
+		path_ = path;
+		return ret;
 	}
 
 	int SetEffect(Effects id) {
@@ -139,6 +144,7 @@ public:
 			if (state_ == VoicePlayerState::PLAYER_PLAYING)return HAVE_INITED;
 		}
 		auto ret = SUCCEED;
+		ctx_->stop_eof_ = false;
 		if (!inited_) {
 			if (effect_) {
 				ctx_->Connect(source_reader_, effect_->Input());
@@ -202,5 +208,14 @@ public:
 			Join();
 		}else
 			return SUCCEED;
+	}
+
+	void Clear() {
+		source_reader_->Clear();
+		ctx_->Clear();
+	}
+
+	string Path() {
+		return path_;
 	}
 };

@@ -26,6 +26,7 @@ namespace vocaloid {
 		private:
 			WAV_HEADER header_;
 			ofstream out_;
+			bool closed_;
 			size_t data_chunk_pos_;
 
 			template <typename Word>

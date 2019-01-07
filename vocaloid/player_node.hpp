@@ -38,7 +38,8 @@ namespace vocaloid {
 			void Dispose() override {
 				if (player_ == nullptr)return;
 				player_->Flush();
-				player_->Dispose();
+				delete player_;
+				player_ = nullptr;
 			}
 
 			int64_t ProcessFrame() override {

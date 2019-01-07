@@ -91,6 +91,14 @@ namespace vocaloid {
 			float Frequency() {
 				return frequency_;
 			}
+
+			void Dispose() override {
+				if (waveform_buffer_) {
+					delete waveform_buffer_;
+					waveform_buffer_ = nullptr;
+				}
+				InputNode::Dispose();
+			}
 		};
 	}
 }

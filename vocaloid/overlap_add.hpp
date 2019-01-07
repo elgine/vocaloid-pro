@@ -102,6 +102,25 @@ namespace vocaloid {
 				output_queue_->Pop(output, pop_size);
 				return pop_size;
 			}
+
+			virtual void Dispose() {
+				if (input_queue_) {
+					delete input_queue_;
+					input_queue_ = nullptr;
+				}
+				if (output_queue_) {
+					delete output_queue_;
+					output_queue_ = nullptr;
+				}
+				
+				if (out_) {
+					delete out_;
+					out_ = nullptr;
+				}
+				DeleteArray(&buffer_);
+				DeleteArray(&frame_);
+				DeleteArray(&win_);
+			}
 		};
 	}
 }

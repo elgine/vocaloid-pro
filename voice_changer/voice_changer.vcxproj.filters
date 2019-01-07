@@ -122,6 +122,9 @@
     <ClInclude Include="voice_renderer.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="render_list.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="interface.cpp">
