@@ -1,18 +1,4 @@
 LIBRARY VoiceChanger
 EXPORTS
-SetExtractTempPath
-DisposeTemp
-SetPreviewEffect
-SetPreviewLoop
-SetPreviewSegments
-OpenPreview
-SetPreviewEffectOptions
-StartPreview
-StopPreview
-Seek
-Render
-StopRender
-StopRenderAll
-CancelRender
-CancelRenderAll
-ForceExitRender
+ExtensionInitializer
+ExtensionFinalizer

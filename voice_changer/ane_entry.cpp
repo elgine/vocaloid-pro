@@ -1,12 +1,14 @@
 #include "ane_entry.h"
 #include "ane_helper.hpp"
 #include "interface.h"
+#include "status.h"
 
 FREObject SetExtractTempPath(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
-	
+	if (argc < 1)return FromInt(MISS_PARAM);
+
 }
 
-FREObject DisposeTemp(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+FREObject DisposeTemps(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 
 }
 
@@ -74,13 +76,13 @@ void ContextInitializer(
 	const FRENamedFunction	** functionsToSet){
 
 	static FRENamedFunction extension_functions[] = {
-		{ (const uint8_t*) "setExtractTempPath", NULL, &SetExtractTempPath },
-		{ (const uint8_t*) "disposeTemp", NULL, &DisposeTemp },
-		{ (const uint8_t*) "setPreviewEffect", NULL, &SetPreviewEffect },
-		{ (const uint8_t*) "setPreviewLoop", NULL, &SetPreviewLoop },
-		{ (const uint8_t*) "setPreviewSegments", NULL, &SetPreviewSegments },
+		{ (const uint8_t*) "setTempPath", NULL, &SetExtractTempPath },
+		{ (const uint8_t*) "disposeTemps", NULL, &DisposeTemps },
+		{ (const uint8_t*) "setEffectPreview", NULL, &SetPreviewEffect },
+		{ (const uint8_t*) "setLoopPreview", NULL, &SetPreviewLoop },
+		{ (const uint8_t*) "setSegmentsPreview", NULL, &SetPreviewSegments },
 		{ (const uint8_t*) "openPreview", NULL, &OpenPreview },
-		{ (const uint8_t*) "setPreviewEffectOptions", NULL, &SetPreviewEffectOptions },
+		{ (const uint8_t*) "setEffectOptionsPreview", NULL, &SetPreviewEffectOptions },
 		{ (const uint8_t*) "startPreview", NULL, &StartPreview },
 		{ (const uint8_t*) "stopPreview", NULL, &StopPreview },
 		{ (const uint8_t*) "seek", NULL, &Seek },
@@ -91,8 +93,7 @@ void ContextInitializer(
 		{ (const uint8_t*) "cancelRenderAll", NULL, &CancelRenderAll },
 		{ (const uint8_t*) "forceExitRender", NULL, &ForceExitRender }
 	};
-
-	*numFunctionsToSet = 16;
+	*numFunctionsToSet = sizeof(extension_functions)/sizeof(extension_functions[0]);
 	*functionsToSet = extension_functions;
 }
 

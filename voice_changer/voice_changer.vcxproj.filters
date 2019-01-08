@@ -125,9 +125,18 @@
     <ClInclude Include="ane_helper.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ane.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ane_entry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="interface.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ane_entry.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

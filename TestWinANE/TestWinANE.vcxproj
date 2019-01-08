@@ -19,67 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="exports.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="alien.hpp" />
-    <ClInclude Include="ane.h" />
-    <ClInclude Include="ane_entry.h" />
-    <ClInclude Include="ane_helper.hpp" />
-    <ClInclude Include="astronaut.hpp" />
-    <ClInclude Include="balrog.hpp" />
-    <ClInclude Include="render_list.hpp" />
-    <ClInclude Include="voice_renderer.hpp" />
-    <ClInclude Include="interface.h" />
-    <ClInclude Include="extract_resource.hpp" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="uncle.hpp" />
-    <ClInclude Include="broad_room.hpp" />
-    <ClInclude Include="cave.hpp" />
-    <ClInclude Include="child.hpp" />
-    <ClInclude Include="effect.hpp" />
-    <ClInclude Include="effects.h" />
-    <ClInclude Include="factory.hpp" />
-    <ClInclude Include="female.hpp" />
-    <ClInclude Include="hall.hpp" />
-    <ClInclude Include="male.hpp" />
-    <ClInclude Include="megaphone.hpp" />
-    <ClInclude Include="muffler.hpp" />
-    <ClInclude Include="old_female.hpp" />
-    <ClInclude Include="old_male.hpp" />
-    <ClInclude Include="radio.hpp" />
-    <ClInclude Include="robot1.hpp" />
-    <ClInclude Include="robot2.hpp" />
-    <ClInclude Include="status.h" />
-    <ClInclude Include="telephone.hpp" />
-    <ClInclude Include="transformer.hpp" />
-    <ClInclude Include="under_water.hpp" />
-    <ClInclude Include="voice_player.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="ane_entry.cpp" />
-    <ClCompile Include="interface.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="voice_changer.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Media Include="..\samples\church.wav" />
-    <Media Include="..\samples\female-voice.wav" />
-    <Media Include="..\samples\fire.mp3" />
-    <Media Include="..\samples\large-long-echo-hall.wav" />
-    <Media Include="..\samples\large-wide-echo-hall.wav" />
-    <Media Include="..\samples\muffler.wav" />
-    <Media Include="..\samples\parking.wav" />
-    <Media Include="..\samples\radio.wav" />
-    <Media Include="..\samples\spring.wav" />
-    <Media Include="..\samples\telephone.wav" />
-    <Media Include="..\samples\underwater.mp3" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{AECEBFF0-24F0-4923-BA88-6F05306F33E7}</ProjectGuid>
+    <ProjectGuid>{299FF872-A2E5-4583-8D56-D102F14D9196}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>voice_changer</RootNamespace>
+    <RootNamespace>TestWinANE</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -129,31 +74,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
-    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
+    <IncludePath>$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
-    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
+    <IncludePath>$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
-    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
+    <IncludePath>$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
-    <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
+    <IncludePath>$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -161,12 +102,11 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TESTWINANE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -175,12 +115,11 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;TESTWINANE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -191,15 +130,13 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TESTWINANE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -210,15 +147,13 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;TESTWINANE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
