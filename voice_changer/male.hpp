@@ -21,7 +21,7 @@ namespace effect {
 		static float PITCH_OFFSET_MIN;
 		static float PITCH_OFFSET_MAX;
 
-		explicit Male(AudioContext* ctx) :Effect(ctx) {
+		explicit Male(BaseAudioContext* ctx) :Effect(ctx) {
 			id_ = Effects::MALE;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;

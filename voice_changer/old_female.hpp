@@ -37,7 +37,7 @@ namespace effect {
 		static float VIBRATO_SPEED_MIN;
 		static float VIBRATO_SPEED_MAX;
 
-		explicit OldFemale(AudioContext *ctx) : Effect(ctx) {
+		explicit OldFemale(BaseAudioContext *ctx) : Effect(ctx) {
 			id_ = Effects::OLD_FEMALE;
 			highpass_ = new BiquadNode(ctx);
 			highpass_->type_ = BIQUAD_TYPE::HIGH_PASS;

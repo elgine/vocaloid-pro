@@ -4,7 +4,6 @@
 #include "waveform.hpp"
 #include "../utility/buffer.hpp"
 #include "maths.hpp"
-#include "audio_context.hpp"
 namespace vocaloid {
 	namespace node {
 		class OscillatorNode : public InputNode {
@@ -17,7 +16,7 @@ namespace vocaloid {
 			int64_t offset_;
 
 		public:
-			explicit OscillatorNode(AudioContext *ctx) :InputNode(ctx) {
+			explicit OscillatorNode(BaseAudioContext *ctx) :InputNode(ctx) {
 				frequency_ = 440;
 				waveform_dirty_ = true;
 				type_ = dsp::WAVEFORM_TYPE::SINE;

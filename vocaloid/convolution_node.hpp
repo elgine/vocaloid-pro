@@ -1,5 +1,4 @@
 #pragma once
-#include "audio_context.hpp"
 #include "convolver.hpp"
 using namespace vocaloid::dsp;
 namespace vocaloid {
@@ -46,7 +45,7 @@ namespace vocaloid {
 
 			bool normalize_;
 
-			explicit ConvolutionNode(AudioContext *ctx) :AudioNode(ctx) {
+			explicit ConvolutionNode(BaseAudioContext *ctx) :AudioNode(ctx) {
 				convolver_ = new Convolver*[8]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 				kernel_ = nullptr;
 				normalize_ = true;

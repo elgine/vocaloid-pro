@@ -12,7 +12,7 @@ namespace effect {
 	private:
 		ConvolutionNode *convolution_;
 	public:
-		explicit Hall(AudioContext *ctx) :Effect(ctx) {
+		explicit Hall(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::HALL;
 			convolution_ = new ConvolutionNode(ctx);
 			auto channel_data = new AudioChannel();

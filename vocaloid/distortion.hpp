@@ -24,7 +24,7 @@ namespace vocaloid {
 
 			float gain_;
 
-			DistortionNode(AudioContext *ctx):WaveShaperNode(ctx) {
+			explicit DistortionNode(BaseAudioContext *ctx):WaveShaperNode(ctx) {
 				gain_ = 0.5f;
 			}
 

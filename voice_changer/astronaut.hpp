@@ -1,7 +1,6 @@
 #pragma once
 #include "effect.hpp"
 #include "effects.h"
-#include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/biquad_node.hpp"
 #include "../vocaloid/distortion.hpp"
 #include "../vocaloid/dynamic_compressor_node.hpp"
@@ -18,7 +17,7 @@ namespace effect {
 		DynamicsCompressorNode *compressor_;
 		DistortionNode *distortion_;
 	public:
-		explicit Astronaut(AudioContext *ctx) :Effect(ctx) {
+		explicit Astronaut(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::ASTRONAUT;
 			distortion_ = new DistortionNode(ctx);
 			b1_ = new BiquadNode(ctx);

@@ -1,4 +1,0 @@
-LIBRARY VoiceChanger
-EXPORTS
-ExtensionInitializer
-ExtensionFinalizer

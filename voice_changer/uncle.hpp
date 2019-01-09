@@ -1,6 +1,5 @@
 #pragma once
 #include "../vocaloid/maths.hpp"
-#include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/biquad_node.hpp"
 #include "../vocaloid/jungle.hpp"
 #include "effects.h"
@@ -35,7 +34,7 @@ namespace effect {
 			}
 		}
 
-		explicit Uncle(AudioContext *ctx): Effect(ctx) {
+		explicit Uncle(BaseAudioContext *ctx): Effect(ctx) {
 			id_ = Effects::UNCLE;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;

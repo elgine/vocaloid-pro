@@ -2,7 +2,6 @@
 #include <math.h>
 #include <float.h>
 #include "../utility/buffer.hpp"
-#include "audio_context.hpp"
 #include "maths.hpp"
 // From Chromium, DynamicsCompressorKernel.cpp
 namespace vocaloid {
@@ -298,7 +297,7 @@ namespace vocaloid {
 				return 20.0f * log10f(v);
 			}
 
-			explicit DynamicsCompressorNode(AudioContext *ctx) :AudioNode(ctx) {
+			explicit DynamicsCompressorNode(BaseAudioContext *ctx) :AudioNode(ctx) {
 				m_last_predelay_frames_ = DEFAULT_PREDELAY_FRAMES;
 				m_predelay_read_index_ = 0;
 				m_predelay_write_index_ = DEFAULT_PREDELAY_FRAMES;

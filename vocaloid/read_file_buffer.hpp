@@ -1,14 +1,17 @@
 #pragma once
 #include "stdafx.h"
+#ifdef WIN
 #include "ffmpeg_io.hpp"
+#else
 #include "wav.hpp"
+#endif
 #include "../utility/buffer.hpp"
 #include "../utility/path.hpp"
 namespace vocaloid {
 	namespace io {
 		int64_t ReadFileBuffer(const char* source, AudioFormat *format, Buffer<char> *buffer) {
 			AudioFileReader *reader = nullptr;
-#ifdef _WIN32 || _WIN64
+#ifdef WIN
 			reader = new FFmpegFileReader();
 #else
 			if (GetExtension(source) != ".wav") {

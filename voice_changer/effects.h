@@ -3,6 +3,7 @@
 using namespace std;
 namespace effect {
 	enum Effects {
+		NONE,
 		// Character
 		ALIEN,
 		ROBOT1,

@@ -113,7 +113,7 @@ namespace effect {
 			}
 		}
 
-		explicit Balrog(AudioContext *ctx) : Effect(ctx) {
+		explicit Balrog(BaseAudioContext *ctx) : Effect(ctx) {
 			id_ = Effects::BALROG;
 			filter_ = new BiquadNode(ctx);
 			filter_->type_ = BIQUAD_TYPE::HIGH_SHELF;

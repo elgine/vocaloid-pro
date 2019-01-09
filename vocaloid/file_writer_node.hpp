@@ -1,6 +1,6 @@
 #pragma once
 #include "file.h"
-#ifdef _WIN32 || _WIN64
+#ifdef WIN
 #include "ffmpeg_io.hpp"
 #else
 #include "wav.hpp"
@@ -16,7 +16,7 @@ namespace vocaloid {
 			Buffer<char> *buf_;
 		public:
 			explicit FileWriterNode(BaseAudioContext *ctx): DestinationNode(ctx){
-#ifdef _WIN32 || _WIN64
+#ifdef WIN
 				writer_ = new io::FFmpegFileWriter();
 #else
 				writer_ = new io::WAVWriter();

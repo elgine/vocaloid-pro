@@ -12,7 +12,7 @@ namespace effect {
 	private:
 		ConvolutionNode *convolution_;
 	public:
-		explicit Muffler(AudioContext *ctx) :Effect(ctx) {
+		explicit Muffler(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::MUFFLER;
 			convolution_ = new ConvolutionNode(ctx);
 			auto channel_data = new AudioChannel();

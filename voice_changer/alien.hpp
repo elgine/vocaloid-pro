@@ -21,7 +21,7 @@ namespace effect {
 		static float LFO_GAIN_MIN;
 		static float LFO_GAIN_MAX;
 
-		explicit Alien(AudioContext *ctx) :Effect(ctx) {
+		explicit Alien(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::ALIEN;
 			delay_ = new DelayNode(ctx);
 			osc_ = new OscillatorNode(ctx);

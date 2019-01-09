@@ -2,12 +2,10 @@
 #include "stdafx.h"
 #include "file.h"
 #include "source_node.hpp"
-#include "audio_context.hpp"
 #include "../utility/path.hpp"
 #include "maths.hpp"
 #include "status.h"
-#define _WIN _WIN32 || _WIN64
-#ifdef _WIN
+#ifdef WIN
 #include "ffmpeg_io.hpp"
 #else
 #include "wav.hpp"
@@ -27,9 +25,9 @@ namespace vocaloid {
 			bool need_update_;
 		public:
 
-			explicit FileReaderNode(AudioContext *ctx) :SourceNode(ctx) {
+			explicit FileReaderNode(BaseAudioContext *ctx) :SourceNode(ctx) {
 				path_ = "undefined";
-#ifdef _WIN
+#ifdef WIN
 				reader_ = new io::FFmpegFileReader();
 #else
 				reader_ = new io::WAVReader();

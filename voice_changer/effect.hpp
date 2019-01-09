@@ -1,5 +1,4 @@
 #pragma once
-#include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/gain_node.hpp"
 #include "effects.h"
 using namespace vocaloid;
@@ -9,7 +8,7 @@ namespace effect {
 	class Effect {
 	protected:
 		Effects id_;
-		AudioContext *ctx_;
+		BaseAudioContext *ctx_;
 		GainNode *gain_;
 	public:
 
@@ -17,7 +16,7 @@ namespace effect {
 		static float GAIN_MIN;
 		static float GAIN_MAX;
 
-		explicit Effect(AudioContext *ctx) {
+		explicit Effect(BaseAudioContext *ctx) {
 			ctx_ = ctx;
 			gain_ = new GainNode(ctx, GAIN_DEFAULT);
 		}

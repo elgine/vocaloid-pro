@@ -12,7 +12,7 @@ namespace effect {
 	private:
 		ConvolutionNode *convolution_;
 	public:
-		explicit Cave(AudioContext *ctx) :Effect(ctx) {
+		explicit Cave(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::CAVE;
 			convolution_ = new ConvolutionNode(ctx);
 			auto channel_data = new AudioChannel();

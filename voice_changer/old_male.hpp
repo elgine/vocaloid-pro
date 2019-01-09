@@ -40,7 +40,7 @@ namespace effect {
 		static float VIBRATO_SPEED_MAX;
 
 
-		explicit OldMale(AudioContext *ctx) : Effect(ctx) {
+		explicit OldMale(BaseAudioContext *ctx) : Effect(ctx) {
 			id_ = Effects::OLD_MALE;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;

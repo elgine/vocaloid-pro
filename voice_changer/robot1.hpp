@@ -1,5 +1,4 @@
 #pragma once
-#include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/oscillator_node.hpp"
 #include "../vocaloid/biquad_node.hpp"
 #include "../vocaloid/gain_node.hpp"
@@ -19,7 +18,7 @@ namespace effect {
 
 	public:
 
-		explicit Robot1(AudioContext *ctx):Effect(ctx) {
+		explicit Robot1(BaseAudioContext *ctx):Effect(ctx) {
 			id_ = Effects::ROBOT1;
 			delay_ = new DelayNode(ctx, 0.01);
 			osc_ = new OscillatorNode(ctx);

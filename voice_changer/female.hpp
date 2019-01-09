@@ -15,7 +15,7 @@ namespace effect {
 		static float PITCH_OFFSET_MIN;
 		static float PITCH_OFFSET_MAX;
 
-		explicit Female(AudioContext *ctx):Effect(ctx) {
+		explicit Female(BaseAudioContext *ctx):Effect(ctx) {
 			id_ = Effects::FEMALE;
 			compressor_ = new DynamicsCompressorNode(ctx);
 			jungle_ = new Jungle(ctx);

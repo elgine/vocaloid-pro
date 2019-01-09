@@ -35,7 +35,7 @@ namespace vocaloid {
 			GainNode *aw_depth_;
 			BiquadNode *aw_filter_;
 
-			explicit AutoWah(AudioContext *ctx):Composite(ctx) {
+			explicit AutoWah(BaseAudioContext *ctx):Composite(ctx) {
 				wave_shaper_ = new WaveShaperNode(ctx);
 				aw_follower_ = new BiquadNode(ctx);
 				aw_follower_->frequency_->value_ = 10.0f;

@@ -16,7 +16,7 @@ namespace effect {
 		Jungle *jungle4_;
 		DynamicsCompressorNode *compressor_;
 	public:
-		explicit Transformer(AudioContext *ctx) : Effect(ctx) {
+		explicit Transformer(BaseAudioContext *ctx) : Effect(ctx) {
 			id_ = Effects::TRANSFORMER;
 			jungle1_ = new Jungle(ctx);
 			jungle1_->SetPitchOffset(-0.1f);

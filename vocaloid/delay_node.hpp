@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "maths.hpp"
 #include "audio_channel.hpp"
-#include "audio_context.hpp"
 using namespace std;
 namespace vocaloid {
 	namespace node {
@@ -15,7 +14,7 @@ namespace vocaloid {
 		public:
 			AudioParam *delay_time_;
 
-			explicit DelayNode(AudioContext *ctx, float delay_time = 0, float max_delay_time = 1.0f) :AudioNode(ctx), max_delay_time_(max_delay_time) {
+			explicit DelayNode(BaseAudioContext *ctx, float delay_time = 0, float max_delay_time = 1.0f) :AudioNode(ctx), max_delay_time_(max_delay_time) {
 				delay_time_ = new AudioParam(ctx);
 				delay_time_->value_ = delay_time;
 				max_delay_size_ = 0;

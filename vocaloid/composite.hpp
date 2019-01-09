@@ -1,5 +1,4 @@
 #pragma once
-#include "audio_context.hpp"
 #include "gain_node.hpp"
 namespace vocaloid {
 	namespace composite {
@@ -7,14 +6,14 @@ namespace vocaloid {
 		using namespace vocaloid::node;
 		class Composite {
 		protected:
-			AudioContext *ctx_;
+			BaseAudioContext *ctx_;
 		public:		
 			GainNode *input_;
 			GainNode *dry_;
 			GainNode *wet_;
 			GainNode *output_;
 
-			explicit Composite(AudioContext *ctx) {
+			explicit Composite(BaseAudioContext *ctx) {
 				ctx_ = ctx;
 				input_ = new GainNode(ctx);
 				dry_ = new GainNode(ctx);
@@ -54,7 +53,7 @@ namespace vocaloid {
 				wet_->gain_->value_ = gain2;
 			}
 
-			AudioContext* Context() {
+			BaseAudioContext* Context() {
 				return ctx_;
 			}
 		};

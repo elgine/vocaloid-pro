@@ -23,7 +23,7 @@
 #include "megaphone.hpp"
 namespace effect {
 
-	Effect* EffectFactory(Effects id, AudioContext *ctx) {
+	Effect* EffectFactory(Effects id, BaseAudioContext *ctx) {
 		switch (id) {
 		case Effects::ALIEN:return new Alien(ctx);
 		case Effects::ROBOT1:return new Robot1(ctx);

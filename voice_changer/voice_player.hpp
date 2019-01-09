@@ -84,12 +84,16 @@ public:
 		ctx_->Unlock();
 	}
 
-	void SetOptions(float* options, int option_count) {
+	int SetOptions(float* options, int option_count) {
+		int ret = SUCCEED;
 		ctx_->Lock();
 		if (effect_) {
 			effect_->SetOptions(options, option_count);
 		}
+		else
+			ret = NO_SUCH_EFFECT;
 		ctx_->Unlock();
+		return ret;
 	}
 
 	int Open(const char* path) {
@@ -122,7 +126,7 @@ public:
 		return ret;
 	}
 
-	int PlaySegments(int64_t **segments, int segment_count) {
+	int PlaySegments(int *segments, int segment_count) {
 		ctx_->Lock();
 		auto ret = source_reader_->StartWithSegments(segments, segment_count);
 		ctx_->Unlock();
@@ -201,10 +205,17 @@ public:
 			return SUCCEED;
 	}
 
-	void Seek(int64_t timestamp) {
+	int Seek(int64_t timestamp) {
+		int ret = SUCCEED;
+		ctx_->Lock();
 		if (source_reader_) {
 			source_reader_->Seek(timestamp);
 		}
+		else {
+			ret = HAVE_NOT_DEFINED_SOURCE;
+		}
+		ctx_->Unlock();
+		return ret;
 	}
 
 	string Path() {

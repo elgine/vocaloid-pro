@@ -8,7 +8,7 @@ using namespace std;
 struct RenderData {
 	const char* source;
 	const char* dest;
-	int64_t** segments;
+	int* segments;
 	int segment_count;
 	int effect_id;
 	float* options;
@@ -111,7 +111,7 @@ public:
 
 
 	void AddRenderData(const char* source, const char* dest, int effect_id, float* options, int option_count, 
-				int64_t** segments = nullptr, int segment_count = 0) {
+				int* segments = nullptr, int segment_count = 0) {
 		unique_lock<mutex> lck(render_thread_mutex_);
 		list_.push_back({
 			source,

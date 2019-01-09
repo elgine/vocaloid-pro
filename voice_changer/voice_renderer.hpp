@@ -2,10 +2,12 @@
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/file_reader_node.hpp"
 #include "../vocaloid/file_writer_node.hpp"
+#include "effects.h"
 #include "effect.hpp"
 #include "factory.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
+using namespace effect;
 
 enum VoiceRendererState {
 	RENDERER_STOP,
@@ -76,9 +78,10 @@ public:
 		return ret;
 	}
 
-	int RenderSegments(int64_t **segments, int segment_count) {
+	int RenderSegments(int *segments, int segment_count) {
+		auto ret = SUCCEED;
 		ctx_->Lock();
-		auto ret = source_reader_->StartWithSegments(segments, segment_count);
+		ret = source_reader_->StartWithSegments(segments, segment_count);
 		ctx_->Unlock();
 		return ret;
 	}

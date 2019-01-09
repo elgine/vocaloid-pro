@@ -1,6 +1,5 @@
 #pragma once
 #include "phase_vocoder.hpp"
-#include "audio_context.hpp"
 namespace vocaloid {
 	namespace node {
 		class PhaseVocoderNode : public AudioNode {
@@ -11,7 +10,7 @@ namespace vocaloid {
 			float pitch_;
 			float tempo_;
 
-			explicit PhaseVocoderNode(AudioContext *ctx) :AudioNode(ctx) {
+			explicit PhaseVocoderNode(BaseAudioContext *ctx) :AudioNode(ctx) {
 				shifters_ = new dsp::PhaseVocoder*[8]{ nullptr };
 				pitch_ = 1.0f;
 				tempo_ = 1.0f;

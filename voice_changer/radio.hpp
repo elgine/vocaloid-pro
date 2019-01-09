@@ -12,7 +12,7 @@ namespace effect {
 	private:
 		ConvolutionNode *convolution_;
 	public:
-		explicit Radio(AudioContext *ctx) :Effect(ctx) {
+		explicit Radio(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::RADIO;
 			convolution_ = new ConvolutionNode(ctx);
 			auto channel_data = new AudioChannel();

@@ -38,7 +38,7 @@ namespace vocaloid {
 			GainNode *gain_;
 			OscillatorNode *osc_;
 
-			Chorus(AudioContext *ctx) :Composite(ctx) {
+			explicit Chorus(BaseAudioContext *ctx) :Composite(ctx) {
 				delay_ = new DelayNode(ctx);
 				osc_ = new OscillatorNode(ctx);
 				gain_ = new GainNode(ctx);

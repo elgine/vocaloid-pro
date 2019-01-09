@@ -12,7 +12,7 @@ namespace effect {
 	private:
 		ConvolutionNode *convolution_;
 	public:
-		explicit BroadRoom(AudioContext *ctx) :Effect(ctx) {
+		explicit BroadRoom(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::BROAD_ROOM;
 			convolution_ = new ConvolutionNode(ctx);
 			auto channel_data = new AudioChannel();

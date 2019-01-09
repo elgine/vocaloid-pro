@@ -41,7 +41,7 @@ namespace vocaloid {
 				float flanger_feedback;
 			};
 
-			Flanger(AudioContext *ctx):Composite(ctx) {
+			explicit Flanger(BaseAudioContext *ctx):Composite(ctx) {
 				osc_ = new OscillatorNode(ctx);
 				delay_ = new DelayNode(ctx);
 				gain_ = new GainNode(ctx);

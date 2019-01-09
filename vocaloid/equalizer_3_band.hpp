@@ -1,5 +1,4 @@
 #pragma once
-#include "audio_context.hpp"
 #include "biquad_node.hpp"
 #include "composite.hpp"
 namespace vocaloid {
@@ -39,7 +38,7 @@ namespace vocaloid {
 			BiquadNode *lo_;
 			BiquadNode *mi_;
 
-			explicit Equalizer3Band(AudioContext *ctx):Composite(ctx){
+			explicit Equalizer3Band(BaseAudioContext *ctx):Composite(ctx){
 				hi_ = new BiquadNode(ctx);
 				hi_->type_ = BIQUAD_TYPE::HIGH_SHELF;
 				hi_->frequency_->value_ = 2500;

@@ -27,11 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="exports.def">
-      <Filter>源文件</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="effect.hpp">
       <Filter>头文件\effects</Filter>
     </ClInclude>
@@ -107,9 +102,6 @@
     <ClInclude Include="uncle.hpp">
       <Filter>头文件\effects\character</Filter>
     </ClInclude>
-    <ClInclude Include="interface.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -128,22 +120,9 @@
     <ClInclude Include="ane.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ane_entry.h">
+    <ClInclude Include="interface.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="interface.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ane_entry.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="voice_changer.rc">
-      <Filter>资源文件</Filter>
-    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Media Include="..\samples\church.wav">
@@ -179,5 +158,15 @@
     <Media Include="..\samples\underwater.mp3">
       <Filter>资源文件</Filter>
     </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="voice_changer.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

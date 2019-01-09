@@ -15,7 +15,7 @@ namespace effect {
 		BiquadNode *hpf1_;
 		BiquadNode *hpf2_;
 	public:
-		explicit Megaphone(AudioContext *ctx) :Effect(ctx) {
+		explicit Megaphone(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::MEGAPHONE;
 			compressor_ = new DynamicsCompressorNode(ctx);
 			distortion_ = new DistortionNode(ctx);

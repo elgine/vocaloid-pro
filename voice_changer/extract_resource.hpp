@@ -1,23 +1,15 @@
 #pragma once
-#include <windows.h>
-#include "../utility/path.hpp"
-#include "../utility/string_wstring.hpp"
 #include <fstream>
 #include <map>
+#include "../utility/module.hpp"
+#include "../utility/path.hpp"
+#include "../utility/string_wstring.hpp"
 using namespace std;
 
 #define NO_SUCH_RESOURCE L"Not exist resource"
 
 static wstring temp_path;
 static map<int, wstring> resources;
-
-HMODULE GetSelfModuleHandle(){
-	MEMORY_BASIC_INFORMATION mbi;
-
-	return ((::VirtualQuery(GetSelfModuleHandle, &mbi, sizeof(mbi)) != 0)
-		? (HMODULE)mbi.AllocationBase : nullptr);
-}
-
 
 bool ExtractResource(LPCTSTR strDstFile, LPCTSTR strResType, LPCTSTR strResName){
 	auto handler = GetSelfModuleHandle();
@@ -35,8 +27,10 @@ bool ExtractResource(LPCTSTR strDstFile, LPCTSTR strResType, LPCTSTR strResName)
     return true;
 }
 
-void SetTempPath(const char* path) {
+int SetTempPath(const char* path) {
 	temp_path = StringToWString(path);
+	if (CreateDirectoryRecursivly(WStringToString(temp_path.c_str())))return 0;
+	return -510;
 }
 
 string ExtractResource(int res_id, WCHAR* res_type) {
@@ -59,7 +53,7 @@ string ExtractResource(int res_id, WCHAR* res_type) {
 	return WStringToString(result.data());
 }
 
-void DisposeAllTempResources() {
+int DisposeAllTempResources() {
 	for (auto iter : resources) {
 		char* path = WStringToString(iter.second.data());
 		if (IsFileExists(path)) {
@@ -67,4 +61,5 @@ void DisposeAllTempResources() {
 		}
 	}
 	resources.clear();
+	return 0;
 }

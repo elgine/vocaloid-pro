@@ -34,7 +34,7 @@ namespace vocaloid {
 				float vibrato_speed;
 			};
 
-		    explicit Vibrato(AudioContext *ctx) : Composite(ctx) {
+		    explicit Vibrato(BaseAudioContext *ctx) : Composite(ctx) {
 				delay_ = new DelayNode(ctx);
 				osc_ = new OscillatorNode(ctx);
 				gain_ = new GainNode(ctx);

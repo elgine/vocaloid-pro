@@ -53,7 +53,7 @@ namespace effect {
 			}
 		}
 
-		explicit Child(AudioContext *ctx): Effect(ctx) {
+		explicit Child(BaseAudioContext *ctx): Effect(ctx) {
 			id_ = Effects::CHILD;
 			phase_vocoder_ = new PhaseVocoderNode(ctx);
 			phase_vocoder_->pitch_ = PITCH_DEFAULT;

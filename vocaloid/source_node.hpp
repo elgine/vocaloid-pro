@@ -118,17 +118,17 @@ namespace vocaloid {
 				return frame_count;
 			}
 
-			int StartWithSegments(int64_t **segments, int segment_count, int64_t delay = 0) {
-				auto dur = int64_t(Duration() * SourceSampleRate() * 0.001f);
+			int StartWithSegments(int *segments, int segment_count, int64_t delay = 0) {
+				auto dur = int(Duration() * SourceSampleRate() * 0.001f);
 				if (dur <= 0)return HAVE_NOT_DEFINED_SOURCE;
 				auto ret = InputNode::Start();
 				if (ret < 0)return ret;
 				delay_ = delay;
 				try {
 					int64_t last = 0, start_timestamp, end_timestamp, start_bytes = 0, end_bytes = 0;
-					for (auto i = 0; i < segment_count; i++) {
-						start_timestamp = Clamp(int64_t(0), dur, segments[i][0]);
-						end_timestamp = Clamp(int64_t(0), dur, segments[i][1]);
+					for (auto i = 0; i < segment_count; i+=2) {
+						start_timestamp = Clamp(0, dur, segments[i]);
+						end_timestamp = Clamp(0, dur, segments[i + 1]);
 						if (start_timestamp < last) {
 							start_timestamp = last;
 						}

@@ -43,7 +43,7 @@ namespace effect {
 		static float UNDER_WATER_BACKGROUND_GAIN_MIN;
 		static float UNDER_WATER_BACKGROUND_GAIN_MAX;
 
-		explicit UnderWater(AudioContext *ctx) : Effect(ctx) {
+		explicit UnderWater(BaseAudioContext *ctx) : Effect(ctx) {
 			id_ = Effects::UNDER_WATER;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;

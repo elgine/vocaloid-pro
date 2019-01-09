@@ -23,11 +23,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utility", "utility\utility.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voice_changer", "voice_changer\voice_changer.vcxproj", "{AECEBFF0-24F0-4923-BA88-6F05306F33E7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voice_changer_example", "voice_changer_example\voice_changer_example.vcxproj", "{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}"
-	ProjectSection(ProjectDependencies) = postProject
-		{AECEBFF0-24F0-4923-BA88-6F05306F33E7} = {AECEBFF0-24F0-4923-BA88-6F05306F33E7}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestWinANE", "TestWinANE\TestWinANE.vcxproj", "{299FF872-A2E5-4583-8D56-D102F14D9196}"
 EndProject
 Global
@@ -78,14 +73,6 @@ Global
 		{AECEBFF0-24F0-4923-BA88-6F05306F33E7}.Release|x64.Build.0 = Release|x64
 		{AECEBFF0-24F0-4923-BA88-6F05306F33E7}.Release|x86.ActiveCfg = Release|Win32
 		{AECEBFF0-24F0-4923-BA88-6F05306F33E7}.Release|x86.Build.0 = Release|Win32
-		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x64.ActiveCfg = Debug|x64
-		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x64.Build.0 = Debug|x64
-		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x86.ActiveCfg = Debug|Win32
-		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x86.Build.0 = Debug|Win32
-		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Release|x64.ActiveCfg = Release|x64
-		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Release|x64.Build.0 = Release|x64
-		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Release|x86.ActiveCfg = Release|Win32
-		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Release|x86.Build.0 = Release|Win32
 		{299FF872-A2E5-4583-8D56-D102F14D9196}.Debug|x64.ActiveCfg = Debug|x64
 		{299FF872-A2E5-4583-8D56-D102F14D9196}.Debug|x64.Build.0 = Debug|x64
 		{299FF872-A2E5-4583-8D56-D102F14D9196}.Debug|x86.ActiveCfg = Debug|Win32

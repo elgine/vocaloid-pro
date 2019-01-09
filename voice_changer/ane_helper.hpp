@@ -21,6 +21,10 @@ bool IsString(FREObject obj) {
 	return GetType(obj) == FREObjectType::FRE_TYPE_STRING;
 }
 
+bool IsBool(FREObject obj) {
+	return GetType(obj) == FREObjectType::FRE_TYPE_BOOLEAN;
+}
+
 int ArrayLen(FREObject obj) {
 	if (!IsArray(obj))return -1;
 	uint32_t len = 0;
@@ -34,6 +38,13 @@ const char* ToString(FREObject obj) {
 	uint32_t len = 0;
 	if (FRE_OK != FREGetObjectAsUTF8(obj, &len, &str))return nullptr;
 	return (const char*)(str);
+}
+
+bool ToBool(FREObject obj) {
+	if (!IsBool(obj))return false;
+	uint32_t v;
+	if (FRE_OK != FREGetObjectAsBool(obj, &v))return false;
+	return bool(v);
 }
 
 int ToInt(FREObject obj) {

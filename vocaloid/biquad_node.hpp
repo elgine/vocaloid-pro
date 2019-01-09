@@ -1,5 +1,4 @@
 #pragma once
-#include "audio_context.hpp"
 #include "audio_param.hpp"
 #include "biquad.hpp"
 namespace vocaloid {
@@ -14,7 +13,7 @@ namespace vocaloid {
 			AudioParam *gain_;
 			dsp::BIQUAD_TYPE type_;
 
-			explicit BiquadNode(AudioContext *ctx) :AudioNode(ctx) {
+			explicit BiquadNode(BaseAudioContext *ctx) :AudioNode(ctx) {
 				type_ = dsp::BIQUAD_TYPE::LOW_PASS;
 				filters_ = new dsp::Biquad*[8]{nullptr};
 				frequency_ = new AudioParam(ctx);

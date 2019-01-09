@@ -305,14 +305,13 @@
 #include "gain_node.hpp"
 #include "delay_node.hpp"
 #include "buffer_node.hpp"
-#include "audio_context.hpp"
 #include "audio_channel.hpp"
 #include "composite.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
 namespace vocaloid {
 	namespace composite {
-		AudioChannel* CreateFadeBuffer(AudioContext *ctx, float active_time, float fade_time) {
+		AudioChannel* CreateFadeBuffer(BaseAudioContext *ctx, float active_time, float fade_time) {
 			int64_t length1 = ctx->SampleRate() * active_time;
 			int64_t length2 = (active_time - 2 * fade_time) * ctx->SampleRate();
 			int64_t length = length1 + length2;
@@ -344,7 +343,7 @@ namespace vocaloid {
 			return buffer;
 		}
 
-		AudioChannel* CreateDelayTimeBuffer(AudioContext *ctx, float active_time, float fade_time, bool shift_up) {
+		AudioChannel* CreateDelayTimeBuffer(BaseAudioContext *ctx, float active_time, float fade_time, bool shift_up) {
 			int64_t length1 = active_time * ctx->SampleRate();
 			int64_t length2 = (active_time - 2 * fade_time) * ctx->SampleRate();
 			int64_t length = length1 + length2;
@@ -397,7 +396,7 @@ namespace vocaloid {
 			GainNode *mix2_;
 
 
-			Jungle(AudioContext *ctx, float delay_time = 0.1, float fade_time = 0.05, float buffer_time = 0.1) :Composite(ctx) {
+			explicit Jungle(BaseAudioContext *ctx, float delay_time = 0.1, float fade_time = 0.05, float buffer_time = 0.1) :Composite(ctx) {
 				previous_pitch_ = -1;
 				buffer_time_ = buffer_time;
 				fade_time_ = fade_time;

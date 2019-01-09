@@ -14,7 +14,7 @@ namespace effect {
 		BiquadNode *b4_;
 		DynamicsCompressorNode *compressor_;
 	public:
-		explicit Telephone(AudioContext *ctx):Effect(ctx) {
+		explicit Telephone(BaseAudioContext *ctx):Effect(ctx) {
 			id_ = Effects::TELEPHONE;
 			b1_ = new BiquadNode(ctx);
 			b1_->frequency_->value_ = 2000;
