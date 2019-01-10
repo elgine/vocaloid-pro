@@ -74,7 +74,6 @@ namespace vocaloid {
 			condition_variable can_decode_;
 			atomic<bool> is_end_;
 			atomic<bool> decoding_;
-			atomic<bool> has_begun_;
 
 			int64_t frame_count_;
 			int64_t output_frame_size_;
@@ -159,12 +158,11 @@ namespace vocaloid {
 							packet_->data = nullptr;
 							packet_->size = 0;
 							Decode(packet_);
-							is_end_ = true;
 							decoding_ = false;
-							// has_begun_ = false;
+							is_end_ = true;
 							break;
 						}
-						else if(ret >= 0){
+						else if (ret >= 0) {
 							if (packet_->stream_index == a_stream_index_) {
 								DecodePacket(packet_);
 							}
@@ -212,7 +210,6 @@ namespace vocaloid {
 				auto audio_stream = ctx_->streams[a_stream_index_];
 				auto duration = audio_stream->duration * av_q2d(audio_stream->time_base);
 				return duration * codec_ctx_->sample_rate * codec_ctx_->channels * BITS_PER_SEC / 8;
-
 			}
 
 			int64_t Duration() override {
@@ -232,47 +229,44 @@ namespace vocaloid {
 			}
 
 			int64_t ReadData(char* data, int64_t length) override {
-				auto decoding = false;
-				{
-					unique_lock<mutex> lck(decode_mutex_);
-					decoding = decoding_;
-				}
-				if (!decoding) {
+				if (!Decoding() && !End()) {
 					decoding_ = true;
 					decode_thread_ = new thread(&FFmpegFileReader::Loop, this);
-					return 0;
 				}
-				else {
-					{
-						unique_lock<mutex> lck(decode_mutex_);
-						if (buffer_size_ < length) {
+				{
+					unique_lock<mutex> lck(decode_mutex_);
+					if (buffer_size_ < length) {
 #ifdef _DEBUG
-							//cout << "buffer size is too small: " << buffer_size_ << endl;
+						//cout << "buffer size is too small: " << buffer_size_ << endl;
 #endif
-							return 0;
-						}
-
-						try {
-							memcpy(data, buffer_, length);
-							buffer_size_ -= length;
-							if (buffer_size_ < 0)
-								buffer_size_ = 0;
-							if (buffer_size_ > 0)
-								memmove(buffer_, buffer_ + length, buffer_size_);
-							// memcpy(buffer_, buffer_ + length, buffer_size_);
-						}
-						catch (exception e) {
-							cout << e.what() << endl;
-						}
-
-						if (EnableToDecode())
-							can_decode_.notify_all();
-#ifdef _DEBUG
-						//cout << "Pick buffer" << endl;
-#endif
+						return 0;
 					}
-					return length;
+
+					try {
+						memcpy(data, buffer_, length);
+						buffer_size_ -= length;
+						if (buffer_size_ < 0)
+							buffer_size_ = 0;
+						if (buffer_size_ > 0)
+							memmove(buffer_, buffer_ + length, buffer_size_);
+						// memcpy(buffer_, buffer_ + length, buffer_size_);
+					}
+					catch (exception e) {
+						cout << e.what() << endl;
+					}
+
+					if (EnableToDecode())
+						can_decode_.notify_all();
+#ifdef _DEBUG
+					//cout << "Pick buffer" << endl;
+#endif
 				}
+				return length;
+			}
+
+			bool Decoding() {
+				unique_lock<mutex> lck(decode_mutex_);
+				return decoding_;
 			}
 
 			int16_t Open(const char *input_path) override {
@@ -325,11 +319,11 @@ namespace vocaloid {
 
 				// Prevent frame_size be zero
 				/*if (codec_ctx_->frame_size <= 0) {
-					if (codec_ctx_->codec_id == AV_CODEC_ID_PCM_S24LE || 
-						codec_ctx_->codec_id == AV_CODEC_ID_PCM_S24BE) {
-						codec_ctx_->frame_size = 682;
-					}else
-						codec_ctx_->frame_size = 1024;
+				if (codec_ctx_->codec_id == AV_CODEC_ID_PCM_S24LE ||
+				codec_ctx_->codec_id == AV_CODEC_ID_PCM_S24BE) {
+				codec_ctx_->frame_size = 682;
+				}else
+				codec_ctx_->frame_size = 1024;
 				}*/
 
 				swr_ctx_ = swr_alloc();
@@ -365,18 +359,16 @@ namespace vocaloid {
 				memset(buffer_, 0, max_buffer_size_);
 				buffer_size_ = 0;
 				frame_count_ = 0;
-				has_begun_ = false;
 				decoding_ = false;
 				is_end_ = false;
 				return ret;
 			}
 
 			void Clear() override {
-				unique_lock<mutex> lck(decode_mutex_); 
+				unique_lock<mutex> lck(decode_mutex_);
 				if (ctx_) {
 					avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
 				}
-				buffer_size_ = 0;
 			}
 
 			void Stop() override {
@@ -416,9 +408,8 @@ namespace vocaloid {
 						av_seek_frame(ctx_, a_stream_index_, frame_offset, AVSEEK_FLAG_BACKWARD);
 						avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
 						FlushConvertor();
-						buffer_size_ = 0;
 						is_end_ = false;
-						has_begun_ = false;
+						buffer_size_ = 0;
 
 						// Read frame util it's timestamp reach time or EOF
 						while (true) {
@@ -466,7 +457,7 @@ namespace vocaloid {
 
 			AudioFormat Format() override {
 				unique_lock<mutex> lck(decode_mutex_);
-				if (decode_frame_ == nullptr)return{0, 0, 0, 0};
+				if (decode_frame_ == nullptr)return{ 0, 0, 0, 0 };
 				int16_t bits = 16;
 				int32_t sample_rate = decode_frame_->sample_rate;
 				int16_t channels = decode_frame_->channels;
@@ -596,11 +587,11 @@ namespace vocaloid {
 				// Add stream
 				auto stream = avformat_new_stream(ctx_, codec);
 				stream->id = stream->index = 0;
-				
+
 
 				codec_ctx_->codec_id = codec_id;
 				codec_ctx_->codec_type = AVMEDIA_TYPE_AUDIO;
-				
+
 				codec_ctx_->sample_fmt = codec->sample_fmts[0];
 				codec_ctx_->sample_rate = sample_rate;
 				codec_ctx_->channel_layout = av_get_default_channel_layout(channels);
@@ -648,7 +639,7 @@ namespace vocaloid {
 				buffer_size_ = 0;
 
 				// Don't let frame size be zero!
-				if(codec_ctx_->frame_size <= 0)
+				if (codec_ctx_->frame_size <= 0)
 					codec_ctx_->frame_size = 1024;
 
 				packet_ = av_packet_alloc();

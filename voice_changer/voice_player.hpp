@@ -116,7 +116,6 @@ public:
 			}
 			effect_ = new_effect;
 			if (playing) {
-				source_reader_->Clear();
 				source_reader_->Resume();
 				Start(true); 
 			}

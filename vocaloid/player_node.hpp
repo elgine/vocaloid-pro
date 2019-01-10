@@ -10,7 +10,7 @@ namespace vocaloid {
 		private:
 			io::Player *player_ = nullptr;
 			Buffer<char>* bytes_;
-
+			bool inited_;
 		public:
 			explicit PlayerNode(BaseAudioContext *ctx) :DestinationNode(ctx) {
 				player_ = nullptr;
@@ -18,6 +18,8 @@ namespace vocaloid {
 				player_ = new io::PCMPlayer();
 #endif
 				bytes_ = new Buffer<char>();
+				sample_rate_ = 0;
+				inited_ = false;
 			}
 
 			void Dispose() override {
@@ -30,15 +32,20 @@ namespace vocaloid {
 			}
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
-				DestinationNode::Initialize(sample_rate, frame_size);
-				if (player_ == nullptr)return UNKNOWN_EXCEPTION;
-				player_->Clear();
-				int ret = player_->Open(sample_rate_, BITS_PER_SEC, channels_) < 0;
+				DestinationNode::Initialize(sample_rate, frame_size); 
+				int ret = 0;
+				if(!inited_)
+					player_->Open(sample_rate_, BITS_PER_SEC, channels_) < 0;
 				if (ret < 0)return ret;
 				int64_t size = frame_size * channels_ * BITS_PER_SEC / 8;
 				bytes_->Alloc(size);
 				bytes_->SetSize(size);
 				return ret;
+			}
+
+			void Clear() override {
+				player_->Clear();
+				DestinationNode::Clear();
 			}
 
 			int64_t Processed() override {

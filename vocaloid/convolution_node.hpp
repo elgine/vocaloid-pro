@@ -59,6 +59,7 @@ namespace vocaloid {
 						convolver_[i] = nullptr;
 					}
 				}
+				AudioNode::Dispose();
 			}
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {

@@ -86,7 +86,12 @@ namespace vocaloid {
 				auto buf_size = len * frame_size;
 				auto size = reader_->ReadData(temp_buffer_, buf_size);
 				if (size <= 0) {
-					if (reader_->End())return EOF;
+					if (reader_->End()) {
+						if (!loop_) {
+							return EOF;
+						}
+						return len;
+					}
 					return 0;
 				}
 				result_buffer_->silence_ = false;
@@ -113,10 +118,10 @@ namespace vocaloid {
 				return reader_->Duration();
 			}
 
-			void Resume() override {
-				reader_->Seek(play_pos_);
+			/*void Resume() override {
+				Seek(play_pos_);
 				SourceNode::Resume();
-			}
+			}*/
 
 			void Stop() override {
 				SourceNode::Stop();

@@ -31,7 +31,6 @@ namespace vocaloid {
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				InputNode::Initialize(sample_rate, frame_size);
 				delay_frames_ = MsecToBytes(sample_rate, delay_);
-				play_pos_ = 0;
 				return SUCCEED;
 			}
 

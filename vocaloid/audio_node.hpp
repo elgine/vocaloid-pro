@@ -50,7 +50,7 @@ namespace vocaloid {
 				can_be_connected_(can_be_connected),
 				can_connect_(can_connect) {
 				frame_size_ = DEFAULT_FRAME_SIZE;
-				sample_rate_ = DEFAULT_SAMPLE_RATE;
+				sample_rate_ = 0;
 				channels_ = 2;
 				enable_ = true;
 				summing_buffer_ = new AudioChannel(channels_, frame_size_);
