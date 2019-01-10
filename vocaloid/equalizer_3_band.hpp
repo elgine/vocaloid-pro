@@ -57,6 +57,19 @@ namespace vocaloid {
 				ctx->Connect(lo_, wet_);
 			}
 
+			void Dispose() override {
+				hi_->Dispose();
+				delete hi_;
+				hi_ = nullptr;
+				lo_->Dispose();
+				delete lo_;
+				lo_ = nullptr;
+				mi_->Dispose();
+				delete mi_;
+				mi_ = nullptr;
+				Composite::Dispose();
+			}
+
 			void SetLowShelfGain(float v) {
 				lo_->gain_->value_ = Clamp(LOWSHELF_GAIN_MIN, LOWSHELF_GAIN_MAX, v);
 			}
@@ -73,21 +86,6 @@ namespace vocaloid {
 				SetLowShelfGain(options.lowshelf_gain);
 				SetHighShelfGain(options.peaking_gain);
 				SetPeakingGain(options.highshelf_gain);
-			}
-
-			void Dispose() override {
-				hi_->Dispose();
-				delete hi_;
-				hi_ = nullptr;
-
-				lo_->Dispose();
-				delete lo_;
-				lo_ = nullptr;
-
-				mi_->Dispose();
-				delete mi_;
-				mi_ = nullptr;
-				Composite::Dispose();
 			}
 		};
 

@@ -14,6 +14,15 @@ namespace vocaloid {
 				context_->Connect(gain_, this);
 			}
 
+			void Dispose() override {
+				if (gain_) {
+					gain_->Dispose();
+					delete gain_;
+					gain_ = nullptr;
+				}
+				AudioNode::Dispose();
+			}
+
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				gain_->Initialize(sample_rate_, frame_size);
@@ -34,14 +43,6 @@ namespace vocaloid {
 
 			void Clear() override {
 				gain_->Clear();
-			}
-
-			void Dispose() override {
-				if (gain_) {
-					delete gain_;
-					gain_ = nullptr;
-				}
-				AudioNode::Dispose();
 			}
 		};
 	}

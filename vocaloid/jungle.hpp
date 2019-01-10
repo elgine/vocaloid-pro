@@ -481,16 +481,45 @@ namespace vocaloid {
 				SetPitchOffset(0.0);
 			}
 
+			void Dispose() override {
+				mod1_->Dispose();
+				mod2_->Dispose();
+				mod3_->Dispose();
+				mod4_->Dispose();
+				mod1_gain_->Dispose();
+				mod2_gain_->Dispose();
+				mod3_gain_->Dispose();
+				mod4_gain_->Dispose();
+				mod_gain1_->Dispose();
+				mod_gain2_->Dispose();
+				fade1_->Dispose();
+				fade2_->Dispose();
+				delay1_->Dispose();
+				delay2_->Dispose();
+				mix1_->Dispose();
+				mix2_->Dispose();
+				delete mod1_; mod1_ = nullptr;
+				delete mod2_; mod2_ = nullptr;
+				delete mod3_; mod3_ = nullptr;
+				delete mod4_; mod4_ = nullptr;
+				delete mod1_gain_; mod1_gain_ = nullptr;
+				delete mod2_gain_; mod2_gain_ = nullptr;
+				delete mod3_gain_; mod3_gain_ = nullptr;
+				delete mod4_gain_; mod4_gain_ = nullptr;
+				delete mod_gain1_; mod_gain1_ = nullptr;
+				delete mod_gain2_; mod_gain2_ = nullptr;
+				delete fade1_; fade1_ = nullptr;
+				delete fade2_; fade2_ = nullptr;
+				delete delay1_; delay1_ = nullptr;
+				delete delay2_; delay2_ = nullptr;
+				delete mix1_; mix1_ = nullptr;
+				delete mix2_; mix2_ = nullptr;
+				Composite::Dispose();
+			}
+
 			void Start() override {
 				auto t = 0.05;
 				auto t2 = t + buffer_time_ - fade_time_;
-				/*mod1_->Start();
-				mod2_->Start();
-				mod3_->Start();
-				mod4_->Start();
-				fade1_->Start();
-				fade2_->Start();*/
-
 				mod1_->Start(0, 0, t * 1000);
 				mod2_->Start(0, 0, t2 * 1000);
 				mod3_->Start(0, 0, t * 1000);

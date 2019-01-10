@@ -51,6 +51,16 @@ namespace vocaloid {
 				normalize_ = true;
 			}
 
+			void Dispose() override {
+				for (auto i = 0; i < channels_; i++) {
+					if (convolver_[i] != nullptr) {
+						convolver_[i]->Dispose();
+						delete convolver_[i];
+						convolver_[i] = nullptr;
+					}
+				}
+			}
+
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				auto scale = normalize_?CalculateNormalizationScale(kernel_):1.0f;
@@ -71,15 +81,6 @@ namespace vocaloid {
 					}
 				}	
 				return frame_size_;
-			}
-
-			void Dispose() override {
-				for (auto i = 0; i < channels_; i++) {
-					if(convolver_[i] != nullptr){
-						delete convolver_[i];
-						convolver_[i] = nullptr;
-					}
-				}
 			}
 		};
 	}

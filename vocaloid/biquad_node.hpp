@@ -30,6 +30,31 @@ namespace vocaloid {
 				context_->Connect(gain_, this);
 			}
 
+
+			void Dispose() override {
+				if (frequency_) {
+					frequency_->Dispose();
+					delete frequency_;
+					frequency_ = nullptr;
+				}
+				if (detune_) {
+					detune_->Dispose();
+					delete detune_;
+					detune_ = nullptr;
+				}
+				if (Q_) {
+					Q_->Dispose();
+					delete Q_;
+					Q_ = nullptr;
+				}
+				if (gain_) {
+					gain_->Dispose();
+					delete gain_;
+					gain_ = nullptr;
+				}
+				AudioNode::Dispose();
+			}
+
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				for (auto i = 0; i < channels_; i++) {
@@ -50,30 +75,6 @@ namespace vocaloid {
 				detune_->Clear();
 				Q_->Clear();
 				gain_->Clear();
-			}
-
-			void Dispose() override {
-				if (frequency_) {
-					delete frequency_;
-					frequency_ = nullptr;
-				}
-				
-				if (detune_) {
-					delete detune_;
-					detune_ = nullptr;
-				}
-
-				if (Q_) {
-					delete Q_;
-					Q_ = nullptr;
-				}
-
-				if (gain_) {
-					delete gain_;
-					gain_ = nullptr;
-				}
-				
-				AudioNode::Dispose();
 			}
 
 			int64_t ProcessFrame() override {

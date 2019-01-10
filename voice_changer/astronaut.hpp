@@ -43,6 +43,25 @@ namespace effect {
 			ctx->Connect(compressor_, gain_);
 		}
 
+		void Dispose() override {
+			b1_->Dispose();
+			b2_->Dispose();
+			b3_->Dispose();
+			b4_->Dispose();
+			b5_->Dispose();
+			delete b1_;
+			delete b2_;
+			delete b3_;
+			delete b4_;
+			delete b5_;
+			b1_ = nullptr;
+			b2_ = nullptr;
+			b3_ = nullptr;
+			b4_ = nullptr;
+			b5_ = nullptr;
+			Effect::Dispose();
+		}
+
 		void SetLowpass1Frequency(float v) {
 			b1_->frequency_->value_ = v;
 		}
@@ -61,28 +80,6 @@ namespace effect {
 
 		void SetHighpass2Frequency(float v) {
 			b5_->frequency_->value_ = v;
-		}
-
-		void Dispose() override {
-			b1_->Dispose();
-			b2_->Dispose();
-			b3_->Dispose();
-			b4_->Dispose();
-			b5_->Dispose();
-
-			delete b1_;
-			delete b2_;
-			delete b3_;
-			delete b4_;
-			delete b5_;
-
-			b1_ = nullptr;
-			b2_ = nullptr;
-			b3_ = nullptr;
-			b4_ = nullptr;
-			b5_ = nullptr;
-
-			Effect::Dispose();
 		}
 
 		AudioNode *Input() {

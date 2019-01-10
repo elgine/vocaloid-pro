@@ -1,5 +1,5 @@
 #pragma once
-#include <math.h>
+#include "audio_node.hpp"
 namespace vocaloid {
 	namespace node {
 		class WaveShaperNode : public AudioNode {
@@ -10,6 +10,12 @@ namespace vocaloid {
 			explicit WaveShaperNode(BaseAudioContext *ctx) :AudioNode(ctx) {
 				curve_length_ = 0;
 				curve_ = nullptr;
+			}
+
+			void Dispose() override {
+				DeleteArray(&curve_);
+				curve_length_ = 0;
+				AudioNode::Dispose();
 			}
 
 			void SetCurve(float *c, int64_t len) {
@@ -41,12 +47,6 @@ namespace vocaloid {
 					}
 				}
 				return frame_size_;
-			}
-
-			void Dispose() override {
-				DeleteArray(&curve_);
-				curve_length_ = 0;
-				AudioNode::Dispose();
 			}
 
 			int64_t CurveLength() {

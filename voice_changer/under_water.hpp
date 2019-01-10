@@ -71,6 +71,34 @@ namespace effect {
 			ctx->Connect(underwater_gain_, compressor_);
 		}
 
+		void Dispose() override {
+			if (lowpass_) {
+				lowpass_->Dispose();
+				delete lowpass_; lowpass_ = nullptr;
+			}
+			if (compressor_) {
+				compressor_->Dispose();
+				delete compressor_; compressor_ = nullptr;
+			}
+			if (underwater_) {
+				underwater_->Dispose();
+				delete underwater_; underwater_ = nullptr;
+			}
+			if (wahwah_) {
+				wahwah_->Dispose();
+				delete wahwah_; wahwah_ = nullptr;
+			}
+			if (input_gain_) {
+				input_gain_->Dispose();
+				delete input_gain_; input_gain_ = nullptr;
+			}
+			if (underwater_gain_) {
+				underwater_gain_->Dispose();
+				delete underwater_gain_; underwater_gain_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		void SetLowpassFrequency(float v) {
 			lowpass_->frequency_->value_ = Clamp(LOWPASS_FREQ_MIN, LOWPASS_FREQ_MAX, v);
 		}
@@ -102,22 +130,6 @@ namespace effect {
 		void Start() override {
 			wahwah_->Start();
 			underwater_->Start(0);
-		}
-
-		void Dispose() override {
-			lowpass_->Dispose();
-			delete lowpass_; lowpass_ = nullptr;
-			compressor_->Dispose();
-			delete compressor_; compressor_ = nullptr;
-			underwater_->Dispose();
-			delete underwater_; underwater_ = nullptr;
-			wahwah_->Dispose();
-			delete wahwah_; wahwah_ = nullptr;
-			input_gain_->Dispose();
-			delete input_gain_; input_gain_ = nullptr;
-			underwater_gain_->Dispose();
-			delete underwater_gain_; underwater_gain_ = nullptr;
-			Effect::Dispose();
 		}
 	};
 

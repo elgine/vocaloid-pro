@@ -160,6 +160,7 @@ namespace vocaloid {
 							packet_->size = 0;
 							Decode(packet_);
 							is_end_ = true;
+							decoding_ = false;
 							// has_begun_ = false;
 							break;
 						}
@@ -231,8 +232,12 @@ namespace vocaloid {
 			}
 
 			int64_t ReadData(char* data, int64_t length) override {
-				if (!has_begun_) {
-					has_begun_ = true;
+				auto decoding = false;
+				{
+					unique_lock<mutex> lck(decode_mutex_);
+					decoding = decoding_;
+				}
+				if (!decoding) {
 					decoding_ = true;
 					decode_thread_ = new thread(&FFmpegFileReader::Loop, this);
 					return 0;
@@ -371,6 +376,7 @@ namespace vocaloid {
 				if (ctx_) {
 					avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
 				}
+				buffer_size_ = 0;
 			}
 
 			void Stop() override {

@@ -173,46 +173,66 @@ namespace effect {
 			ctx->Connect(fire_gain_, gain_);
 		}
 
+		void Dispose() override {
+			if (filter_) {
+				filter_->Dispose();
+				delete filter_; filter_ = nullptr;
+			}
+			if (compressor_) {
+				compressor_->Dispose();
+				delete compressor_; compressor_ = nullptr;
+			}
+			
+			if (delay_) {
+				delay_->Dispose();
+				delete delay_; delay_ = nullptr;
+			}
+			
+			if (convolver_) {
+				convolver_->Dispose();
+				delete convolver_; convolver_ = nullptr;
+			}
+			
+			if (osc_) {
+				osc_->Dispose();
+				delete osc_; osc_ = nullptr;
+			}
+			
+			if (osc_gain_) {
+				osc_gain_->Dispose();
+				delete osc_gain_; osc_gain_ = nullptr;
+			}
+			
+			if (convolver_gain_) {
+				convolver_gain_->Dispose();
+				delete convolver_gain_; convolver_gain_ = nullptr;
+			}
+			
+			if (fire_gain_) {
+				fire_gain_->Dispose();
+				delete fire_gain_; fire_gain_ = nullptr;
+			}
+			
+			if (no_conv_gain_) {
+				no_conv_gain_->Dispose();
+				delete no_conv_gain_; no_conv_gain_ = nullptr;
+			}
+			
+			if (fire_) {
+				fire_->Dispose();
+				delete fire_; fire_ = nullptr;
+			}
+			
+			if (filter2_) {
+				filter2_->Dispose();
+				delete filter2_; filter2_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		void Start() override {
 			fire_->Start(0);
 			osc_->Start();
-		}
-
-		void Dispose() override {
-			filter_->Dispose();
-			delete filter_; filter_ = nullptr;
-
-			compressor_->Dispose();
-			delete compressor_; compressor_ = nullptr;
-
-			delay_->Dispose();
-			delete delay_; delay_ = nullptr;
-
-			convolver_->Dispose();
-			delete convolver_; convolver_ = nullptr;
-
-			osc_->Dispose();
-			delete osc_; osc_ = nullptr;
-
-			osc_gain_->Dispose();
-			delete osc_gain_; osc_gain_ = nullptr;
-
-			convolver_gain_->Dispose();
-			delete convolver_gain_; convolver_gain_ = nullptr;
-
-			fire_gain_->Dispose();
-			delete fire_gain_; fire_gain_ = nullptr;
-
-			no_conv_gain_->Dispose();
-			delete no_conv_gain_; no_conv_gain_ = nullptr;
-
-			fire_->Dispose();
-			delete fire_; fire_ = nullptr;
-
-			filter2_->Dispose();
-			delete filter2_; filter2_ = nullptr;
-
-			Effect::Dispose();
 		}
 
 		AudioNode *Input() {

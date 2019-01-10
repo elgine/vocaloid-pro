@@ -40,6 +40,40 @@ namespace effect {
 			ctx->Connect(compressor_, gain_);
 		}
 
+		void Dispose() override {
+			if (input_) {
+				input_->Dispose();
+				delete input_;
+				input_ = nullptr;
+			}
+			if (compressor_) {
+				compressor_->Dispose();
+				delete compressor_;
+				compressor_ = nullptr;
+			}
+			if (jungle1_) {
+				jungle1_->Dispose();
+				delete jungle1_;
+				jungle1_ = nullptr;
+			}
+			if (jungle2_) {
+				jungle2_->Dispose();
+				delete jungle2_;
+				jungle2_ = nullptr;
+			}
+			if (jungle3_) {
+				jungle3_->Dispose();
+				delete jungle3_;
+				jungle3_ = nullptr;
+			}
+			if (jungle4_) {
+				jungle4_->Dispose();
+				delete jungle4_;
+				jungle4_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		AudioNode *Input() {
 			return input_;
 		}
@@ -49,33 +83,6 @@ namespace effect {
 			jungle2_->Start();
 			jungle3_->Start();
 			jungle4_->Start();
-		}
-
-		void Dispose() override {
-			input_->Dispose();
-			delete input_;
-			input_ = nullptr;
-
-			compressor_->Dispose();
-			delete compressor_;
-			compressor_ = nullptr;
-
-			jungle1_->Dispose();
-			jungle2_->Dispose();
-			jungle3_->Dispose();
-			jungle4_->Dispose();
-
-			delete jungle1_;
-			delete jungle2_;
-			delete jungle3_;
-			delete jungle4_;
-
-			jungle1_ = nullptr;
-			jungle2_ = nullptr;
-			jungle3_ = nullptr;
-			jungle4_ = nullptr;
-
-			Effect::Dispose();
 		}
 	};
 }

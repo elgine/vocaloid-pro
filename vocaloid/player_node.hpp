@@ -20,9 +20,19 @@ namespace vocaloid {
 				bytes_ = new Buffer<char>();
 			}
 
+			void Dispose() override {
+				if (player_ == nullptr)return;
+				player_->Flush();
+				player_->Dispose();
+				delete player_;
+				player_ = nullptr;
+				DestinationNode::Dispose();
+			}
+
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				DestinationNode::Initialize(sample_rate, frame_size);
 				if (player_ == nullptr)return UNKNOWN_EXCEPTION;
+				player_->Clear();
 				int ret = player_->Open(sample_rate_, BITS_PER_SEC, channels_) < 0;
 				if (ret < 0)return ret;
 				int64_t size = frame_size * channels_ * BITS_PER_SEC / 8;
@@ -33,13 +43,6 @@ namespace vocaloid {
 
 			int64_t Processed() override {
 				return player_->Played();
-			}
-
-			void Dispose() override {
-				if (player_ == nullptr)return;
-				player_->Flush();
-				delete player_;
-				player_ = nullptr;
 			}
 
 			int64_t ProcessFrame() override {

@@ -24,6 +24,20 @@ namespace effect {
 			ctx_->Connect(compressor_, gain_);
 		}
 
+		void Dispose() override {
+			if (jungle_) {
+				jungle_->Dispose();
+				delete jungle_;
+				jungle_ = nullptr;
+			}
+			if (compressor_) {
+				compressor_->Dispose();
+				delete compressor_;
+				compressor_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		void SetOptions(float *options, int option_count) override {
 			if (option_count > 0) {
 				jungle_->SetPitchOffset(Clamp(PITCH_OFFSET_MIN, PITCH_OFFSET_MAX, options[0]));
@@ -39,18 +53,6 @@ namespace effect {
 
 		void SetPitchOffset(float v) {
 			jungle_->SetPitchOffset(v);
-		}
-
-		void Dispose() override {
-			jungle_->Dispose();
-			delete jungle_;
-			jungle_ = nullptr;
-
-			compressor_->Dispose();
-			delete compressor_;
-			compressor_ = nullptr;
-
-			Effect::Dispose();
 		}
 
 		AudioNode* Input() {

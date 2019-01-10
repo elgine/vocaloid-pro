@@ -24,23 +24,20 @@ namespace vocaloid {
 				buf_ = new Buffer<char>();
 			}
 
-			~FileWriterNode() {
-				Dispose();
+			void Dispose() override {
+				Close();
+				if (writer_) {
+					writer_->Dispose();
+					delete writer_;
+					writer_ = nullptr;
+				}
+				DestinationNode::Dispose();
 			}
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				DestinationNode::Initialize(sample_rate, frame_size);
 				processed_ = 0;
 				return writer_->Open(Path(), sample_rate_, BITS_PER_SEC, channels_);
-			}
-
-			void Dispose() override {
-				Close();
-				if (writer_) {
-					delete writer_;
-					writer_ = nullptr;
-				}
-				AudioNode::Dispose();
 			}
 
 			void Close() override {

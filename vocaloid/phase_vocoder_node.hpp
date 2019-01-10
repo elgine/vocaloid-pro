@@ -18,6 +18,17 @@ namespace vocaloid {
 				channels_ = 1;
 			}
 
+			void Dispose() override {
+				for (int i = 0; i < channels_; i++) {
+					if (shifters_[i]) {
+						shifters_[i]->Dispose();
+						delete shifters_[i];
+						shifters_[i] = nullptr;
+					}
+				}
+				AudioNode::Dispose();
+			}
+
 			int Initialize(int32_t sample_rate, int64_t frame_size) {
 				AudioNode::Initialize(sample_rate, frame_size);
 				for (int i = 0; i < channels_; i++) {
@@ -37,16 +48,6 @@ namespace vocaloid {
 					processed = shifters_[i]->Process(summing_buffer_->Channel(i)->Data(), summing_buffer_->Size(), result_buffer_->Channel(i)->Data());
 				}
 				return processed;
-			}
-
-			void Dispose() override {
-				for (int i = 0; i < channels_; i++) {
-					if (shifters_[i]) {
-						delete shifters_[i];
-						shifters_[i] = nullptr;
-					}
-				}
-				AudioNode::Dispose();
 			}
 		};
 	}

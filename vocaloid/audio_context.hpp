@@ -183,6 +183,7 @@ namespace vocaloid {
 					}
 					else if (destination_->OutputType() != output) {
 						inputs.assign(destination_->Inputs().begin(), destination_->Inputs().end());
+						destination_->Dispose();
 						delete destination_;
 						destination_ = nullptr;
 						if (output == OutputType::PLAYER) {
@@ -214,10 +215,17 @@ namespace vocaloid {
 
 			void RemoveNode(AudioNode* node) override {
 				auto id = node->Id(); 
-				nodes_.erase(id);
-				for (auto dest : connections_[id]) {
-					Disconnect(node, FindNode(dest));
+				for (auto f_node : node->Inputs()) {
+					Disconnect(f_node, node);
 				}
+				node->Inputs().clear();
+				auto connection = connections_[id];
+				for (auto it = connection.begin(); it != connection.end();) {
+					auto t_id = *it;
+					it++;
+					Disconnect(id, t_id);
+				}
+				nodes_.erase(id);
 			}
 
 			void Connect(AudioNode *from_node, AudioNode *to_node, 
@@ -273,6 +281,7 @@ namespace vocaloid {
 				unique_lock<mutex> lck(audio_render_thread_mutex_);
 				source_eof_ = true;
 				int ret = 0;
+				traversal_nodes_.clear();
 				Traverse(traversal_nodes_);
 				for (auto node : traversal_nodes_) {
 					ret = FindNode(node)->Initialize(SampleRate(), frame_size_);
@@ -327,14 +336,8 @@ namespace vocaloid {
 			void Dispose() override {
 				Stop();
 				Close();
-				for (auto connection : connections_) {
-					for (auto to : connection.second) {
-						Disconnect(connection.first, to);
-					}
-					connection.second.clear();
-				}
-				connections_.clear();
 				for (auto node : nodes_) {
+					node.second->Dispose();
 					delete node.second;
 					node.second = nullptr;
 				}
@@ -347,6 +350,7 @@ namespace vocaloid {
 			}
 
 			AudioContextState State() {
+				unique_lock<mutex> lck(audio_render_thread_mutex_);
 				return state_;
 			}
 

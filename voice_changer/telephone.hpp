@@ -35,22 +35,32 @@ namespace effect {
 			ctx->Connect(compressor_, gain_);
 		}
 
-		AudioNode* Input() {
-			return b1_;
+		void Dispose() override {
+			if (b1_) {
+				b1_->Dispose();
+				delete b1_; b1_ = nullptr;
+			}
+			if (b2_) {
+				b2_->Dispose();
+				delete b2_; b2_ = nullptr;
+			}
+			if (b3_) {
+				b3_->Dispose();
+				delete b3_; b3_ = nullptr;
+			}
+			if (b4_) {
+				b4_->Dispose();
+				delete b4_; b4_ = nullptr;
+			}
+			if (compressor_) {
+				compressor_->Dispose();
+				delete compressor_; compressor_ = nullptr;
+			}
+			Effect::Dispose();
 		}
 
-		void Dispose() override {
-			b1_->Dispose();
-			delete b1_; b1_ = nullptr;
-			b2_->Dispose();
-			delete b2_; b2_ = nullptr;
-			b3_->Dispose();
-			delete b3_; b3_ = nullptr;
-			b4_->Dispose();
-			delete b4_; b4_ = nullptr;
-			compressor_->Dispose();
-			delete compressor_; compressor_ = nullptr;
-			Effect::Dispose();
+		AudioNode* Input() {
+			return b1_;
 		}
 	};
 }

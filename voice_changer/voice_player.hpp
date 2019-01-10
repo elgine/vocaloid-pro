@@ -24,7 +24,6 @@ private:
 	PlayerNode *player_;
 	FileReaderNode *source_reader_;
 	Effect* effect_;
-	bool inited_;
 	atomic<VoicePlayerState> state_;
 	thread *tick_thread_;
 	mutex tick_mutex_;
@@ -38,7 +37,7 @@ private:
 				ctx_->Lock();
 				cur = player_->Processed();
 				ctx_->Unlock();
-				if (state_ == VoicePlayerState::PLAYER_STOP && cur == last) {
+				if (state_ == VoicePlayerState::PLAYER_STOP) {
 					break;
 				}
 				last = cur;
@@ -68,7 +67,6 @@ public:
 		on_tick_ = new Signal<string>();
 		effect_ = nullptr;
 		tick_thread_ = nullptr;
-		inited_ = false;
 		state_ = VoicePlayerState::PLAYER_STOP;
 	}
 
@@ -107,6 +105,8 @@ public:
 
 	int SetEffect(Effects id) {
 		if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
+			auto playing = Playing();
+			Stop();
 			Effect* new_effect = EffectFactory(id, ctx_);
 			if (new_effect == nullptr)return NO_SUCH_EFFECT;
 			if (effect_ != nullptr) {
@@ -115,6 +115,11 @@ public:
 				effect_ = nullptr;
 			}
 			effect_ = new_effect;
+			if (playing) {
+				source_reader_->Clear();
+				source_reader_->Resume();
+				Start(true); 
+			}
 		}
 		return SUCCEED;
 	}
@@ -133,31 +138,31 @@ public:
 		return ret;
 	}
 
-	int Start(bool restart = false) {
-		{
-			unique_lock<mutex> lck(tick_mutex_);
-			if (state_ == VoicePlayerState::PLAYER_PLAYING)return SUCCEED;
-		}
+	bool Playing() {
+		unique_lock<mutex> lck(tick_mutex_);
+		return state_ == VoicePlayerState::PLAYER_PLAYING;
+	}
+
+	int Start(bool restart = true) {
+		if (Playing())return SUCCEED;
 		auto ret = SUCCEED;
 		ctx_->stop_eof_ = false;
-		if (!inited_) {
-			if (effect_) {
-				ctx_->Connect(source_reader_, effect_->Input());
-				ctx_->Connect(effect_->Output(), player_);
-			}
-			else {
-				ctx_->Connect(source_reader_, player_);
-			}
+		if (effect_) {
+			ctx_->Disconnect(source_reader_, player_);
+			ctx_->Connect(source_reader_, effect_->Input());
+			ctx_->Connect(effect_->Output(), player_);
+		}
+		else {
+			ctx_->Connect(source_reader_, player_);
 		}
 		if (source_reader_->SegmentCount() == 0)PlayAll();
 		if (effect_) {
 			effect_->Start();
 		}
-		if (!inited_ || (inited_ && restart)) {
+		if (restart) {
 			ret = ctx_->Prepare();
 			if (ret < 0)return ret;
 		}
-		inited_ = true;
 		ctx_->Start();
 		Join();
 		{
@@ -169,32 +174,19 @@ public:
 	}
 
 	int Resume() {
-		auto playing = false;
+		if (Playing())return SUCCEED;
+		ctx_->Start();
+		Join();
 		{
 			unique_lock<mutex> lck(tick_mutex_);
-			playing = state_ == VoicePlayerState::PLAYER_PLAYING;
+			state_ = VoicePlayerState::PLAYER_PLAYING;
 		}
-		if (playing)return SUCCEED; 
-		if (inited_) {
-			ctx_->Start();
-			Join();
-			{
-				unique_lock<mutex> lck(tick_mutex_);
-				state_ = VoicePlayerState::PLAYER_PLAYING;
-			}
-			tick_thread_ = new thread(&VoicePlayer::OnTick, this);
-			return SUCCEED;
-		}
-		return HAVE_NOT_STARTED;
+		tick_thread_ = new thread(&VoicePlayer::OnTick, this);
+		return SUCCEED;
 	}
 
 	int Stop() {
-		auto playing = false;
-		{
-			unique_lock<mutex> lck(tick_mutex_);
-			playing = state_ == VoicePlayerState::PLAYER_PLAYING;
-		}
-		if (playing) {
+		if (Playing()) {
 			auto ret = ctx_->Stop();
 			{
 				unique_lock<mutex> lck(tick_mutex_);

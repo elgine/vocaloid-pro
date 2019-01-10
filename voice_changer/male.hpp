@@ -36,6 +36,20 @@ namespace effect {
 			ctx->Connect(jungle_->output_, gain_);
 		}
 
+		void Dispose() override {
+			if (lowpass_) {
+				lowpass_->Dispose();
+				delete lowpass_;
+				lowpass_ = nullptr;
+			}
+			if (jungle_) {
+				jungle_->Dispose();
+				delete jungle_;
+				jungle_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		void SetOptions(float *options, int option_count) override {
 			if (option_count > 0) {
 				lowpass_->frequency_->value_ = Clamp(LOWPASS_FREQ_MIN, LOWPASS_FREQ_MAX, options[0]);
@@ -55,18 +69,6 @@ namespace effect {
 
 		void Start() override {
 			jungle_->Start();
-		}
-
-		void Dispose() override {
-			lowpass_->Dispose();
-			delete lowpass_;
-			lowpass_ = nullptr;
-
-			jungle_->Dispose();
-			delete jungle_;
-			jungle_ = nullptr;
-
-			Effect::Dispose();
 		}
 	};
 

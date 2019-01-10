@@ -22,6 +22,10 @@ namespace vocaloid {
 			value_ = value;
 		}
 
+		~AudioTimeline() {
+			Dispose();
+		}
+
 		int64_t FindIndex(int64_t timestamp, bool &accurate) {
 			long long start = 0, last = (long long)value_list.size() - 1, middle = 0;
 			long long delta = 0;

@@ -56,24 +56,17 @@ namespace vocaloid {
 				});
 			}
 
-			void Start() override {
-				osc_->Start();
-			}
-
-			void Dispose() override {
-				delay_->Dispose();
+			~Chorus() {
 				delete delay_;
 				delay_ = nullptr;
-
-				gain_->Dispose();
 				delete gain_;
 				gain_ = nullptr;
-
-				osc_->Dispose();
 				delete osc_;
 				osc_ = nullptr;
+			}
 
-				Composite::Dispose();
+			void Start() override {
+				osc_->Start();
 			}
 
 			void SetOptions(ChorusOptions options) {

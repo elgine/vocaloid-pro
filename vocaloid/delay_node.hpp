@@ -23,6 +23,15 @@ namespace vocaloid {
 				context_->Connect(delay_time_, this);
 			}
 
+			void Dispose() override {
+				if (delay_time_) {
+					delay_time_->Dispose();
+					delete delay_time_;
+					delay_time_ = nullptr;
+				}
+				AudioNode::Dispose();
+			}
+
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				AudioNode::Initialize(sample_rate, frame_size);
 				max_delay_size_ = int64_t((max_delay_time_ + 1) * sample_rate);
@@ -60,14 +69,6 @@ namespace vocaloid {
 
 			void Clear() override {
 				delay_time_->Clear();
-			}
-
-			void Dispose() override {
-				if (delay_time_) {
-					delete delay_time_;
-					delay_time_ = nullptr;
-				}
-				AudioNode::Dispose();
 			}
 		};
 	}

@@ -26,6 +26,15 @@ namespace vocaloid {
 				loop_ = true;
 			}
 
+			void Dispose() override {
+				if (waveform_buffer_) {
+					waveform_buffer_->Dispose();
+					delete waveform_buffer_;
+					waveform_buffer_ = nullptr;
+				}
+				AudioNode::Dispose();
+			}
+
 			void SetBuffer(float *buffer, int64_t len) {
 				waveform_buffer_->Set(buffer, len);
 				waveform_dirty_ = true;
@@ -89,14 +98,6 @@ namespace vocaloid {
 
 			float Frequency() {
 				return frequency_;
-			}
-
-			void Dispose() override {
-				if (waveform_buffer_) {
-					delete waveform_buffer_;
-					waveform_buffer_ = nullptr;
-				}
-				InputNode::Dispose();
 			}
 		};
 	}

@@ -39,6 +39,10 @@ namespace vocaloid {
 				active_ = false;
 			}
 
+			virtual void Resume() {
+				active_ = true;
+			}
+
 			virtual int Start() {
 				active_ = true;
 				return SUCCEED;

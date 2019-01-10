@@ -45,24 +45,26 @@ namespace effect {
 			ctx->Connect(jungle_->output_, gain_);
 		}
 
+		void Dispose() override {
+			if (lowpass_) {
+				lowpass_->Dispose();
+				delete lowpass_;
+				lowpass_ = nullptr;
+			}
+			if (jungle_) {
+				jungle_->Dispose();
+				delete jungle_;
+				jungle_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		void SetLowpassFrequency(float freq) {
 			lowpass_->frequency_->value_ = Clamp(LOWPASS_FREQ_MIN, LOWPASS_FREQ_MAX, freq);
 		}
 
 		void SetPitch(float v) {
 			jungle_->SetPitchOffset(Clamp(PITCH_OFFSET_MIN, PITCH_OFFSET_MAX, v));
-		}
-
-		void Dispose() override {
-			lowpass_->Dispose();
-			delete lowpass_;
-			lowpass_ = nullptr;
-
-			jungle_->Dispose();
-			delete jungle_;
-			jungle_ = nullptr;
-
-			Effect::Dispose();
 		}
 
 		AudioNode *Input() {

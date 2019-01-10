@@ -42,28 +42,40 @@ namespace effect {
 			ctx->Connect(compressor_, gain_);
 		}
 
-		AudioNode *Input() {
-			return lpf1_;
+		void Dispose() override {
+			if (compressor_) {
+				compressor_->Dispose();
+				delete compressor_; compressor_ = nullptr;
+			}
+			if (distortion_) {
+				distortion_->Dispose();
+				delete distortion_; distortion_ = nullptr;
+			}
+			if (lpf1_) {
+				lpf1_->Dispose();
+				delete lpf1_;
+				lpf1_ = nullptr;
+			}
+			if (lpf2_) {
+				lpf2_->Dispose();
+				delete lpf2_;
+				lpf2_ = nullptr;
+			}
+			if (hpf1_) {
+				hpf1_->Dispose();
+				delete hpf1_;
+				hpf1_ = nullptr;
+			}
+			if (hpf2_) {
+				hpf2_->Dispose();
+				delete hpf2_;
+				hpf2_ = nullptr;
+			}
+			Effect::Dispose();
 		}
 
-		void Dispose() override {
-			compressor_->Dispose();
-			delete compressor_; compressor_ = nullptr;
-			distortion_->Dispose();
-			delete distortion_; distortion_ = nullptr;
-			lpf1_->Dispose();
-			lpf2_->Dispose();
-			hpf1_->Dispose();
-			hpf2_->Dispose();
-			delete lpf1_;
-			delete lpf2_;
-			delete hpf1_;
-			delete hpf2_;
-			lpf1_ = nullptr;
-			lpf2_ = nullptr;
-			hpf1_ = nullptr;
-			hpf2_ = nullptr;
-			Effect::Dispose();
+		AudioNode *Input() {
+			return lpf1_;
 		}
 	};
 }

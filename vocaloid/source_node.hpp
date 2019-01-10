@@ -23,6 +23,11 @@ namespace vocaloid {
 				play_pos_ = 0;
 			}
 
+			void Dispose() override {
+				Timeline::Dispose();
+				InputNode::Dispose();
+			}
+
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				InputNode::Initialize(sample_rate, frame_size);
 				delay_frames_ = MsecToBytes(sample_rate, delay_);
@@ -108,7 +113,13 @@ namespace vocaloid {
 
 					count = GetBuffer(frame_index, count);
 					if (count <= 0) {
-						if (count == EOF)return EOF;
+						if (count == EOF) {
+							/*if (loop_) {
+								count = 0;
+								play_pos_ = cur_segment.end;
+							}else*/
+								return EOF;
+						}
 						break;
 					}
 					frame_count += count;
@@ -163,11 +174,6 @@ namespace vocaloid {
 				Timeline::Clear();
 				play_pos_ = 0;
 				delay_pos_ = 0;
-			}
-
-			void Dispose() override {
-				AudioNode::Dispose();
-				Timeline::Dispose();
 			}
 
 			virtual int32_t SourceSampleRate() { return sample_rate_; }

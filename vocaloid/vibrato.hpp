@@ -50,6 +50,16 @@ namespace vocaloid {
 				});
 			}
 
+			void Dispose() override {
+				osc_->Dispose();
+				delete osc_;
+				osc_ = nullptr;
+				delay_->Dispose();
+				delete delay_;
+				delay_ = nullptr;
+				Composite::Dispose();
+			}
+
 			void SetDelay(float v) {
 				delay_->delay_time_->value_ = Clamp(VIBRATO_DELAY_MIN, VIBRATO_DELAY_MAX, v);
 			}
@@ -64,16 +74,6 @@ namespace vocaloid {
 
 			void Start() override {
 				osc_->Start();
-			}
-
-			void Dispose() override {
-				osc_->Dispose();
-				delete osc_;
-				osc_ = nullptr;
-				delay_->Dispose();
-				delete delay_;
-				delay_ = nullptr;
-				Composite::Dispose();
 			}
 
 			void SetOptions(VibratoOptions options) {

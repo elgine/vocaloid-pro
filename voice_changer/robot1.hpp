@@ -33,31 +33,36 @@ namespace effect {
 			ctx_->Connect(biquad_, gain_);
 		}
 
+		void Dispose() override {
+			if (delay_) {
+				delay_->Dispose();
+				delete delay_;
+				delay_ = nullptr;
+			}
+			if (osc_) {
+				osc_->Dispose();
+				delete osc_;
+				osc_ = nullptr;
+			}
+			if (osc_gain_) {
+				osc_gain_->Dispose();
+				delete osc_gain_;
+				osc_gain_ = nullptr;
+			}
+			if (biquad_) {
+				biquad_->Dispose();
+				delete biquad_;
+				biquad_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		void Start() override {
 			osc_->Start();
 		}
 
 		AudioNode* Input() override {
 			return delay_;
-		}
-
-		void Dispose() override {
-			delay_->Dispose();
-			delete delay_;
-			delay_ = nullptr;
-
-			osc_->Dispose();
-			delete osc_;
-			osc_ = nullptr;
-
-			osc_gain_->Dispose();
-			delete osc_gain_;
-			osc_gain_ = nullptr;
-
-			biquad_->Dispose();
-			delete biquad_;
-			biquad_ = nullptr;
-			Effect::Dispose();
 		}
 	};
 }

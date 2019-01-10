@@ -24,27 +24,24 @@ namespace vocaloid {
 				CrossFade(1.0);
 			}
 
-			virtual void Start() {}
-
-			virtual void Stop(){}
-
-			virtual void Dispose(){
+			virtual void Dispose() {
 				input_->Dispose();
 				delete input_;
 				input_ = nullptr;
-
 				dry_->Dispose();
 				delete dry_;
 				dry_ = nullptr;
-
 				wet_->Dispose();
 				delete wet_;
 				wet_ = nullptr;
-
 				output_->Dispose();
 				delete output_;
 				output_ = nullptr;
 			}
+
+			virtual void Start() {}
+
+			virtual void Stop(){}
 
 			void CrossFade(float v) {
 				auto gain1 = cosf(v * 0.5 * M_PI);

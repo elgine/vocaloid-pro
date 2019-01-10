@@ -67,24 +67,27 @@ namespace effect {
 			ctx->Connect(highpass_, gain_);
 		}
 
-		AudioNode* Input() {
-			return equalizer_->input_;
+		void Dispose() override {
+			if (phase_vocoder_) {
+				phase_vocoder_->Dispose();
+				delete phase_vocoder_;
+				phase_vocoder_ = nullptr;
+			}
+			if (equalizer_) {
+				equalizer_->Dispose();
+				delete equalizer_;
+				equalizer_ = nullptr;
+			}
+			if (highpass_) {
+				highpass_->Dispose();
+				delete highpass_;
+				highpass_ = nullptr;
+			}
+			Effect::Dispose();
 		}
 
-		void Dispose() override {
-			phase_vocoder_->Dispose();
-			delete phase_vocoder_;
-			phase_vocoder_ = nullptr;
-
-			equalizer_->Dispose();
-			delete equalizer_;
-			equalizer_ = nullptr;
-
-			highpass_->Dispose();
-			delete highpass_;
-			highpass_ = nullptr;
-
-			Effect::Dispose();
+		AudioNode* Input() {
+			return equalizer_->input_;
 		}
 	};
 

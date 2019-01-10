@@ -55,6 +55,25 @@ namespace effect {
 			ctx->Connect(highpass_, vibrato_->input_);
 			ctx->Connect(vibrato_->output_, gain_);
 		}
+
+		void Dispose() override {
+			if (jungle_) {
+				jungle_->Dispose();
+				delete jungle_;
+				jungle_ = nullptr;
+			}
+			if (vibrato_) {
+				vibrato_->Dispose();
+				delete vibrato_;
+				vibrato_ = nullptr;
+			}
+			if (highpass_) {
+				highpass_->Dispose();
+				delete highpass_;
+				highpass_ = nullptr;
+			}
+			Effect::Dispose();
+		}
 		
 		void SetOptions(float *options, int option_count) override {
 			if (option_count > 0) {
@@ -86,22 +105,6 @@ namespace effect {
 
 		void Start() override {
 			vibrato_->Start();
-		}
-
-		void Dispose() override {
-			jungle_->Dispose();
-			delete jungle_;
-			jungle_ = nullptr;
-
-			vibrato_->Dispose();
-			delete vibrato_;
-			vibrato_ = nullptr;
-
-			highpass_->Dispose();
-			delete highpass_;
-			highpass_ = nullptr;
-
-			Effect::Dispose();
 		}
 	};
 

@@ -40,34 +40,39 @@ namespace effect {
 			ctx_->Connect(delay_, gain_);
 		}
 
+		void Dispose() override {
+			if (osc1_) {
+				osc1_->Dispose();
+				delete osc1_;
+				osc1_ = nullptr;
+			}
+			if (osc2_) {
+				osc2_->Dispose();
+				delete osc2_;
+				osc2_ = nullptr;
+			}
+			if (osc3_) {
+				osc3_->Dispose();
+				delete osc3_;
+				osc3_ = nullptr;
+			}
+			if (osc_gain_) {
+				osc_gain_->Dispose();
+				delete osc_gain_;
+				osc_gain_ = nullptr;
+			}
+			if (delay_) {
+				delay_->Dispose();
+				delete delay_;
+				delay_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		void Start() override {
 			osc1_->Start();
 			osc2_->Start();
 			osc3_->Start();
-		}
-
-		void Dispose() override {
-			osc1_->Dispose();
-			delete osc1_;
-			osc1_ = nullptr;
-
-			osc2_->Dispose();
-			delete osc2_;
-			osc2_ = nullptr;
-
-			osc3_->Dispose();
-			delete osc3_;
-			osc3_ = nullptr;
-
-			osc_gain_->Dispose();
-			delete osc_gain_;
-			osc_gain_ = nullptr;
-
-			delay_->Dispose();
-			delete delay_;
-			delay_ = nullptr;
-
-			Effect::Dispose();
 		}
 
 		AudioNode* Input() {

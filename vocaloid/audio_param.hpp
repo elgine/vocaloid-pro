@@ -47,8 +47,8 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
-				AudioNode::Dispose();
 				AudioTimeline::Dispose();
+				AudioNode::Dispose();
 			}
 		};
 	}

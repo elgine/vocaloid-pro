@@ -24,16 +24,17 @@ namespace effect {
 			ctx->Connect(convolution_, gain_);
 		}
 
-		AudioNode *Input() {
-			return convolution_;
+		void Dispose() override {
+			if (convolution_) {
+				convolution_->Dispose();
+				delete convolution_;
+				convolution_ = nullptr;
+			}
+			Effect::Dispose();
 		}
 
-		void Dispose() override {
-			convolution_->Dispose();
-			delete convolution_;
-			convolution_ = nullptr;
-
-			Effect::Dispose();
+		AudioNode *Input() {
+			return convolution_;
 		}
 	};
 }

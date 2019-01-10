@@ -21,6 +21,12 @@ namespace effect {
 			gain_ = new GainNode(ctx, GAIN_DEFAULT);
 		}
 
+		virtual void Dispose() {
+			gain_->Dispose();
+			delete gain_;
+			gain_ = nullptr;
+		}
+
 		void SetGain(float gain) {
 			gain_->gain_->value_ = Clamp(GAIN_MIN, GAIN_MAX, gain);
 		}
@@ -42,12 +48,6 @@ namespace effect {
 		}
 
 		virtual void Start() {}
-
-		virtual void Dispose() {
-			gain_->Dispose();
-			delete gain_;
-			gain_ = nullptr;
-		}
 	};
 
 	float Effect::GAIN_DEFAULT = 0.8f;

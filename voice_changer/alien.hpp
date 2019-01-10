@@ -35,6 +35,25 @@ namespace effect {
 			delay_->delay_time_->value_ = 0.05f;
 		}
 
+		void Dispose() override {
+			if (delay_ != nullptr) {
+				delay_->Dispose();
+				delete delay_;
+				delay_ = nullptr;
+			}
+			if (osc_ != nullptr) {
+				osc_->Dispose();
+				delete osc_;
+				osc_ = nullptr;
+			}
+			if (osc_gain_ != nullptr) {
+				osc_gain_->Dispose();
+				delete osc_;
+				osc_gain_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		// [lfo_freq, lfo_gain, gain]
 		void SetOptions(float *options, int option_count) override {
 			if (option_count > 0) {
@@ -62,25 +81,6 @@ namespace effect {
 
 		AudioNode* Input() override {
 			return delay_;
-		}
-
-		void Dispose() override {
-			if (delay_ != nullptr) {
-				delay_->Dispose();
-				delete delay_;
-				delay_ = nullptr;
-			}
-			if (osc_ != nullptr) {
-				osc_->Dispose();
-				delete osc_;
-				osc_ = nullptr;
-			}
-			if (osc_gain_ != nullptr) {
-				osc_gain_->Dispose();
-				delete osc_;
-				osc_gain_ = nullptr;
-			}
-			Effect::Dispose();
 		}
 	};
 

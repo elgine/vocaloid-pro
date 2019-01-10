@@ -58,6 +58,25 @@ namespace effect {
 			ctx->Connect(vibrato_->output_, gain_);
 		}
 
+		void Dispose() override {
+			if (lowpass_) {
+				lowpass_->Dispose();
+				delete lowpass_;
+				lowpass_ = nullptr;
+			}
+			if (jungle_) {
+				jungle_->Dispose();
+				delete jungle_;
+				jungle_ = nullptr;
+			}
+			if (vibrato_) {
+				vibrato_->Dispose();
+				delete vibrato_;
+				vibrato_ = nullptr;
+			}
+			Effect::Dispose();
+		}
+
 		void SetOptions(float *options, int option_count) override {
 			if (option_count > 0) {
 				jungle_->pitch_ = Clamp(PITCH_MIN, PITCH_MAX, options[0]);
@@ -88,22 +107,6 @@ namespace effect {
 
 		void Start() override {
 			vibrato_->Start();
-		}
-
-		void Dispose() override {
-			lowpass_->Dispose();
-			delete lowpass_;
-			lowpass_ = nullptr;
-
-			jungle_->Dispose();
-			delete jungle_;
-			jungle_ = nullptr;
-
-			vibrato_->Dispose();
-			delete vibrato_;
-			vibrato_ = nullptr;
-
-			Effect::Dispose();
 		}
 	};
 

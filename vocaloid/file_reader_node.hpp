@@ -37,6 +37,15 @@ namespace vocaloid {
 				temp_buffer_ = nullptr;
 			}
 
+			void Dispose() override {
+				if (reader_ != nullptr) {
+					reader_->Dispose();
+					delete reader_;
+					reader_ = nullptr;
+				}
+				SourceNode::Dispose();
+			}
+
 			int Open(const char* path) {
 				if (path_ == path)return SUCCEED;
 				if (IsPathDirectory(path))
@@ -54,8 +63,8 @@ namespace vocaloid {
 			}
 
 			void Clear() override {
-				SourceNode::Clear();
 				reader_->Clear();
+				SourceNode::Clear();
 			}
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
@@ -77,7 +86,7 @@ namespace vocaloid {
 				auto buf_size = len * frame_size;
 				auto size = reader_->ReadData(temp_buffer_, buf_size);
 				if (size <= 0) {
-					if (reader_->End())return loop_?len:EOF;
+					if (reader_->End())return EOF;
 					return 0;
 				}
 				result_buffer_->silence_ = false;
@@ -104,14 +113,14 @@ namespace vocaloid {
 				return reader_->Duration();
 			}
 
+			void Resume() override {
+				reader_->Seek(play_pos_);
+				SourceNode::Resume();
+			}
+
 			void Stop() override {
 				SourceNode::Stop();
 				reader_->Stop();
-			}
-
-			void Dispose() override {
-				AudioNode::Dispose();
-				reader_->Dispose();
 			}
 		};
 	}

@@ -92,6 +92,7 @@ extern "C" {
 
 	DLLEXPORT int ForceExitRender() {
 		GetRenderList()->ForceExitRender();
+		DisposeAllTempResources();
 		return SUCCEED;
 	}
 }
