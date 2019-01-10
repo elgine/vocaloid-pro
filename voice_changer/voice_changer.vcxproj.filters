@@ -114,15 +114,6 @@
     <ClInclude Include="render_list.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ane_helper.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ane.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="interface.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Media Include="..\samples\church.wav">

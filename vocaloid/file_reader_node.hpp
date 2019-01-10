@@ -5,7 +5,7 @@
 #include "../utility/path.hpp"
 #include "maths.hpp"
 #include "status.h"
-#ifdef WIN
+#ifdef _WIN32 || _WIN64
 #include "ffmpeg_io.hpp"
 #else
 #include "wav.hpp"
@@ -27,7 +27,7 @@ namespace vocaloid {
 
 			explicit FileReaderNode(BaseAudioContext *ctx) :SourceNode(ctx) {
 				path_ = "undefined";
-#ifdef WIN
+#ifdef _WIN32 || _WIN64
 				reader_ = new io::FFmpegFileReader();
 #else
 				reader_ = new io::WAVReader();
@@ -43,7 +43,7 @@ namespace vocaloid {
 					return PATH_NOT_FILE;
 				if (!IsFileReadable(path))
 					return FILE_NOT_READABLE;
-#ifndef _WIN
+#ifndef _WIN32 || _WIN64
 				if (GetExtension(path) != ".wav") {
 					return FILE_NOT_WAV;
 				}

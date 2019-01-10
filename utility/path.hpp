@@ -43,6 +43,9 @@ bool CreateDirectoryRecursivly(const char* path) {
 		offset = pos + 1;
 		pos = all_path.find("\\", offset);
 	}
+	if (_access(all_path.data(), 0) < 0) {
+		if (mkdir(all_path.data()) < 0)return false;
+	}
 	return true;
 }
 

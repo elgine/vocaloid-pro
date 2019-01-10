@@ -1,5 +1,5 @@
 #pragma once
-#ifdef WIN
+#ifdef _WIN32 || _WIN64
 #include "file.h"
 #include <memory>
 #include <thread>
@@ -7,7 +7,7 @@
 #include <atomic>
 #include <iostream>
 #include <condition_variable>
-#ifdef WIN64
+#ifdef _WIN64
 extern "C"
 {
 #include "libswscale/swscale.h"

@@ -136,7 +136,7 @@ public:
 	int Start(bool restart = false) {
 		{
 			unique_lock<mutex> lck(tick_mutex_);
-			if (state_ == VoicePlayerState::PLAYER_PLAYING)return HAVE_INITED;
+			if (state_ == VoicePlayerState::PLAYER_PLAYING)return SUCCEED;
 		}
 		auto ret = SUCCEED;
 		ctx_->stop_eof_ = false;

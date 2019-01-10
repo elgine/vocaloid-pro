@@ -1,8 +1,3 @@
 #pragma once
 #define NO_SUCH_EFFECT -1024
 #define HAVE_NOT_STARTED -1025
-#define HAVE_INITED 1
-#define MISS_PARAM -1026
-#define NO_SUCH_PATH -1027
-#define PARAM_NOT_MATCH -1028
-#define CANT_LOAD_FFMPEG -1029

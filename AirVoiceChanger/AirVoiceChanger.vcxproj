@@ -18,62 +18,11 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="alien.hpp" />
-    <ClInclude Include="astronaut.hpp" />
-    <ClInclude Include="balrog.hpp" />
-    <ClInclude Include="render_list.hpp" />
-    <ClInclude Include="voice_renderer.hpp" />
-    <ClInclude Include="extract_resource.hpp" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="uncle.hpp" />
-    <ClInclude Include="broad_room.hpp" />
-    <ClInclude Include="cave.hpp" />
-    <ClInclude Include="child.hpp" />
-    <ClInclude Include="effect.hpp" />
-    <ClInclude Include="effects.h" />
-    <ClInclude Include="factory.hpp" />
-    <ClInclude Include="female.hpp" />
-    <ClInclude Include="hall.hpp" />
-    <ClInclude Include="male.hpp" />
-    <ClInclude Include="megaphone.hpp" />
-    <ClInclude Include="muffler.hpp" />
-    <ClInclude Include="old_female.hpp" />
-    <ClInclude Include="old_male.hpp" />
-    <ClInclude Include="radio.hpp" />
-    <ClInclude Include="robot1.hpp" />
-    <ClInclude Include="robot2.hpp" />
-    <ClInclude Include="status.h" />
-    <ClInclude Include="telephone.hpp" />
-    <ClInclude Include="transformer.hpp" />
-    <ClInclude Include="under_water.hpp" />
-    <ClInclude Include="voice_player.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="dllmain.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Media Include="..\samples\church.wav" />
-    <Media Include="..\samples\female-voice.wav" />
-    <Media Include="..\samples\fire.mp3" />
-    <Media Include="..\samples\large-long-echo-hall.wav" />
-    <Media Include="..\samples\large-wide-echo-hall.wav" />
-    <Media Include="..\samples\muffler.wav" />
-    <Media Include="..\samples\parking.wav" />
-    <Media Include="..\samples\radio.wav" />
-    <Media Include="..\samples\spring.wav" />
-    <Media Include="..\samples\telephone.wav" />
-    <Media Include="..\samples\underwater.mp3" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="voice_changer.rc" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{AECEBFF0-24F0-4923-BA88-6F05306F33E7}</ProjectGuid>
+    <ProjectGuid>{20B467F0-FA4E-4557-AAE0-AA00CA3BB07F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>voice_changer</RootNamespace>
+    <RootNamespace>AirVoiceChanger</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>VoiceChanger</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -122,35 +71,31 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
-    <TargetName>VoiceChanger</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
-    <TargetName>VoiceChanger</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x86);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
-    <TargetName>VoiceChanger</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\include;$(SolutionDir)third_party\flash\include;$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <ReferencePath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
-    <LibraryPath>$(SolutionDir)third_party\ffmpeg\$(PlatformTarget)\lib;$(SolutionDir)third_party\flash\lib;$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir)third_party\flash\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ReferencePath>$(SolutionDir)third_party\flash\lib;$(VC_ReferencesPath_x64);</ReferencePath>
+    <LibraryPath>$(SolutionDir)third_party\flash\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>$(SolutionDir)build\$(PlatformTarget)\</OutDir>
-    <TargetName>VoiceChanger</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -158,15 +103,11 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN;WIN32;_DEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;AIRVOICECHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
-      <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -175,15 +116,11 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN;_DEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;AIRVOICECHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
-      <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -194,17 +131,13 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN;WIN32;NDEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;AIRVOICECHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
-      <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -215,19 +148,25 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN;NDEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;AIRVOICECHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
-      <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ane.h" />
+    <ClInclude Include="ane_helper.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
