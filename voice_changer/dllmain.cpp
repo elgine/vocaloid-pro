@@ -81,16 +81,18 @@ extern "C" {
 		return GetPlayer()->Resume();
 	}
 
-	DLLEXPORT int Render(const char** sources, const char **dest, int *effect_ids,
-		float *options, int *option_count, int* segments, int *segment_counts, int count) {
-		/*auto set_segments = bool(segmentses != nullptr);
-		auto set_options = bool(options != nullptr);
+	DLLEXPORT int Render(const char** sources, const char **dests, int *effect_ids,
+		float *options, int *option_counts, int* segments, int *segment_counts, int count) {
+		auto option_offset = 0;
+		auto segment_offset = 0;
 		for (auto i = 0; i < count; i++) {
-		auto segs = set_segments ? segmentses[i] : nullptr;
-		auto seg_c = set_segments ? segment_counts[i] : 0;
-		render_list->AddRenderData(sources[i], dest[i], effect_ids[i], set_options ? options[i] : nullptr, set_options ? option_count[i] : 0, segs, seg_c);
-		}*/
-		//render_list->Start();
+			render_list->AddRenderData(sources[i], dests[i], effect_ids[i], 
+				options + option_offset, option_counts[i],
+				segments + segment_offset, segment_counts[i]);
+			option_offset += option_counts[i];
+			segment_offset += segment_counts[i];
+		}
+		render_list->Start();
 		return SUCCEED;
 	}
 
