@@ -47,7 +47,10 @@ private:
 			processed_time = FramesToMsec(source_reader_->SourceSampleRate(), source_reader_->Played());
 			played_time = FramesToMsec(player_->SampleRate(), player_->Processed()) % source_reader_->Duration();
 			ctx_->Unlock();
-			on_tick_->Emit({processed_time, played_time});
+			{
+				unique_lock<mutex> lck(tick_mutex_);
+				on_tick_->Emit({ processed_time, played_time });
+			}
 			this_thread::sleep_for(chrono::milliseconds(22));
 		}
 	}
@@ -115,7 +118,6 @@ public:
 			auto playing = Playing();
 			Stop();
 			Effect* new_effect = EffectFactory(id, ctx_);
-			if (new_effect == nullptr)return NO_SUCH_EFFECT;
 			if (effect_ != nullptr) {
 				effect_->Dispose();
 				delete effect_;
