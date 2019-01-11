@@ -1,10 +1,10 @@
 #include "voice_player.hpp"
 #include "render_list.hpp"
 
+#define DLLEXPORT __declspec(dllexport)
+
 static VoicePlayer *player = nullptr;
 static RenderList *render_list = nullptr;
-
-#define DLLEXPORT __declspec(dllexport)
 
 VoicePlayer* GetPlayer() {
 	if (player == nullptr)player = new VoicePlayer();
@@ -17,6 +17,26 @@ RenderList* GetRenderList() {
 }
 
 extern "C" {
+	DLLEXPORT void SubscribePlayerTick(OnPlayerTick tick) {
+		GetPlayer()->SubscribeTick(tick);
+	}
+
+	/*DLLEXPORT void SubscribePlayerEnd(OnPlayerEnd end) {
+		GetPlayer()->SubscribeEnd(end);
+	}*/
+
+	DLLEXPORT void SubscribeRenderListProgress(OnRenderListProgress p) {
+		GetRenderList()->SubscribeProgress(p);
+	}
+
+	DLLEXPORT void SubscribeRenderListComplete(OnRenderListComplete c) {
+		GetRenderList()->SubscribeComplete(c);
+	}
+
+	DLLEXPORT void SubscribeRenderListEnd(OnRenderListEnd c) {
+		GetRenderList()->SubscribeEnd(c);
+	}
+
 	DLLEXPORT int SetExtractTempPath(const char* path) {
 		return SetTempPath(path);
 	}
@@ -55,6 +75,10 @@ extern "C" {
 
 	DLLEXPORT int StopPreview() {
 		return GetPlayer()->Stop();
+	}
+
+	DLLEXPORT int Resume() {
+		return GetPlayer()->Resume();
 	}
 
 	DLLEXPORT int Render(const char** sources, const char **dest, int *effect_ids,

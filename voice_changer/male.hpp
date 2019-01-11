@@ -70,6 +70,10 @@ namespace effect {
 		void Start() override {
 			jungle_->Start();
 		}
+
+		void Resume() override {
+			jungle_->Resume();
+		}
 	};
 
 	float Male::LOWPASS_FREQ_DEFAULT = 4000.0f;

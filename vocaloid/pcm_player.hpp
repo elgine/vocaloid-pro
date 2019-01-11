@@ -85,16 +85,12 @@ namespace vocaloid {
 			}
 
 			void Clear() override {
-				Reset();
+				buf_offset_ = 0;
+				waveOutReset(wave_out_);
 			}
 
 			void Resume() override {
-				Reset();
-			}
-
-			void Reset() override {
-				buf_offset_ = 0;
-				waveOutReset(wave_out_);
+				waveOutRestart(wave_out_);
 			}
 
 			void Stop() override {

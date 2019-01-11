@@ -17,33 +17,38 @@ enum VoicePlayerState {
 	PLAYER_STOP
 };
 
+struct TickData {
+	int64_t processed_time;
+	int64_t played_time;
+};
+typedef void(*OnPlayerTick)(TickData);
+
 class VoicePlayer {
 
 private:
+	Signal<TickData> *on_tick_;
+
 	AudioContext *ctx_;
 	PlayerNode *player_;
 	FileReaderNode *source_reader_;
 	Effect* effect_;
-	atomic<VoicePlayerState> state_;
+
 	thread *tick_thread_;
 	mutex tick_mutex_;
+	atomic<VoicePlayerState> state_;
 	string path_;
+	
 
-	void OnTick() {
-		int64_t last = 0, cur = 0;
-		while (true) {
-			{
-				unique_lock<mutex> lck(tick_mutex_);
-				ctx_->Lock();
-				cur = player_->Processed();
-				ctx_->Unlock();
-				if (state_ == VoicePlayerState::PLAYER_STOP) {
-					break;
-				}
-				last = cur;
-			}
-			//on_tick_->Emit(BuildTickMsg(cur));
-			this_thread::sleep_for(chrono::milliseconds(20));
+	void Tick() {
+		auto played_time = 0, processed_time = 0;
+		while (1) {
+			if (!Playing())break;
+			ctx_->Lock();
+			processed_time = FramesToMsec(source_reader_->SourceSampleRate(), source_reader_->Played());
+			played_time = FramesToMsec(player_->SampleRate(), player_->Processed()) % source_reader_->Duration();
+			ctx_->Unlock();
+			on_tick_->Emit({processed_time, played_time});
+			this_thread::sleep_for(chrono::milliseconds(22));
 		}
 	}
 
@@ -57,17 +62,19 @@ private:
 
 public:
 
-	Signal<string> *on_tick_;
-
 	explicit VoicePlayer(int32_t sample_rate = 44100, int16_t channels = 2) {
 		ctx_ = new AudioContext();
 		ctx_->SetOutput(OutputType::PLAYER, sample_rate, channels);
 		player_ = static_cast<PlayerNode*>(ctx_->Destination());
 		source_reader_ = new FileReaderNode(ctx_);
-		on_tick_ = new Signal<string>();
 		effect_ = nullptr;
 		tick_thread_ = nullptr;
 		state_ = VoicePlayerState::PLAYER_STOP;
+		on_tick_ = new Signal<TickData>();
+	}
+
+	void SubscribeTick(OnPlayerTick h) {
+		on_tick_->On(h);
 	}
 
 	void Loop(bool v) {
@@ -144,6 +151,7 @@ public:
 
 	int Start(bool restart = true) {
 		if (Playing())return SUCCEED;
+		else Stop();
 		auto ret = SUCCEED;
 		ctx_->stop_eof_ = false;
 		if (effect_) {
@@ -163,24 +171,23 @@ public:
 			if (ret < 0)return ret;
 		}
 		ctx_->Start();
-		Join();
-		{
-			unique_lock<mutex> lck(tick_mutex_);
-			state_ = VoicePlayerState::PLAYER_PLAYING;
-		}
-		tick_thread_ = new thread(&VoicePlayer::OnTick, this);
+		state_ = VoicePlayerState::PLAYER_PLAYING;
+		tick_thread_ = new thread(&VoicePlayer::Tick, this);
 		return ret;
 	}
 
 	int Resume() {
-		if (Playing())return SUCCEED;
+		if (!Playing())return SUCCEED;
+		source_reader_->Resume();
+		if (effect_) {
+			effect_->Resume();
+		}
 		ctx_->Start();
-		Join();
 		{
 			unique_lock<mutex> lck(tick_mutex_);
 			state_ = VoicePlayerState::PLAYER_PLAYING;
 		}
-		tick_thread_ = new thread(&VoicePlayer::OnTick, this);
+		tick_thread_ = new thread(&VoicePlayer::Tick, this);
 		return SUCCEED;
 	}
 
@@ -192,6 +199,7 @@ public:
 				state_ = VoicePlayerState::PLAYER_STOP;
 			}
 			Join();
+			return ret;
 		}else
 			return SUCCEED;
 	}

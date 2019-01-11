@@ -21,7 +21,6 @@ namespace vocaloid {
 			char* temp_buffer_;
 			float resample_ratio_;
 			int16_t bits_;
-
 			bool need_update_;
 		public:
 
@@ -117,11 +116,6 @@ namespace vocaloid {
 			int64_t Duration() {
 				return reader_->Duration();
 			}
-
-			/*void Resume() override {
-				Seek(play_pos_);
-				SourceNode::Resume();
-			}*/
 
 			void Stop() override {
 				SourceNode::Stop();

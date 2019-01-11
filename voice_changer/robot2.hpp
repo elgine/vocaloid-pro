@@ -75,6 +75,12 @@ namespace effect {
 			osc3_->Start();
 		}
 
+		void Resume() override {
+			osc1_->Resume();
+			osc2_->Resume();
+			osc3_->Resume();
+		}
+
 		AudioNode* Input() {
 			return delay_;
 		}

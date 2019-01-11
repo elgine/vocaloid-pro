@@ -9,7 +9,7 @@ namespace vocaloid {
 		public:
 			explicit DestinationNode(BaseAudioContext *ctx) :AudioNode(ctx, AudioNodeType::OUTPUT, true, false) {}
 
-			void SetFormat(int32_t sample_rate, int16_t channels) {
+			virtual void SetFormat(int32_t sample_rate, int16_t channels) {
 				sample_rate_ = sample_rate;
 				channels_ = channels;
 			}
@@ -19,6 +19,10 @@ namespace vocaloid {
 			virtual int64_t Flush() { return 0; }
 
 			virtual void Close() {}
+
+			void Stop() override {
+				Flush();
+			}
 
 			OutputType OutputType() {
 				return output_type_;

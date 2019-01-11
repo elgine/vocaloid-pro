@@ -58,15 +58,21 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
-				hi_->Dispose();
-				delete hi_;
-				hi_ = nullptr;
-				lo_->Dispose();
-				delete lo_;
-				lo_ = nullptr;
-				mi_->Dispose();
-				delete mi_;
-				mi_ = nullptr;
+				if (hi_) {
+					hi_->Dispose();
+					delete hi_;
+					hi_ = nullptr;
+				}
+				if (lo_) {
+					lo_->Dispose();
+					delete lo_;
+					lo_ = nullptr;
+				}
+				if (mi_) {
+					mi_->Dispose();
+					delete mi_;
+					mi_ = nullptr;
+				}
 				Composite::Dispose();
 			}
 

@@ -51,6 +51,10 @@ namespace effect {
 			jungle_->Start();
 		}
 
+		void Resume() override {
+			jungle_->Resume();
+		}
+
 		void SetPitchOffset(float v) {
 			jungle_->SetPitchOffset(v);
 		}

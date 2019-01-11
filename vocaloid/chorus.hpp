@@ -56,7 +56,8 @@ namespace vocaloid {
 				});
 			}
 
-			~Chorus() {
+			void Dispose() override {
+				delay_->Dispose();
 				delete delay_;
 				delay_ = nullptr;
 				delete gain_;
@@ -67,6 +68,10 @@ namespace vocaloid {
 
 			void Start() override {
 				osc_->Start();
+			}
+
+			void Resume() override {
+				osc_->Resume();
 			}
 
 			void SetOptions(ChorusOptions options) {

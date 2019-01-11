@@ -235,6 +235,11 @@ namespace effect {
 			osc_->Start();
 		}
 
+		void Resume() override {
+			fire_->Resume();
+			osc_->Resume();
+		}
+
 		AudioNode *Input() {
 			return delay_;
 		}

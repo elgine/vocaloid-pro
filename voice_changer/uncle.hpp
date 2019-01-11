@@ -27,7 +27,7 @@ namespace effect {
 				SetLowpassFrequency(options[0]);
 			}
 			if (option_count > 1) {
-				SetPitch(options[1]);
+				SetPitchOffset(options[1]);
 			}
 			if (option_count > 2) {
 				SetGain(options[2]);
@@ -59,11 +59,19 @@ namespace effect {
 			Effect::Dispose();
 		}
 
+		void Start() override {
+			jungle_->Start();
+		}
+
+		void Resume() override {
+			jungle_->Resume();
+		}
+
 		void SetLowpassFrequency(float freq) {
 			lowpass_->frequency_->value_ = Clamp(LOWPASS_FREQ_MIN, LOWPASS_FREQ_MAX, freq);
 		}
 
-		void SetPitch(float v) {
+		void SetPitchOffset(float v) {
 			jungle_->SetPitchOffset(Clamp(PITCH_OFFSET_MIN, PITCH_OFFSET_MAX, v));
 		}
 

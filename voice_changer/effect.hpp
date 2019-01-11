@@ -47,6 +47,8 @@ namespace effect {
 			return gain_;
 		}
 
+		virtual void Resume() {}
+
 		virtual void Start() {}
 	};
 

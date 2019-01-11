@@ -106,6 +106,10 @@ namespace effect {
 		void Start() override {
 			vibrato_->Start();
 		}
+
+		void Resume() override {
+			vibrato_->Resume();
+		}
 	};
 
 	float OldFemale::HIGHPASS_FREQ_DEFAULT = 120.0f;

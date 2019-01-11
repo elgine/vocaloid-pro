@@ -131,6 +131,11 @@ namespace effect {
 			wahwah_->Start();
 			underwater_->Start(0);
 		}
+
+		void Resume() override {
+			wahwah_->Resume();
+			underwater_->Resume();
+		}
 	};
 
 	float UnderWater::LOWPASS_FREQ_DEFAULT = 500;

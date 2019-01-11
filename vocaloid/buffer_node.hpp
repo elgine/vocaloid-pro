@@ -36,7 +36,7 @@ namespace vocaloid {
 			}
 
 			int64_t Duration() override {
-				return BytesToMsec(SourceSampleRate(), summing_buffer_->Size());
+				return FramesToMsec(SourceSampleRate(), summing_buffer_->Size());
 			}
 
 			int32_t SourceSampleRate() override {

@@ -84,5 +84,12 @@ namespace effect {
 			jungle3_->Start();
 			jungle4_->Start();
 		}
+
+		void Resume() override {
+			jungle1_->Resume();
+			jungle2_->Resume();
+			jungle3_->Resume();
+			jungle4_->Resume();
+		}
 	};
 }

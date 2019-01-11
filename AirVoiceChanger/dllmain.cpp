@@ -1,15 +1,17 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <sstream>
 #include "ane_helper.hpp"
 #include "../utility/path.hpp"
 #include "../utility/string_wstring.hpp"
-
+#include "../utility/utf8_string.hpp"
 #define MISS_PARAM -1026
 #define PARAM_NOT_MATCH -1028
 #define NO_SUCH_PATH -1029
 #define LOAD_LIBRARY_FAILED -1030
 #define HAS_NOT_INITED -1031
 
+FREContext fre_context = nullptr;
 const int dependency_count = 9;
 const char *dependencies[dependency_count] = {
 	"avutil-55.dll",
@@ -41,6 +43,75 @@ int(*cancel_render)(const char*);
 int(*cancel_render_all)();
 int(*force_render_exit)();
 
+struct TickData {
+	int64_t processed_time;
+	int64_t played_time;
+};
+typedef void(*OnPlayerTick)(TickData);
+typedef void(*OnRenderListProgress)(float*);
+typedef void(*OnRenderListEnd)(int*);
+typedef void(*OnRenderListComplete)(char*);
+
+void(*subscribe_player_tick)(OnPlayerTick);
+
+void(*subscribe_render_list_progress)(OnRenderListProgress);
+void(*subscribe_render_list_complete)(OnRenderListComplete);
+void(*subscribe_render_list_end)(OnRenderListEnd);
+
+#define PLAYER_TICK_CODE "playerTick"
+#define RENDER_LIST_PROGRESS_CODE "renderListProgress"
+#define RENDER_LIST_COMPLETE_CODE "renderListComplete"
+#define RENDER_LIST_END_CODE "renderListEnd"
+
+void SendPlayerTickMsg(TickData data) {
+	if (fre_context != nullptr) {
+		stringstream ss;
+		ss << "{\"processed\": " << data.processed_time << ", " << "\"played\": " << data.played_time << "}";
+		const uint8_t* s = (const uint8_t*)ss.str().c_str();
+		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)PLAYER_TICK_CODE, (const uint8_t*)ss.str().c_str());
+	}
+}
+
+void SendRenderListProgressMsg(float *progress) {
+	if (fre_context != nullptr) {
+		stringstream ss;
+		ss << "{\"progress\": [";
+		auto count = sizeof(progress) / sizeof(float);
+		for (auto i = 0; i < count; i++) {
+			ss << progress[i];
+			if (i != count - 1) {
+				ss << ",";
+			}
+		}
+		ss << "]}";
+		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)RENDER_LIST_PROGRESS_CODE, (const uint8_t*)ss.str().c_str());
+	}
+}
+
+void SendRenderListCompleteMsg(char* source) {
+	if (fre_context != nullptr) {
+		stringstream ss;
+		ss << "{\"source\":" << source << "}";
+		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)RENDER_LIST_COMPLETE_CODE, (const uint8_t*)ss.str().c_str());
+	}
+}
+
+void SendRenderListEndMsg(int *status) {
+	if (fre_context != nullptr) {
+		stringstream ss;
+		ss << "{\"status\": [";
+		auto count = sizeof(status) / sizeof(int);
+		for (auto i = 0; i < count; i++) {
+			ss << status[i];
+			if (i != count - 1) {
+				ss << ",";
+			}
+		}
+		ss << "]}";
+		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)RENDER_LIST_END_CODE, (const uint8_t*)(StringToUTF8(ss.str())).c_str());
+	}
+}
+
 FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 	if (argc < 1)return FromInt(MISS_PARAM);
 	const char* path = ToString(argv[0]);
@@ -56,41 +127,63 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			return FromInt(LOAD_LIBRARY_FAILED);
 		}
 	}
-	handler = GetModuleHandle(L"VoiceChanger.dll");
-	if (handler != nullptr) {
-		set_temp_path = (int(*)(const char*))GetProcAddress(handler, "SetExtractTempPath");
-		if(set_temp_path == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		dispose_temps = (int(*)(void))GetProcAddress(handler, "DisposeAllTemps");
-		if(dispose_temps == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		seek = (int(*)(int))GetProcAddress(handler, "Seek");
-		if(seek == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		set_loop = (void(*)(bool))GetProcAddress(handler, "SetLoopPreview");
-		if (set_loop == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		set_segments = (int(*)(int*, int))GetProcAddress(handler, "SetSegmentsPreview");
-		if(set_segments == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		set_effect = (int(*)(int))GetProcAddress(handler, "SetEffectPreview");
-		if (set_effect == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		open_preview = (int(*)(const char*))GetProcAddress(handler, "OpenPreview");
-		if (open_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		set_effect_options = (int(*)(float*, int))GetProcAddress(handler, "SetEffectOptionsPreview");
-		if (set_effect_options == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		start_preview = (int(*)())GetProcAddress(handler, "StartPreview");
-		if (start_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		stop_preview = (int(*)())GetProcAddress(handler, "StopPreview");
-		if (stop_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		render = (int(*)(const char**, const char**, int*, float*, int*, int*, int*, int))GetProcAddress(handler, "Render");
-		if (render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		stop_render = (int(*)(const char*))GetProcAddress(handler, "StopRender");
-		if (stop_render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		stop_render_all = (int(*)())GetProcAddress(handler, "StopRenderAll");
-		if (stop_render_all == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		cancel_render = (int(*)(const char*))GetProcAddress(handler, "CancelRender");
-		if(cancel_render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		cancel_render_all = (int(*)())GetProcAddress(handler, "CancelRenderAll");
-		if (cancel_render_all == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		force_render_exit = (int(*)())GetProcAddress(handler, "ForceExitRender");
-		if (force_render_exit == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-		inited = true;
+
+	if (!inited) {
+		handler = GetModuleHandle(L"VoiceChanger.dll");
+		if (handler != nullptr) {
+			subscribe_player_tick = (void(*)(OnPlayerTick))GetProcAddress(handler, "SubscribePlayerTick");
+			if (subscribe_player_tick == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+
+			subscribe_render_list_progress = (void(*)(OnRenderListProgress))GetProcAddress(handler, "SubscribeRenderListProgress");
+			if (subscribe_render_list_progress == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+
+			subscribe_render_list_complete = (void(*)(OnRenderListComplete))GetProcAddress(handler, "SubscribeRenderListComplete");
+			if (subscribe_render_list_complete == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+
+			subscribe_render_list_end = (void(*)(OnRenderListEnd))GetProcAddress(handler, "SubscribeRenderListEnd");
+			if (subscribe_render_list_end == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+
+			set_temp_path = (int(*)(const char*))GetProcAddress(handler, "SetExtractTempPath");
+			if (set_temp_path == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			dispose_temps = (int(*)(void))GetProcAddress(handler, "DisposeAllTemps");
+			if (dispose_temps == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			seek = (int(*)(int))GetProcAddress(handler, "Seek");
+			if (seek == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			set_loop = (void(*)(bool))GetProcAddress(handler, "SetLoopPreview");
+			if (set_loop == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			set_segments = (int(*)(int*, int))GetProcAddress(handler, "SetSegmentsPreview");
+			if (set_segments == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			set_effect = (int(*)(int))GetProcAddress(handler, "SetEffectPreview");
+			if (set_effect == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			open_preview = (int(*)(const char*))GetProcAddress(handler, "OpenPreview");
+			if (open_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			set_effect_options = (int(*)(float*, int))GetProcAddress(handler, "SetEffectOptionsPreview");
+			if (set_effect_options == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			start_preview = (int(*)())GetProcAddress(handler, "StartPreview");
+			if (start_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			stop_preview = (int(*)())GetProcAddress(handler, "StopPreview");
+			if (stop_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			render = (int(*)(const char**, const char**, int*, float*, int*, int*, int*, int))GetProcAddress(handler, "Render");
+			if (render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			stop_render = (int(*)(const char*))GetProcAddress(handler, "StopRender");
+			if (stop_render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			stop_render_all = (int(*)())GetProcAddress(handler, "StopRenderAll");
+			if (stop_render_all == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			cancel_render = (int(*)(const char*))GetProcAddress(handler, "CancelRender");
+			if (cancel_render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			cancel_render_all = (int(*)())GetProcAddress(handler, "CancelRenderAll");
+			if (cancel_render_all == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			force_render_exit = (int(*)())GetProcAddress(handler, "ForceExitRender");
+			if (force_render_exit == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+
+			// Subscribe event
+			subscribe_player_tick(SendPlayerTickMsg);
+			subscribe_render_list_progress(SendRenderListProgressMsg);
+			subscribe_render_list_complete(SendRenderListCompleteMsg);
+			subscribe_render_list_end(SendRenderListEndMsg);
+			inited = true;
+		}else
+			return FromInt(LOAD_LIBRARY_FAILED);
 	}
 	return FromInt(0);
 }
@@ -235,6 +328,7 @@ void ContextInitializer(
 	};
 	*numFunctionsToSet = fn_count;
 	*functionsToSet = fns;
+	fre_context = ctx;
 }
 
 void ContextFinalizer(FREContext ctx) {

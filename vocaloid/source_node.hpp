@@ -30,7 +30,7 @@ namespace vocaloid {
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				InputNode::Initialize(sample_rate, frame_size);
-				delay_frames_ = MsecToBytes(sample_rate, delay_);
+				delay_frames_ = MsecToFrames(sample_rate, delay_);
 				return SUCCEED;
 			}
 
@@ -146,7 +146,7 @@ namespace vocaloid {
 							end_timestamp = start_timestamp + 1;
 						}
 						last = end_timestamp;
-						AddSegment(MsecToBytes(SourceSampleRate(), start_timestamp), MsecToBytes(SourceSampleRate(), end_timestamp));
+						AddSegment(MsecToFrames(SourceSampleRate(), start_timestamp), MsecToFrames(SourceSampleRate(), end_timestamp));
 					}
 				}
 				catch (exception e) {
@@ -162,8 +162,8 @@ namespace vocaloid {
 				auto ret = InputNode::Start();
 				if (ret < 0)return ret;
 				delay_ = delay;
-				start_bytes = MsecToBytes(SourceSampleRate(), Clamp(int64_t(0), Duration(), start));
-				end_bytes = MsecToBytes(SourceSampleRate(), start + (duration <= 0 || (start + duration) > Duration()) ? (Duration() - start) : duration);
+				start_bytes = MsecToFrames(SourceSampleRate(), Clamp(int64_t(0), Duration(), start));
+				end_bytes = MsecToFrames(SourceSampleRate(), start + (duration <= 0 || (start + duration) > Duration()) ? (Duration() - start) : duration);
 				Timeline::Dispose();
 				AddSegment(start_bytes, end_bytes);
 				return SUCCEED;
@@ -173,6 +173,11 @@ namespace vocaloid {
 				Timeline::Clear();
 				play_pos_ = 0;
 				delay_pos_ = 0;
+				ready_to_play_ = 0;
+			}
+
+			int64_t Played() {
+				return play_pos_;
 			}
 
 			virtual int32_t SourceSampleRate() { return sample_rate_; }

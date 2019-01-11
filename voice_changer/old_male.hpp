@@ -108,6 +108,10 @@ namespace effect {
 		void Start() override {
 			vibrato_->Start();
 		}
+
+		void Resume() override {
+			vibrato_->Resume();
+		}
 	};
 
 	float OldMale::LOWPASS_FREQ_DEFAULT = 8000.0f;

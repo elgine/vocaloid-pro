@@ -35,7 +35,7 @@ namespace vocaloid {
 				}
 				else {
 					for (auto i = 0; i < frame_size_; i++) {
-						result_buffer_->Channel(0)->Data()[i] = summing_buffer_->Channel(0)->Data()[i] + GetValueAtTime(BytesToMsec(sample_rate_, offset_ + i));
+						result_buffer_->Channel(0)->Data()[i] = summing_buffer_->Channel(0)->Data()[i] + GetValueAtTime(FramesToMsec(sample_rate_, offset_ + i));
 					}
 				}
 				offset_ += frame_size_;

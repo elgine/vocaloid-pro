@@ -9,7 +9,6 @@ namespace vocaloid {
 			virtual int Flush() = 0;
 			virtual int64_t Played() = 0;
 			virtual void Clear() = 0;
-			virtual void Reset() = 0;
 			virtual void Stop() = 0;
 			virtual void Dispose() = 0;
 			virtual void Resume() = 0;

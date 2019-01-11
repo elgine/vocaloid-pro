@@ -34,18 +34,19 @@ namespace vocaloid {
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				DestinationNode::Initialize(sample_rate, frame_size); 
 				int ret = 0;
-				if(!inited_)
-					player_->Open(sample_rate_, BITS_PER_SEC, channels_) < 0;
-				if (ret < 0)return ret;
-				int64_t size = frame_size * channels_ * BITS_PER_SEC / 8;
-				bytes_->Alloc(size);
-				bytes_->SetSize(size);
+				if (!inited_) {
+					ret = player_->Open(sample_rate, BITS_PER_SEC, channels_);
+					if (ret < 0)return ret;
+					int64_t size = frame_size * channels_ * BITS_PER_SEC / 8;
+					bytes_->Alloc(size);
+					bytes_->SetSize(size);
+					inited_ = true;
+				}
 				return ret;
 			}
 
 			void Clear() override {
 				player_->Clear();
-				DestinationNode::Clear();
 			}
 
 			int64_t Processed() override {

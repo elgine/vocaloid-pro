@@ -44,21 +44,31 @@ namespace effect {
 		}
 
 		void Dispose() override {
-			b1_->Dispose();
-			b2_->Dispose();
-			b3_->Dispose();
-			b4_->Dispose();
-			b5_->Dispose();
-			delete b1_;
-			delete b2_;
-			delete b3_;
-			delete b4_;
-			delete b5_;
-			b1_ = nullptr;
-			b2_ = nullptr;
-			b3_ = nullptr;
-			b4_ = nullptr;
-			b5_ = nullptr;
+			if (b1_) {
+				b1_->Dispose();
+				delete b1_;
+				b1_ = nullptr;
+			}
+			if (b2_) {
+				b2_->Dispose();
+				delete b2_;
+				b2_ = nullptr;
+			}
+			if (b3_) {
+				b3_->Dispose();
+				delete b3_;
+				b3_ = nullptr;
+			}
+			if (b4_) {
+				b4_->Dispose();
+				delete b4_;
+				b4_ = nullptr;
+			}
+			if (b5_) {
+				b5_->Dispose();
+				delete b5_;
+				b5_ = nullptr;
+			}
 			Effect::Dispose();
 		}
 

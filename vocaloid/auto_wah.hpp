@@ -70,18 +70,28 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
-				wave_shaper_->Dispose();
-				delete wave_shaper_;
-				wave_shaper_ = nullptr;
-				aw_follower_->Dispose();
-				delete aw_follower_;
-				aw_follower_ = nullptr;
-				aw_depth_->Dispose();
-				delete aw_depth_;
-				aw_depth_ = nullptr;
-				aw_filter_->Dispose();
-				delete aw_filter_;
-				aw_filter_ = nullptr;
+				if (wave_shaper_) {
+					wave_shaper_->Dispose();
+					delete wave_shaper_;
+					wave_shaper_ = nullptr;
+				}
+				if (aw_follower_) {
+					aw_follower_->Dispose();
+					delete aw_follower_;
+					aw_follower_ = nullptr;
+				}
+				if (aw_depth_) {
+					aw_depth_->Dispose();
+					delete aw_depth_;
+					aw_depth_ = nullptr;
+				}
+				
+				if (aw_filter_) {
+					aw_filter_->Dispose();
+					delete aw_filter_;
+					aw_filter_ = nullptr;
+				}
+				
 				Composite::Dispose();
 			}
 

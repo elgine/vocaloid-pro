@@ -3,6 +3,7 @@
 #include <vector>
 #include <atomic>
 #include <thread>
+#include "../utility/signal.hpp"
 #include "voice_renderer.hpp"
 using namespace std;
 struct RenderData {
@@ -15,8 +16,13 @@ struct RenderData {
 	int option_count;
 };
 
+typedef void(*OnRenderListProgress)(float*);
+typedef void(*OnRenderListEnd)(int*);
+typedef void(*OnRenderListComplete)(char*);
+
 class RenderList {
 private:
+
 	int index_;
 	vector<RenderData> list_;
 	vector<VoiceRenderer*> renderers_;
@@ -100,15 +106,36 @@ private:
 
 public:
 
+	Signal<float*> *on_tick_;
+	Signal<int*> *on_end_;
+	Signal<char*> *on_complete_;
+
 	explicit RenderList(int max_count = 1) {
 		render_thread_ = nullptr;
 		renderers_.reserve(max_count);
 		index_ = 0;
+		on_tick_ = new Signal<float*>();
+		on_end_ = new Signal<int*>();
+		on_complete_ = new Signal<char*>();
 		for (auto i = 0; i < max_count; i++) {
 			renderers_.emplace_back(new VoiceRenderer());
 		}
 	}
 
+	void SubscribeComplete(OnRenderListComplete handler) {
+		unique_lock<mutex> lck(render_thread_mutex_);
+		on_complete_->On(handler);
+	}
+
+	void SubscribeProgress(OnRenderListProgress handler) {
+		unique_lock<mutex> lck(render_thread_mutex_);
+		on_tick_->On(handler);
+	}
+
+	void SubscribeEnd(OnRenderListEnd handler) {
+		unique_lock<mutex> lck(render_thread_mutex_);
+		on_end_->On(handler);
+	}
 
 	void AddRenderData(const char* source, const char* dest, int effect_id, float* options, int option_count, 
 				int* segments = nullptr, int segment_count = 0) {

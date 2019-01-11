@@ -41,6 +41,8 @@ namespace vocaloid {
 
 			virtual void Start() {}
 
+			virtual void Resume() {}
+
 			virtual void Stop(){}
 
 			void CrossFade(float v) {

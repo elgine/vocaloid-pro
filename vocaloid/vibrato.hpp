@@ -51,12 +51,16 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
-				osc_->Dispose();
-				delete osc_;
-				osc_ = nullptr;
-				delay_->Dispose();
-				delete delay_;
-				delay_ = nullptr;
+				if (osc_) {
+					osc_->Dispose();
+					delete osc_;
+					osc_ = nullptr;
+				}
+				if (delay_) {
+					delay_->Dispose();
+					delete delay_;
+					delay_ = nullptr;
+				}
 				Composite::Dispose();
 			}
 
@@ -74,6 +78,10 @@ namespace vocaloid {
 
 			void Start() override {
 				osc_->Start();
+			}
+
+			void Resume() override {
+				osc_->Resume();
 			}
 
 			void SetOptions(VibratoOptions options) {

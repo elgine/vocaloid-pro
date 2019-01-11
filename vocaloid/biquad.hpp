@@ -240,6 +240,18 @@ namespace vocaloid {
 		public:
 			explicit Biquad(float sample_rate) {
 				sample_rate_ = sample_rate;
+				freq_ = 0;
+				b0_ = 0;
+				b1_ = 0;
+				b2_ = 0;
+				a1_ = 0;
+				a2_ = 0;
+				Q_ = 0;
+				gain_ = 0;
+				x1_ = 0;
+				y1_ = 0;
+				x2_ = 0;
+				y2_ = 0;
 			}
 
 			void SetType(BIQUAD_TYPE type) {

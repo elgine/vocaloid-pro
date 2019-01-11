@@ -135,27 +135,20 @@ namespace vocaloid {
 								}
 							}
 						}
-						if (all_input_eof) {
+						/*if (all_input_eof) {
 							destination_->Flush();
 							source_eof_ = all_input_eof;
-						}
+						}*/
 					}
-					if (!all_input_eof) {
-						processed_frames_ += cur_processed_frames;
-					}
-					on_tick_->Emit(processed_frames_);
+					processed_frames_ += cur_processed_frames;
 					this_thread::sleep_for(chrono::milliseconds(sleep));
 					if (source_eof_) {
-						on_end_->Emit(0);
 						if (stop_eof_)break;
 					}
 				}
 			}
 
 		public:
-
-			Signal<int64_t> *on_tick_;
-			Signal<int> *on_end_;
 
 			atomic<bool> stop_eof_;
 
@@ -164,8 +157,6 @@ namespace vocaloid {
 				state_ = AudioContextState::STOPPED;
 				frame_size_ = DEFAULT_FRAME_SIZE;
 				audio_render_thread_ = nullptr;
-				on_tick_ = new Signal<int64_t>();
-				on_end_ = new Signal<int>();
 				stop_eof_ = false;
 				source_eof_ = true;
 			}
