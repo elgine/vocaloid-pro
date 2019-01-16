@@ -69,12 +69,6 @@ namespace vocaloid {
 			explicit PhaseVocoder():stretch_(1.0f),
 									pitch_(1.0f),
 									tempo_(1.0f), OverlapAdd(){
-				input_queue_ = new Buffer<float>();
-				output_queue_ = new Buffer<float>();
-				out_ = new Buffer<float>();
-				frame_ = nullptr;
-				win_ = nullptr;
-				buffer_ = nullptr;
 				last_phase_ = nullptr;
 				new_phase_ = nullptr;
 				omega_ = nullptr;
@@ -139,20 +133,19 @@ namespace vocaloid {
 				ShiftWindow(frame_, frame_size_);
 			}
 
+			void Process(float *in, int64_t len) override {
+				OverlapAdd::Process(in, len);
+			}
+
 			int64_t Process(float *in, int64_t len, float *out) {
 				OverlapAdd::Process(in, len);
-				//return PopFrame(out, len);
 				return OverlapAdd::Pop(out, len);
 			}
 
-			/*int64_t PopFrame(float *frame, int64_t len) {
-				auto frame_len = int64_t(len * stretch_);
-				out_->Alloc(frame_len);
-				out_->SetSize(frame_len);
-				frame_len = OverlapAdd::Pop(out_, frame_len);
-				if (frame_len <= 0)return 0;
-				return Resample(out_->Data(), frame_len, len, frame);
-			}*/
+			int64_t Flush(float *out, int64_t len) {
+				OverlapAdd::Process();
+				return OverlapAdd::Pop(out, len, true);
+			}
 
 			void SetPitch(float v) {
 				if (pitch_ == v)return;

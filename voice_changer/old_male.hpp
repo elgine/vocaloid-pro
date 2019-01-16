@@ -2,9 +2,11 @@
 #include "../vocaloid/Jungle.hpp"
 #include "../vocaloid/equalizer_3_band.hpp"
 #include "../vocaloid/vibrato.hpp"
+#include "../vocaloid/phase_vocoder_node.hpp"
 #include "effect.hpp"
 #include "effects.h"
 using namespace vocaloid::composite;
+using namespace vocaloid::node;
 namespace effect {
 	
 	class OldMale : public Effect {
@@ -47,6 +49,7 @@ namespace effect {
 			jungle_ = new PhaseVocoderNode(ctx);
 			jungle_->pitch_ = PITCH_DEFAULT;
 			jungle_->tempo_ = TEMPO_DEFAULT;
+			jungle_->watched_ = true;
 			vibrato_ = new Vibrato(ctx);
 			vibrato_->SetOptions({
 				VIBRATO_DELAY_DEFAULT,
@@ -99,6 +102,10 @@ namespace effect {
 			if (option_count > 6) {
 				SetGain(options[6]);
 			}
+		}
+
+		virtual int64_t CalculateDuration(int64_t origin) {
+			return origin * jungle_->tempo_ + vibrato_->Delay() * 1000;
 		}
 
 		AudioNode *Input() {

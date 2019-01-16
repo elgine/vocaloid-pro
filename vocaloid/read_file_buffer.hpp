@@ -21,7 +21,8 @@ namespace vocaloid {
 #endif
 			auto ret = reader->Open(source);
 			if (ret < 0)return ret;
-			auto f = reader->Format();
+			AudioFormat f = {};
+			reader->GetFormat(&f);
 			format->sample_rate = f.sample_rate;
 			format->channels = f.channels;
 			format->bits = f.bits;

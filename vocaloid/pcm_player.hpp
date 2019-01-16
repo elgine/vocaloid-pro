@@ -151,8 +151,10 @@ namespace vocaloid {
 			}
 
 			int Flush() override {
-				if (buf_offset_ > 0 && Play(caching_buf_, buf_offset_) < 0) {
-					return -1;
+				if (buf_offset_ > 0) {
+					auto ret = Play(caching_buf_, buf_offset_);
+					buf_offset_ = 0;
+					return ret;
 				}
 				return 0;
 			}

@@ -21,9 +21,9 @@ extern "C" {
 		GetPlayer()->SubscribeTick(tick);
 	}
 
-	/*DLLEXPORT void SubscribePlayerEnd(OnPlayerEnd end) {
+	DLLEXPORT void SubscribePlayerEnd(OnPlayerEnd end) {
 		GetPlayer()->SubscribeEnd(end);
-	}*/
+	}
 
 	DLLEXPORT void SubscribeRenderListProgress(OnRenderListProgress p) {
 		GetRenderList()->SubscribeProgress(p);
@@ -45,12 +45,21 @@ extern "C" {
 		return DisposeAllTempResources();
 	}
 
-	DLLEXPORT int Seek(int64_t timestamp) {
+	DLLEXPORT int Seek(int timestamp) {
 		return GetPlayer()->Seek(timestamp);
 	}
 
 	DLLEXPORT void SetLoopPreview(bool v) {
 		GetPlayer()->Loop(v);
+	}
+
+	DLLEXPORT void GetSourceInfo(int* arr) {
+		auto f = GetPlayer()->SourceFormat();
+		arr[0] = f->sample_rate;
+		arr[1] = f->bits;
+		arr[2] = f->channels;
+		arr[3] = f->block_align;
+		arr[4] = GetPlayer()->SourceDuration();
 	}
 
 	DLLEXPORT int SetSegmentsPreview(int* segs, int count) {
@@ -69,8 +78,8 @@ extern "C" {
 		return GetPlayer()->SetOptions(options, count);
 	}
 
-	DLLEXPORT int StartPreview() {
-		return GetPlayer()->Start();
+	DLLEXPORT int StartPreview(bool v) {
+		return GetPlayer()->Start(v);
 	}
 
 	DLLEXPORT int StopPreview() {

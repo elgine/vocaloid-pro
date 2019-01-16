@@ -77,7 +77,7 @@ namespace vocaloid {
 				gain_->Clear();
 			}
 
-			int64_t ProcessFrame() override {
+			int64_t ProcessFrame(bool flush = false) override {
 				auto frequency_buffer = frequency_->GetResult()->Channel(0)->Data();
 				auto gain_buffer = gain_->GetResult()->Channel(0)->Data();
 				auto Q_buffer = Q_->GetResult()->Channel(0)->Data();

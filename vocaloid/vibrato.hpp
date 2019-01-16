@@ -89,6 +89,10 @@ namespace vocaloid {
 				gain_->gain_->value_ = options.vibrato_depth;
 				osc_->SetFrequency(options.vibrato_speed);
 			}
+
+			float Delay() {
+				return delay_->delay_time_->value_;
+			}
 		};
 
 		float Vibrato::VIBRATO_DELAY_DEFAULT = 3.5f;

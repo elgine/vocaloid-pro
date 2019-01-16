@@ -29,7 +29,7 @@ namespace vocaloid {
 				offset_ += len;
 			}
 
-			int64_t ProcessFrame() {
+			int64_t ProcessFrame(bool flush = false) override {
 				if (TimelineEmpty() && summing_buffer_->silence_) {
 					result_buffer_->Fill(value_);
 				}

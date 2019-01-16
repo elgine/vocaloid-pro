@@ -45,6 +45,10 @@ namespace vocaloid {
 				return ret;
 			}
 
+			int64_t Flush() override {
+				return player_->Flush();
+			}
+
 			void Clear() override {
 				player_->Clear();
 			}
@@ -53,12 +57,12 @@ namespace vocaloid {
 				return player_->Played();
 			}
 
-			int64_t ProcessFrame() override {
+			int64_t ProcessFrame(bool flush = false) override {
 				if (player_ == nullptr || summing_buffer_->silence_)return 0;
 				int64_t size = 0;
 				summing_buffer_->ToByteArray(BITS_PER_SEC, bytes_->Data(), size);
 				player_->Push(bytes_->Data(), size);
-				return size;
+				return summing_buffer_->Size();
 			}
 		};
 	}

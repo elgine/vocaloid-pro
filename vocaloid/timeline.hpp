@@ -43,8 +43,9 @@ namespace vocaloid {
 				return SUCCEED;
 			}
 
-			int Seek(int64_t bytes) {
+			int SeekSegmentIndex(int64_t bytes) {
 				int64_t index = -1;
+				if (segments_.size() <= 0)return index;
 				if (bytes < segments_[cur_index_].start || bytes >= segments_[cur_index_].end) {
 					int64_t start = 0, end = segments_.size() - 1, middle = 0;
 					if (end <= 0)return -1;

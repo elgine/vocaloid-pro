@@ -39,6 +39,10 @@ namespace effect {
 			return id_;
 		}
 
+		virtual int64_t CalculateDuration(int64_t origin) {
+			return origin;
+		}
+		
 		virtual AudioNode* Input() {
 			return gain_;
 		}

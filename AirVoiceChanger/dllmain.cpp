@@ -25,15 +25,21 @@ const char *dependencies[dependency_count] = {
 	"VoiceChanger.dll"
 };
 
+struct TickData {
+	int64_t processed_time;
+	int64_t played_time;
+};
+
 bool inited = false;
 int(*set_temp_path)(const char*);
+void(*get_source_info)(int*);
 int(*dispose_temps)();
 int(*set_effect)(int);
 int(*set_effect_options)(float*, int);
 int(*set_segments)(int*, int);
 void(*set_loop)(bool);
 int(*open_preview)(const char*);
-int(*start_preview)();
+int(*start_preview)(bool);
 int(*stop_preview)();
 int(*seek)(int);
 int(*render)(const char**, const char**, int*,float*, int*, int*, int*, int);
@@ -43,32 +49,41 @@ int(*cancel_render)(const char*);
 int(*cancel_render_all)();
 int(*force_render_exit)();
 
-struct TickData {
-	int64_t processed_time;
-	int64_t played_time;
-};
-typedef void(*OnPlayerTick)(TickData);
+
+typedef void(*OnPlayerTick)(int);
+typedef void(*OnPlayerEnd)(int);
 typedef void(*OnRenderListProgress)(float*);
 typedef void(*OnRenderListEnd)(int*);
 typedef void(*OnRenderListComplete)(char*);
 
 void(*subscribe_player_tick)(OnPlayerTick);
+void(*subscribe_player_end)(OnPlayerEnd);
 
 void(*subscribe_render_list_progress)(OnRenderListProgress);
 void(*subscribe_render_list_complete)(OnRenderListComplete);
 void(*subscribe_render_list_end)(OnRenderListEnd);
 
 #define PLAYER_TICK_CODE "playerTick"
+#define PLAYER_END_CODE "playerEnd"
 #define RENDER_LIST_PROGRESS_CODE "renderListProgress"
 #define RENDER_LIST_COMPLETE_CODE "renderListComplete"
 #define RENDER_LIST_END_CODE "renderListEnd"
 
-void SendPlayerTickMsg(TickData data) {
+void SendPlayerTickMsg(int timestamp) {
 	if (fre_context != nullptr) {
 		stringstream ss;
-		ss << "{\"processed\": " << data.processed_time << ", " << "\"played\": " << data.played_time << "}";
+		ss << "{\"played\": " << timestamp << "}";
 		const uint8_t* s = (const uint8_t*)ss.str().c_str();
 		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)PLAYER_TICK_CODE, (const uint8_t*)ss.str().c_str());
+	}
+}
+
+void SendPlayerEndMsg(int flag) {
+	if (fre_context != nullptr) {
+		stringstream ss;
+		ss << "{\"flag\": " << flag << "}";
+		const uint8_t* s = (const uint8_t*)ss.str().c_str();
+		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)PLAYER_END_CODE, (const uint8_t*)ss.str().c_str());
 	}
 }
 
@@ -134,6 +149,9 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			subscribe_player_tick = (void(*)(OnPlayerTick))GetProcAddress(handler, "SubscribePlayerTick");
 			if (subscribe_player_tick == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 
+			subscribe_player_end = (void(*)(OnPlayerEnd))GetProcAddress(handler, "SubscribePlayerEnd");
+			if (subscribe_player_end == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+
 			subscribe_render_list_progress = (void(*)(OnRenderListProgress))GetProcAddress(handler, "SubscribeRenderListProgress");
 			if (subscribe_render_list_progress == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 
@@ -142,7 +160,8 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 
 			subscribe_render_list_end = (void(*)(OnRenderListEnd))GetProcAddress(handler, "SubscribeRenderListEnd");
 			if (subscribe_render_list_end == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-
+			get_source_info = (void(*)(int*))GetProcAddress(handler, "GetSourceInfo");
+			if (get_source_info == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			set_temp_path = (int(*)(const char*))GetProcAddress(handler, "SetExtractTempPath");
 			if (set_temp_path == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			dispose_temps = (int(*)(void))GetProcAddress(handler, "DisposeAllTemps");
@@ -159,7 +178,7 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			if (open_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			set_effect_options = (int(*)(float*, int))GetProcAddress(handler, "SetEffectOptionsPreview");
 			if (set_effect_options == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-			start_preview = (int(*)())GetProcAddress(handler, "StartPreview");
+			start_preview = (int(*)(bool))GetProcAddress(handler, "StartPreview");
 			if (start_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			stop_preview = (int(*)())GetProcAddress(handler, "StopPreview");
 			if (stop_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
@@ -178,6 +197,7 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 
 			// Subscribe event
 			subscribe_player_tick(SendPlayerTickMsg);
+			subscribe_player_end(SendPlayerEndMsg);
 			subscribe_render_list_progress(SendRenderListProgressMsg);
 			subscribe_render_list_complete(SendRenderListCompleteMsg);
 			subscribe_render_list_end(SendRenderListEndMsg);
@@ -186,6 +206,19 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			return FromInt(LOAD_LIBRARY_FAILED);
 	}
 	return FromInt(0);
+}
+
+FREObject GetSourceInfo(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+	static int arr[5] = {0, 0, 0, 0, 0};
+	arr[0] = arr[1] = arr[2] = arr[3] = arr[4] = 0;
+	get_source_info(arr);
+	stringstream ss;
+	ss << "{\"sampleRate\": " << arr[0]
+	   << ",\"bits\": " << arr[1] 
+	   << ",\"channels\": " << arr[2]
+	   << ",\"blockAlign\": " << arr[3]
+	   << ",\"duration\": " << arr[4] << "}";
+	return FromString(ss.str().c_str());
 }
 
 FREObject SetExtractTempPath(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
@@ -200,13 +233,14 @@ FREObject DisposeTemps(FREContext ctx, void* funcData, uint32_t argc, FREObject 
 FREObject SetEffectPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 	if (argc < 1)return FromInt(MISS_PARAM);
 	if (!inited)return FromInt(HAS_NOT_INITED);
-	FromInt(set_effect(ToInt(argv[0])));
+	return FromInt(set_effect(ToInt(argv[0])));
 }
 
 FREObject SetLoopPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 	if (argc < 1)return FromInt(MISS_PARAM);
 	if (!inited)return FromInt(HAS_NOT_INITED);
 	set_loop(ToBool(argv[0]));
+	return FromInt(0);
 }
 
 FREObject SetSegmentsPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
@@ -237,7 +271,7 @@ FREObject SetEffectOptionsPreview(FREContext ctx, void* funcData, uint32_t argc,
 
 FREObject StartPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 	if (!inited)return FromInt(HAS_NOT_INITED);
-	return FromInt(start_preview());
+	return FromInt(start_preview(ToBool(argv[0])));
 }
 
 FREObject StopPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
@@ -248,7 +282,7 @@ FREObject StopPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject a
 FREObject Seek(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 	if (argc < 1)return FromInt(MISS_PARAM);
 	if (!inited)return FromInt(HAS_NOT_INITED);
-	return FromInt(seek((int64_t)ToInt(argv[0])));
+	return FromInt(seek(ToInt(argv[0])));
 }
 
 FREObject Render(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
@@ -306,8 +340,8 @@ void ContextInitializer(
 	FREContext				   ctx,
 	uint32_t				 * numFunctionsToSet,
 	const FRENamedFunction	** functionsToSet) {
-	int fn_count = 17;
 	static FRENamedFunction fns[] = {
+		{ (const uint8_t*) "getSourceInfo", NULL, &GetSourceInfo },
 		{ (const uint8_t*) "initialize", NULL, &Initialize },
 		{ (const uint8_t*) "setTempPath", NULL, &SetExtractTempPath },
 		{ (const uint8_t*) "disposeTemps", NULL, &DisposeTemps },
@@ -326,7 +360,7 @@ void ContextInitializer(
 		{ (const uint8_t*) "cancelRenderAll", NULL, &CancelRenderAll },
 		{ (const uint8_t*) "forceExitRender", NULL, &ForceExitRender }
 	};
-	*numFunctionsToSet = fn_count;
+	*numFunctionsToSet = sizeof(fns) / sizeof(FRENamedFunction);
 	*functionsToSet = fns;
 	fre_context = ctx;
 }

@@ -99,7 +99,6 @@ namespace vocaloid {
 		class WAVReader : public AudioFileReader {
 		private:
 			WAV_HEADER header_;
-			AudioFormat format_;
 			ifstream in_;
 			int64_t pos_;
 			bool has_extra_data_;
@@ -145,10 +144,6 @@ namespace vocaloid {
 				in_.read((char*)&header_.block_align, sizeof(int16_t));
 				in_.read((char*)&header_.bits_per_sec, sizeof(int16_t));
 				in_.read((char*)&header_.data, 4);
-				format_.sample_rate = header_.samples_per_sec;
-				format_.bits = header_.bits_per_sec;
-				format_.channels = header_.channels;
-				format_.block_align = format_.channels * format_.bits / 8;
 				if (strcmp(header_.data, "data") != 0) {
 					has_extra_data_ = true;
 					in_.read((char*)&header_.extra_size, sizeof(int32_t));
@@ -224,8 +219,11 @@ namespace vocaloid {
 				return header_;
 			}
 
-			AudioFormat Format() override {
-				return format_;
+			void GetFormat(AudioFormat *format) override {
+				format->sample_rate = header_.samples_per_sec;
+				format->bits = header_.bits_per_sec;
+				format->channels = header_.channels;
+				format->block_align = format->channels * format->bits / 8;
 			}
 		};
 	}

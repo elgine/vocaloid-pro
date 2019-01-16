@@ -1,9 +1,12 @@
 #pragma once
 #include "../vocaloid/vibrato.hpp"
 #include "../vocaloid/jungle.hpp"
-#include "../vocaloid/equalizer_3_band.hpp"
+#include "../vocaloid/phase_vocoder_node.hpp"
+#include "../vocaloid/biquad_node.hpp"
 #include "effect.hpp"
 #include "effects.h"
+using namespace vocaloid::composite;
+using namespace vocaloid::node;
 namespace effect {
 	
 	class OldFemale : public Effect {
@@ -40,9 +43,10 @@ namespace effect {
 		explicit OldFemale(BaseAudioContext *ctx) : Effect(ctx) {
 			id_ = Effects::OLD_FEMALE;
 			highpass_ = new BiquadNode(ctx);
-			highpass_->type_ = BIQUAD_TYPE::HIGH_PASS;
+			highpass_->type_ = dsp::BIQUAD_TYPE::HIGH_PASS;
 			highpass_->frequency_->value_ = HIGHPASS_FREQ_DEFAULT;
 			jungle_ = new PhaseVocoderNode(ctx);
+			jungle_->watched_ = true;
 			jungle_->pitch_ = PITCH_DEFAULT;
 			jungle_->tempo_ = TEMPO_DEFAULT;
 			vibrato_ = new composite::Vibrato(ctx);
@@ -54,6 +58,10 @@ namespace effect {
 			ctx->Connect(jungle_, highpass_);
 			ctx->Connect(highpass_, vibrato_->input_);
 			ctx->Connect(vibrato_->output_, gain_);
+		}
+
+		virtual int64_t CalculateDuration(int64_t origin) {
+			return origin * jungle_->tempo_ + vibrato_->Delay() * 1000;
 		}
 
 		void Dispose() override {

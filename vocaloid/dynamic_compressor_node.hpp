@@ -364,7 +364,7 @@ namespace vocaloid {
 				m_max_attack_compression_diff_db_ = -1;
 			}
 
-			int64_t ProcessFrame() override {
+			int64_t ProcessFrame(bool flush = false) override {
 				float filter_stage_gain = filter_stage_gain_;
 				float filter_stage_ratio = filter_stage_ratio_;
 				float anchor = filter_anchor_;

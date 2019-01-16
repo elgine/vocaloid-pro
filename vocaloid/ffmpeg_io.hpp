@@ -273,6 +273,7 @@ namespace vocaloid {
 				int16_t ret = 0;
 				char* err_msg = new char[512];
 				av_register_all();
+				if (ctx_ != nullptr)Dispose();
 				ctx_ = avformat_alloc_context();
 				ret = avformat_open_input(&ctx_, input_path, NULL, NULL);
 				if (ret < 0) {
@@ -401,19 +402,33 @@ namespace vocaloid {
 				return buffer_size_ >= len;
 			}
 
+			int64_t FramesToPTS(int64_t frames) {
+				if (!ctx_)return 0;
+				auto stream = ctx_->streams[a_stream_index_];
+				return float(frames) / codec_ctx_->sample_rate / av_q2d(stream->time_base);
+			}
+
+			int64_t PTSToFrames(int64_t pts) {
+				if (!ctx_)return 0;
+				auto stream = ctx_->streams[a_stream_index_];
+				return pts * av_q2d(stream->time_base) * codec_ctx_->sample_rate;
+			}
+
 			int64_t Seek(int64_t frame_offset) override {
 				{
 					unique_lock<mutex> lck(decode_mutex_);
+					auto pts = FramesToPTS(frame_offset);
 					if (ctx_ != nullptr) {
-						av_seek_frame(ctx_, a_stream_index_, frame_offset, AVSEEK_FLAG_BACKWARD);
+						auto ret = av_seek_frame(ctx_, a_stream_index_, pts, AVSEEK_FLAG_BACKWARD);
 						avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
 						FlushConvertor();
 						is_end_ = false;
 						buffer_size_ = 0;
+						can_decode_.notify_all();
 
 						// Read frame util it's timestamp reach time or EOF
 						while (true) {
-							auto ret = av_read_frame(ctx_, packet_);
+							ret = av_read_frame(ctx_, packet_);
 							if (ret == AVERROR_EOF) {
 								packet_->data = nullptr;
 								packet_->size = 0;
@@ -422,7 +437,7 @@ namespace vocaloid {
 							}
 							else {
 								if (packet_->duration <= 0)break;
-								if (packet_->pts >= frame_offset) {
+								if (packet_->pts >= pts) {
 									auto decoded = 0, got_frame = 0;
 									while (packet_->size > 0) {
 										decoded = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet_);
@@ -444,30 +459,26 @@ namespace vocaloid {
 											break;
 										}
 									}
-									frame_offset = packet_->pts;
+									frame_offset = PTSToFrames(packet_->pts + packet_->duration);
 									break;
 								}
 							}
 							av_packet_unref(packet_);
 						}
 					}
+					else
+						return HAVE_NOT_DEFINED_SOURCE;
 				}
 				return frame_offset;
 			}
 
-			AudioFormat Format() override {
+			void GetFormat(AudioFormat *format) override {
 				unique_lock<mutex> lck(decode_mutex_);
-				if (decode_frame_ == nullptr)return{ 0, 0, 0, 0 };
-				int16_t bits = 16;
-				int32_t sample_rate = decode_frame_->sample_rate;
-				int16_t channels = decode_frame_->channels;
-				int16_t block_align = bits / 8 * channels;
-				return{
-					sample_rate,
-					bits,
-					channels,
-					block_align
-				};
+				if (decode_frame_ == nullptr)return;
+				format->bits = 16;
+				format->sample_rate = decode_frame_->sample_rate;
+				format->channels = decode_frame_->channels;
+				format->block_align = format->bits / 8 * format->channels;
 			}
 		};
 

@@ -29,7 +29,7 @@ namespace vocaloid {
 				return SUCCEED;
 			}
 
-			int64_t ProcessFrame() override {
+			int64_t ProcessFrame(bool flush = false) override {
 				auto gain_result = gain_->GetResult()->Channel(0)->Data();
 				for (auto i = 0; i < frame_size_; i++) {
 					auto value = gain_result[i];

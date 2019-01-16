@@ -37,9 +37,11 @@ namespace vocaloid {
 			AudioChannel *summing_buffer_;
 			AudioChannel *result_buffer_;
 
+
 		public:
 
 			bool enable_;
+			bool watched_;
 
 			explicit AudioNode(BaseAudioContext *ctx, AudioNodeType type = AudioNodeType::NORMAL,
 				bool can_be_connected = true,
@@ -53,6 +55,7 @@ namespace vocaloid {
 				sample_rate_ = 0;
 				channels_ = 2;
 				enable_ = true;
+				watched_ = false;
 				summing_buffer_ = new AudioChannel(channels_, frame_size_);
 				result_buffer_ = new AudioChannel(channels_, frame_size_);
 			}
@@ -88,6 +91,7 @@ namespace vocaloid {
 			}
 
 			virtual void PullBuffers() {
+				summing_buffer_->SetSize(frame_size_);
 				summing_buffer_->Zero();
 				for (auto input : inputs_) {
 					if (input->type_ != AudioNodeType::PARAM) {
@@ -119,7 +123,7 @@ namespace vocaloid {
 				result_buffer_->Copy(summing_buffer_);
 			}
 
-			virtual int64_t ProcessFrame() { return 0; }
+			virtual int64_t ProcessFrame(bool flush = false) { return 0; }
 
 			virtual void Stop() {}
 
@@ -139,10 +143,11 @@ namespace vocaloid {
 				context_->RemoveNode(this);
 			}
 
-			virtual int64_t Process() {
+			virtual int64_t Process(bool flush = false) {
 				PullBuffers();
-				if (enable_ && (type_ != AudioNodeType::NORMAL || (type_ == AudioNodeType::NORMAL && !summing_buffer_->silence_)))
-					return ProcessFrame();
+				if (!enable_)return 0;
+				if(type_ != AudioNodeType::NORMAL || (type_ == AudioNodeType::NORMAL && !summing_buffer_->silence_))
+					return ProcessFrame(flush);	
 				return 0;
 			}
 

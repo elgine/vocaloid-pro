@@ -20,7 +20,7 @@ namespace vocaloid {
 			virtual bool End() = 0;
 			virtual void Flush(char* data, int64_t& length) = 0;
 			virtual int64_t Seek(int64_t pos) = 0;
-			virtual AudioFormat Format() = 0;
+			virtual void GetFormat(AudioFormat*) = 0;
 			virtual int64_t FileLength() = 0;
 			virtual int64_t Duration() = 0;
 			virtual bool CapableToRead(int64_t len) = 0;

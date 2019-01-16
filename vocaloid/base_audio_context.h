@@ -25,8 +25,8 @@ namespace vocaloid {
 			virtual void Disconnect(int64_t from, int64_t to) = 0;
 			virtual AudioNode* FindNode(int64_t v_id) = 0;
 			virtual set<int64_t> FindConnection(int64_t v_id) = 0;
-			virtual void Lock() = 0;
-			virtual void Unlock() = 0;
+			//virtual void Lock() = 0;
+			//virtual void Unlock() = 0;
 			virtual int Prepare() = 0;
 			virtual void Start() = 0;
 			virtual int Stop() = 0;

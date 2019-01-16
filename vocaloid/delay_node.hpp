@@ -19,6 +19,7 @@ namespace vocaloid {
 				delay_time_->value_ = delay_time;
 				max_delay_size_ = 0;
 				write_index_ = 0;
+				watched_ = true;
 				buffers_ = new vector<float>[8];
 				context_->Connect(delay_time_, this);
 			}
@@ -42,7 +43,13 @@ namespace vocaloid {
 				return SUCCEED;
 			}
 
-			int64_t ProcessFrame() override {
+			//int64_t Process(bool flush = false)override {
+			//	PullBuffers();
+			//	if (!enable_)return 0;
+			//	if()
+			//}
+
+			int64_t ProcessFrame(bool flush = false) override {
 				auto delay_buffer = delay_time_->GetResult()->Channel(0)->Data();
 				for (auto i = 0; i < frame_size_; i++) {
 					auto delay_time = delay_buffer[i];
@@ -62,8 +69,14 @@ namespace vocaloid {
 						auto sample2 = buffers_[j][read_index2];
 						result_buffer_->Channel(j)->Data()[i] = (1.0f - factor) * sample1 + factor * sample2;
 					}
+
+					/*for (auto j = 0; j < channels_; j++) {
+						auto input = summing_buffer_->Channel(j)->Data()[i];
+						buffers_[j][write_index_] = input;
+					}*/
 					write_index_ = (write_index_ + 1) % max_delay_size_;
 				}
+				result_buffer_->silence_ = false;
 				return frame_size_;
 			}
 

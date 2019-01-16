@@ -75,7 +75,7 @@ namespace vocaloid {
 				return SUCCEED;
 			}
 
-			int64_t ProcessFrame() override {
+			int64_t ProcessFrame(bool flush = false) override {
 				if (kernel_->Size() > 0) {
 					for (auto i = 0; i < channels_;i++) {
 						convolver_[i]->Process(summing_buffer_->Channel(i)->Data(), summing_buffer_->Size(), result_buffer_->Channel(i)->Data());

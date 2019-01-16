@@ -40,7 +40,7 @@ namespace vocaloid {
 				waveform_dirty_ = true;
 			}
 
-			int64_t ProcessFrame() override {
+			int64_t ProcessFrame(bool flush = false) override {
 				result_buffer_->silence_ = false;
 				if (waveform_dirty_) {
 					auto freq = abs(frequency_) * pow(2, detune_ / 1200.0f);

@@ -64,25 +64,35 @@ public:
 	}
 
 	void SetOptions(float* options, int option_count) {
-		ctx_->Lock();
-		if (effect_) {
-			effect_->SetOptions(options, option_count);
+		//ctx_->Lock();
+		{
+			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
+			if (effect_) {
+				effect_->SetOptions(options, option_count);
+			}
 		}
-		ctx_->Unlock();
+		//ctx_->Unlock();
 	}
 
 	int RenderAll() {
-		ctx_->Lock();
-		auto ret = source_reader_->Start();
-		ctx_->Unlock();
+		auto ret = SUCCEED;
+		//ctx_->Lock();
+		{
+			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
+			ret = source_reader_->Start();
+		}
+		//ctx_->Unlock();
 		return ret;
 	}
 
 	int RenderSegments(int *segments, int segment_count) {
 		auto ret = SUCCEED;
-		ctx_->Lock();
-		ret = source_reader_->StartWithSegments(segments, segment_count);
-		ctx_->Unlock();
+		//ctx_->Lock();
+		{
+			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
+			ret = source_reader_->StartWithSegments(segments, segment_count);
+		}
+		//ctx_->Unlock();
 		return ret;
 	}
 

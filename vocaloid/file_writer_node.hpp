@@ -58,7 +58,7 @@ namespace vocaloid {
 				return processed_;
 			}
 
-			int64_t ProcessFrame() override {
+			int64_t ProcessFrame(bool flush = false) override {
 				int64_t size = summing_buffer_->Size();
 				int64_t byte_len = size * summing_buffer_->Channels() * BITS_PER_SEC / 8;
 				buf_->Alloc(byte_len);

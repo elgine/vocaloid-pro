@@ -23,7 +23,7 @@ namespace vocaloid {
 
 		public:
 
-			OverlapAdd():hop_ana_(0), hop_syn_(0){
+			explicit OverlapAdd():hop_ana_(0), hop_syn_(0){
 				input_queue_ = new Buffer<float>();
 				output_queue_ = new Buffer<float>();
 				out_ = new Buffer<float>();
@@ -60,14 +60,18 @@ namespace vocaloid {
 			// Apply change to frame array
 			virtual void Synthesis() = 0;
 
-			void Process(float *in, int64_t len) {
+			virtual void Process(float *in, int64_t len) {
 				// Add to input data queue
 				input_queue_->Add(in, len);
+				Process();
+			}
+
+			virtual void Process() {
 				int64_t offset = 0;
 				auto data = input_queue_->Data();
 				auto input_buffer_size = input_queue_->Size();
 
-				while (input_buffer_size > offset + frame_size_) {
+				while (input_buffer_size >= offset + frame_size_) {
 					for (int i = 0; i < frame_size_; i++) {
 						frame_[i] = data[offset + i] * win_[i];
 					}
@@ -91,16 +95,32 @@ namespace vocaloid {
 				input_queue_->Splice(offset);
 			}
 
-			int64_t Pop(Buffer<float> *output, int64_t len, bool flush = false) {
+			virtual int64_t Pop(Buffer<float> *output, int64_t len, bool flush = false) {
 				return Pop(output->Data(), len, flush);
 			}
 
-			int64_t Pop(float *output, int64_t len, bool flush = false) {
+			virtual int64_t Pop(float *output, int64_t len, bool flush = false) {
 				int64_t out_buffer_len = output_queue_->Size();
 				if (out_buffer_len < len && !flush)return 0;
 				auto pop_size = min(out_buffer_len, len);
 				output_queue_->Pop(output, pop_size);
 				return pop_size;
+			}
+
+			int64_t InputLeft() {
+				return input_queue_->Size();
+			}
+
+			int64_t HopSizeAna() {
+				return hop_ana_;
+			}
+
+			int64_t HopSizeSyn() {
+				return hop_syn_;
+			}
+
+			int64_t OutputLeft() {
+				return output_queue_->Size();
 			}
 
 			virtual void Dispose() {

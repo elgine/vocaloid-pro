@@ -12,6 +12,8 @@ namespace vocaloid {
 			int64_t delay_frames_;
 
 			int64_t play_pos_;
+
+			int64_t processed_;
 		public:
 
 			explicit SourceNode(BaseAudioContext *ctx) :InputNode(ctx) {
@@ -21,6 +23,7 @@ namespace vocaloid {
 				delay_pos_ = 0;
 				delay_frames_ = 0;
 				play_pos_ = 0;
+				processed_ = 0;
 			}
 
 			void Dispose() override {
@@ -40,23 +43,30 @@ namespace vocaloid {
 				return 0;
 			}
 
-			void Seek(int64_t timestamp) {
-				auto frames = timestamp * 0.001f * sample_rate_;
-				auto seg_index = Timeline::Seek(frames);
+			int Seek(int64_t timestamp) {
+				auto frames = timestamp * 0.001f * SourceSampleRate();
+				auto seg_index = Timeline::SeekSegmentIndex(frames);
 				if (seg_index > -1) {
 					auto seg = Timeline::Segment(seg_index);
 					if (frames < seg.start || frames >= seg.end) {
 						Timeline::SetSegmentIndex(seg_index);
 					}
-					play_pos_ = SeekInternal(frames);
+					auto ret = SeekInternal(frames);
+					if (ret > -1)
+						play_pos_ = ret;
+					return int(ret);
 				}
+				return HAVE_NOT_SET_SEGMENTS;
 			}
 
 			virtual int64_t SeekInternal(int64_t frame_offset) { return frame_offset; }
 
-			int64_t ProcessFrame() override {
-				if (SegmentCount() <= 0)return EOF;
+			int64_t ProcessFrame(bool flush = false) override {
 				auto frame_count = 0;
+				if (SegmentCount() <= 0) {
+					eof_ = true;
+					goto end;
+				}
 				auto frame_index = 0;
 				auto silence_frames = 0;
 				auto frame_size = frame_size_;
@@ -70,8 +80,10 @@ namespace vocaloid {
 						silence_frames = frame_index = delay_frames_ - delay_pos_;
 					}
 					ready_to_play_ = true;
-					play_pos_ = Timeline::FirstSegment().start;
-					SeekInternal(play_pos_);
+					if (play_pos_ <= 0) {
+						play_pos_ = Timeline::FirstSegment().start;
+						SeekInternal(play_pos_);
+					}
 				}
 
 				int64_t byte_left = 0, count = 0;
@@ -79,7 +91,6 @@ namespace vocaloid {
 				TimeSegment last_segment = Timeline::LastSegment(), 
 					first_segment = Timeline::FirstSegment(), 
 					cur_segment = Segment(cur_segment_index);
-
 				while (frame_count < frame_size) {
 					if (Timeline::IsEnd() && play_pos_ >= last_segment.end) {
 						if (loop_) {
@@ -89,15 +100,20 @@ namespace vocaloid {
 							play_pos_ = SeekInternal(play_pos_);
 						}
 						else {
-							return EOF;
+							processed_ += frame_count;
+							eof_ = true;
+							goto end;
 						}
 					}
 					else {
-						cur_segment_index = Timeline::Seek(play_pos_);
+						cur_segment_index = Timeline::SeekSegmentIndex(play_pos_);
 						if (prev_segment_index != cur_segment_index || cur_segment_index == -1) {
 							play_pos_ -= cur_segment.end;
 							cur_segment_index = Timeline::Next();
-							if (cur_segment_index < 0)return EOF;
+							if (cur_segment_index < 0) {
+								eof_ = true;
+								goto end;
+							}
 							cur_segment = Timeline::Segment(cur_segment_index);
 							play_pos_ += cur_segment.start;
 							// Post update
@@ -111,19 +127,17 @@ namespace vocaloid {
 					count = min(frame_size - frame_count, byte_left);
 
 					count = GetBuffer(frame_index, count);
-					if (count <= 0) {
-						if (count == EOF) {
-							/*if (loop_) {
-								count = 0;
-								play_pos_ = cur_segment.end;
-							}else*/
-								return EOF;
-						}
-						break;
+					if (count < 0) {
+						count = cur_segment.end - play_pos_;
 					}
 					frame_count += count;
 					frame_index += count;
 					play_pos_ += count;
+				}
+				processed_ += frame_count;
+			end:
+				if (frame_count > 0) {
+					result_buffer_->silence_ = false;
 				}
 				return frame_count;
 			}
@@ -174,10 +188,15 @@ namespace vocaloid {
 				play_pos_ = 0;
 				delay_pos_ = 0;
 				ready_to_play_ = 0;
+				processed_ = 0;
 			}
 
 			int64_t Played() {
 				return play_pos_;
+			}
+
+			int64_t Processed() {
+				return processed_;
 			}
 
 			virtual int32_t SourceSampleRate() { return sample_rate_; }

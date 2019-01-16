@@ -25,7 +25,7 @@ namespace vocaloid {
 				curve_length_ = len;
 			}
 
-			int64_t ProcessFrame() override {
+			int64_t ProcessFrame(bool flush = false) override {
 				for (auto j = 0; j < frame_size_; j++) {
 					for (int16_t i = 0; i < channels_; i++) {
 						auto input = summing_buffer_->Channel(i)->Data()[j];

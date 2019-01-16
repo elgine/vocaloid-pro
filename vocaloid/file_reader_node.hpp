@@ -17,6 +17,7 @@ namespace vocaloid {
 		protected:
 			string path_;
 			io::AudioFileReader *reader_;
+			io::AudioFormat *format_;
 		private:
 			char* temp_buffer_;
 			float resample_ratio_;
@@ -31,6 +32,7 @@ namespace vocaloid {
 #else
 				reader_ = new io::WAVReader();
 #endif
+				format_ = new io::AudioFormat();
 				resample_ratio_ = 1.0;
 				bits_ = 16;
 				temp_buffer_ = nullptr;
@@ -58,7 +60,10 @@ namespace vocaloid {
 #endif
 				path_ = path;
 				reader_->Dispose();
-				return reader_->Open(path_.c_str());
+				auto ret = reader_->Open(path_.c_str());
+				if (ret < 0)return ret;
+				reader_->GetFormat(format_);
+				return ret;
 			}
 
 			void Clear() override {
@@ -68,15 +73,14 @@ namespace vocaloid {
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
 				SourceNode::Initialize(sample_rate, frame_size);
-				auto format = reader_->Format();
-				channels_ = format.channels;
-				bits_ = format.bits;
-				if (format.sample_rate == 0) {
+				channels_ = format_->channels;
+				bits_ = format_->bits;
+				if (format_->sample_rate == 0) {
 					return INVALIDATE_SOURCE;
 				}
 				DeleteArray(&temp_buffer_);
-				AllocArray(int64_t(float(frame_size_) / resample_ratio_) * format.block_align, &temp_buffer_);
-				summing_buffer_->sample_rate_ = format.sample_rate;
+				AllocArray(int64_t(float(frame_size_) / resample_ratio_) * format_->block_align, &temp_buffer_);
+				summing_buffer_->sample_rate_ = format_->sample_rate;
 				return SUCCEED;
 			}
 
@@ -93,7 +97,6 @@ namespace vocaloid {
 					}
 					return 0;
 				}
-				result_buffer_->silence_ = false;
 				if (resample_ratio_ != 1.0) {
 					summing_buffer_->FromByteArray(temp_buffer_, buf_size, bits_, channels_);
 					for (auto i = 0; i < channels_; i++) {
@@ -103,6 +106,10 @@ namespace vocaloid {
 				else
 					result_buffer_->FromByteArray(temp_buffer_, buf_size, bits_, channels_, offset);
 				return float(size) / frame_size;
+			}
+
+			io::AudioFormat* Format() {
+				return format_;
 			}
 
 			int64_t SeekInternal(int64_t frame_offset) override {
