@@ -17,13 +17,18 @@ enum VoicePlayerState {
 	PLAYER_STOP
 };
 
-typedef void(*OnPlayerTick)(int);
+struct PlayerTickData {
+	int timestamp;
+	int duration;
+};
+
+typedef void(*OnPlayerTick)(PlayerTickData);
 typedef void(*OnPlayerEnd)(int);
 
 class VoicePlayer {
 
 private:
-	Signal<int> *on_tick_;
+	Signal<PlayerTickData> *on_tick_;
 	Signal<int> *on_end_;
 
 	AudioContext *ctx_;
@@ -31,92 +36,71 @@ private:
 	FileReaderNode *source_reader_;
 	Effect* effect_;
 
-	/*thread *tick_thread_;
-	mutex tick_mutex_;*/
-	atomic<VoicePlayerState> state_;
 	string path_;
 
 	int64_t timestamp_;
+	int64_t duration_;
+	int64_t last_processed_player_;
 
-	/*atomic<int64_t> processed_, 
-					processed_dest_,
-					last_processed_dest_;*/
+	thread *tick_thread_;
+	mutex tick_mutex_;
+	atomic<VoicePlayerState> state_;
 
-	//void Tick() {
-	//	while (1) {
-	//		if (!Playing())break;
-	//		{
-	//			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
-	//			/*processed_ = source_reader_->Processed();
-	//			processed_dest_ = player_->Processed();*/
-	//		}
-	//		// on_tick_->Emit((int)CalcCorrectPlayTime(processed, processed_dest));
-	//		{
-	//			unique_lock<mutex> lck(tick_mutex_);
-	//			/*if (ctx_->State() == AudioContextState::STOPPED && 
-	//				(processed <= processed_dest)) {
-	//				{
-	//					unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
-	//					on_tick_->Emit(source_reader_->Duration());
-	//				}
-	//				on_end_->Emit(0);
-	//				break;
-	//			}*/
-	//		}
-	//		//last_processed_dest_ = processed_dest_;
-	//		this_thread::sleep_for(chrono::milliseconds(22));
-	//	}
-	//	{
-	//		unique_lock<mutex> lck(tick_mutex_);
-	//		state_ = VoicePlayerState::PLAYER_STOP;
-	//	}
-	//}
+	int64_t CalcCorrectPlayTime(int64_t delta) {
+		int64_t timestamp = 0;
+		auto source_sample_rate = source_reader_->SourceSampleRate();
+		auto resample_ratio = float(source_sample_rate) / ctx_->SampleRate();
+		// 当前播放片段
+		auto seg_index = source_reader_->Index();
+		auto seg = source_reader_->Segment(seg_index);
+		// 期望的播放位置
+		auto pos = source_reader_->Played();
+		// 递归，若当前播放片段的开始偏移大于期望，则
+		// 证明真实的播放位置应该在当前片段之前...
+		while (delta > 0 && seg.start > pos - delta) {
+			// 去掉当前片段相应的偏移量
+			delta -= pos - seg.start;
+			if (seg_index - 1 < 0) {
+				seg_index += source_reader_->SegmentCount();
+			}
+			seg = source_reader_->Segment(--seg_index);
+			pos = seg.end;
+		}
+		pos -= delta;
+		timestamp = FramesToMsec(source_sample_rate, pos);
+		return timestamp;
+	}
 
-	//int64_t CalcCorrectPlayTime(int64_t processed, int64_t processed_dest) {
-	//	int64_t timestamp = 0;
-	//	{
-	//		unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
-	//		auto source_sample_rate = source_reader_->SourceSampleRate();
-	//		auto resample_ratio = float(source_sample_rate) / ctx_->SampleRate();
-	//		processed *= resample_ratio;
-	//		processed_dest *= resample_ratio;
-	//		// 计算出“已处理”和“已播放”的差值
-	//		auto delta = processed - processed_dest;
-	//		// 当前播放片段
-	//		auto seg_index = source_reader_->Index();
-	//		auto seg = source_reader_->Segment(seg_index);
-	//		// 期望的播放位置
-	//		auto pos = source_reader_->Played();
-	//		// 递归，若当前播放片段的开始偏移大于期望，则
-	//		// 证明真实的播放位置应该在当前片段之前...
-	//		while (delta > 0 && seg.start > pos - delta) {
-	//			// 去掉当前片段相应的偏移量
-	//			delta -= pos - seg.start;
-	//			if (seg_index - 1 < 0) {
-	//				delta = 0;
-	//				break;
-	//			}
-	//			seg = source_reader_->Segment(--seg_index);
-	//			pos = seg.end;
-	//		}
-	//		pos -= delta;
-	//		timestamp = FramesToMsec(source_sample_rate, pos);
-	//	}
-	//	return timestamp;
-	//}
+	void Tick() {
+		int timestamp = 0, duration = 0;
+		while (1) {
+			if (!Playing())break;
+			{
+				unique_lock<mutex> lck(tick_mutex_);
+				if (state_ == VoicePlayerState::PLAYER_STOP)break;
+				timestamp = timestamp_;
+				duration = duration_;
+			}
+			on_tick_->Emit({timestamp, duration});
 
-	/*void Join() {
+			if (timestamp >= duration) {
+				ctx_->Stop();
+				on_end_->Emit(0);
+				break;
+			}
+			this_thread::sleep_for(chrono::milliseconds(33));
+		}
+		{
+			unique_lock<mutex> lck(tick_mutex_);
+			state_ = VoicePlayerState::PLAYER_STOP;
+		}
+	}
+
+	void Join() {
 		if (tick_thread_ != nullptr && tick_thread_->joinable()) {
 			tick_thread_->join();
 			delete tick_thread_;
 			tick_thread_ = nullptr;
-		}
-	}*/
-
-	void UpdateTimestamp() {
-		{
-			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
-
 		}
 	}
 
@@ -129,17 +113,32 @@ public:
 		player_ = static_cast<PlayerNode*>(ctx_->Destination());
 		source_reader_ = new FileReaderNode(ctx_);
 		source_reader_->watched_ = true;
-		effect_ = nullptr;
-		//tick_thread_ = nullptr;
+		tick_thread_ = nullptr;
 		state_ = VoicePlayerState::PLAYER_STOP;
-		on_tick_ = new Signal<int>();
+		effect_ = nullptr;
+		on_tick_ = new Signal<PlayerTickData>();
 		on_end_ = new Signal<int>();
+		timestamp_ = 0;
+		duration_ = 0;
 		ctx_->on_tick_->On([&](int) {
-			UpdateTimestamp();
-			on_tick_->Emit(timestamp_);
-		});
-		ctx_->on_end_->On([&](int v) {
-			on_end_->Emit(v);
+			bool need_update = true;
+			auto processed_player = 0;
+			auto processed = 0;
+			unique_lock<mutex> lck(tick_mutex_);
+			{
+				unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
+				processed = source_reader_->Processed();
+				processed_player = player_->Processed();
+				if (effect_) {
+					processed_player = (processed_player - MsecToFrames(ctx_->SampleRate(), effect_->Delay() * 1000)) / effect_->TimeScale();
+				}
+				if (processed_player < 0) {
+					need_update = false;
+					processed_player = 0;
+				}
+				if(need_update)
+					timestamp_ = CalcCorrectPlayTime(processed - processed_player);
+			}
 		});
 	}
 
@@ -154,7 +153,7 @@ public:
 	void Loop(bool v) {
 		{
 			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
-			source_reader_->loop_ = v;
+			source_reader_->Loop(v);
 		}
 	}
 
@@ -170,7 +169,9 @@ public:
 		{
 			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
 			if (effect_) {
-				effect_->SetOptions(options, option_count);
+				effect_->SetOptions(options, option_count); 
+				source_reader_->Clear();
+				player_->Clear();
 			}
 			else
 				ret = NO_SUCH_EFFECT;
@@ -185,6 +186,9 @@ public:
 		if (ret < 0)return ret;
 		path_ = path;
 		PlayAll();
+		source_reader_->Clear();
+		player_->Clear();
+		duration_ = SourceDuration();
 		return ret;
 	}
 
@@ -209,6 +213,7 @@ public:
 			effect_ = new_effect;
 			if (playing) {
 				Start(true); 
+				Seek(timestamp_);
 			}
 		}
 		return SUCCEED;
@@ -233,9 +238,10 @@ public:
 	}
 
 	bool Playing() {
-		//unique_lock<mutex> lck(tick_mutex_);
+		unique_lock<mutex> lck(tick_mutex_);
 		return state_ == VoicePlayerState::PLAYER_PLAYING;
 	}
+
 
 	int Start(int restart = true) {
 		if (Playing())return SUCCEED;
@@ -258,8 +264,8 @@ public:
 			if (ret < 0)return ret;
 		}
 		ctx_->Start();
-		/*state_ = VoicePlayerState::PLAYER_PLAYING;
-		tick_thread_ = new thread(&VoicePlayer::Tick, this);*/
+		state_ = VoicePlayerState::PLAYER_PLAYING;
+		tick_thread_ = new thread(&VoicePlayer::Tick, this);
 		return ret;
 	}
 
@@ -270,22 +276,17 @@ public:
 			effect_->Resume();
 		}
 		ctx_->Start();
-		/*{
-			unique_lock<mutex> lck(tick_mutex_);
-			state_ = VoicePlayerState::PLAYER_PLAYING;
-		}
-		tick_thread_ = new thread(&VoicePlayer::Tick, this);*/
 		return SUCCEED;
 	}
 
 	int Stop() {
 		if (Playing()) {
 			auto ret = ctx_->Stop();
-			/*{
+			{
 				unique_lock<mutex> lck(tick_mutex_);
 				state_ = VoicePlayerState::PLAYER_STOP;
 			}
-			Join();*/
+			Join();
 			return ret;
 		}else
 			return SUCCEED;
@@ -294,12 +295,14 @@ public:
 	int Seek(int64_t timestamp) {
 		int ret = SUCCEED;
 		{
-			unique_lock<mutex> render(ctx_->audio_render_thread_mutex_);
-			if (source_reader_) {
+			unique_lock<mutex> lck(tick_mutex_);
+			ctx_->Clear();
+			{
+				unique_lock<mutex> render(ctx_->audio_render_thread_mutex_);
 				ret = source_reader_->Seek(timestamp);
 			}
-			else {
-				ret = HAVE_NOT_DEFINED_SOURCE;
+			if(ret >= 0){
+				timestamp_ = timestamp;
 			}
 		}
 		return ret;

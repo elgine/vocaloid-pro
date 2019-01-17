@@ -64,7 +64,6 @@ namespace vocaloid {
 			int64_t ProcessFrame(bool flush = false) override {
 				auto frame_count = 0;
 				if (SegmentCount() <= 0) {
-					eof_ = true;
 					goto end;
 				}
 				auto frame_index = 0;
@@ -100,7 +99,6 @@ namespace vocaloid {
 							play_pos_ = SeekInternal(play_pos_);
 						}
 						else {
-							processed_ += frame_count;
 							eof_ = true;
 							goto end;
 						}
@@ -111,7 +109,6 @@ namespace vocaloid {
 							play_pos_ -= cur_segment.end;
 							cur_segment_index = Timeline::Next();
 							if (cur_segment_index < 0) {
-								eof_ = true;
 								goto end;
 							}
 							cur_segment = Timeline::Segment(cur_segment_index);
@@ -134,11 +131,8 @@ namespace vocaloid {
 					frame_index += count;
 					play_pos_ += count;
 				}
-				processed_ += frame_count;
 			end:
-				if (frame_count > 0) {
-					result_buffer_->silence_ = false;
-				}
+				processed_ += frame_count;
 				return frame_count;
 			}
 
@@ -184,10 +178,6 @@ namespace vocaloid {
 			}
 
 			void Clear() override {
-				Timeline::Clear();
-				play_pos_ = 0;
-				delay_pos_ = 0;
-				ready_to_play_ = 0;
 				processed_ = 0;
 			}
 

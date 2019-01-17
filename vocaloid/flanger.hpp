@@ -8,12 +8,12 @@ namespace vocaloid {
 		using namespace vocaloid::node;
 
 		class Flanger : public Composite {
-		private:
+		public:
 			OscillatorNode *osc_;
 			DelayNode *delay_;
 			GainNode *gain_;
 			GainNode *feedback_;
-		public:
+
 			static float FLANGER_SPEED_DEFAULT;
 			static float FLANGER_SPEED_MIN;
 			static float FLANGER_SPEED_MAX;

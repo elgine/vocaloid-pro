@@ -247,9 +247,10 @@ namespace vocaloid {
 						buffer_size_ -= length;
 						if (buffer_size_ < 0)
 							buffer_size_ = 0;
-						if (buffer_size_ > 0)
-							memmove(buffer_, buffer_ + length, buffer_size_);
-						// memcpy(buffer_, buffer_ + length, buffer_size_);
+						if (buffer_size_ > 0) {
+							memcpy(buffer_, buffer_ + length, buffer_size_);
+						}
+							//memmove(buffer_, buffer_ + length, buffer_size_);
 					}
 					catch (exception e) {
 						cout << e.what() << endl;
@@ -367,7 +368,7 @@ namespace vocaloid {
 
 			void Clear() override {
 				unique_lock<mutex> lck(decode_mutex_);
-				if (ctx_) {
+				if (ctx_ != nullptr) {
 					avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
 				}
 			}
@@ -391,6 +392,8 @@ namespace vocaloid {
 				avcodec_close(codec_ctx_);
 				avformat_close_input(&ctx_);
 				avformat_free_context(ctx_);
+				codec_ctx_ = nullptr;
+				ctx_ = nullptr;
 			}
 
 			bool End() override {
@@ -739,6 +742,7 @@ namespace vocaloid {
 					av_packet_free(&packet_);
 					av_frame_free(&enc_frame_);
 					avio_close(ctx_->pb);
+					avcodec_close(codec_ctx_);
 					avformat_free_context(ctx_);
 					ctx_ = nullptr;
 					codec_ctx_ = nullptr;

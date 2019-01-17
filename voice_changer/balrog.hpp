@@ -149,7 +149,7 @@ namespace effect {
 			fire_->Open(ExtractResource(IDR_FIRE, L"mp3").data());
 			fire_gain_ = new GainNode(ctx);
 			fire_gain_->gain_->value_ = FIRE_GAIN_DEFAULT;
-			fire_->loop_ = true;
+			fire_->Loop(true);
 
 			filter2_ = new BiquadNode(ctx);
 			filter2_->type_ = vocaloid::dsp::BIQUAD_TYPE::LOW_PASS;

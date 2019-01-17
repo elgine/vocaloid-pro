@@ -5,7 +5,8 @@
 #pragma comment(lib, "winmm.lib")
 namespace vocaloid {
 	namespace io {
-		#define MAX_BUFFER_SIZE (1024 * 16 * 8)
+		// 1024 * 16 * 8
+		#define MAX_BUFFER_SIZE (176000)
 		//Simple audio player for playing pcm data
 		class PCMPlayer: public Player {
 		private:
@@ -85,8 +86,11 @@ namespace vocaloid {
 			}
 
 			void Clear() override {
+				if (wave_out_ == nullptr)return;
+				Stop();
 				buf_offset_ = 0;
 				waveOutReset(wave_out_);
+				Resume();
 			}
 
 			void Resume() override {

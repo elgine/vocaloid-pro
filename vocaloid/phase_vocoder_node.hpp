@@ -23,6 +23,15 @@ namespace vocaloid {
 				watched_ = true;
 			}
 
+			void Clear() override {
+				for (int i = 0; i < channels_; i++) {
+					if (shifters_[i]) {
+						shifters_[i]->Clear();
+					}
+				}
+				AudioNode::Clear();
+			}
+
 			void Dispose() override {
 				for (int i = 0; i < channels_; i++) {
 					if (shifters_[i]) {
@@ -46,53 +55,28 @@ namespace vocaloid {
 				return SUCCEED;
 			}
 
+			int64_t Process(bool flush = false) override {
+				PullBuffers();
+				if (channels_ < 1 || !enable_ || (summing_buffer_->silence_ && shifters_[0]->InputLeft() <= 0 && shifters_[0]->OutputLeft() <= 0))return 0;
+				return ProcessFrame();
+			}
+
 			int64_t ProcessFrame(bool flush = false) override {
 				int64_t processed = 0;
+				if (!summing_buffer_->silence_) {
+					for (int i = 0; i < channels_; i++) {
+						shifters_[i]->SetTempo(tempo_);
+						shifters_[i]->SetPitch(pitch_);
+						shifters_[i]->Process(summing_buffer_->Channel(i)->Data(), summing_buffer_->Size());
+					}
+				}
 				for (int i = 0; i < channels_; i++) {
 					shifters_[i]->SetTempo(tempo_);
 					shifters_[i]->SetPitch(pitch_);
-					processed = shifters_[i]->Process(summing_buffer_->Channel(i)->Data(), summing_buffer_->Size(), result_buffer_->Channel(i)->Data());
+					processed = shifters_[i]->Pop(result_buffer_->Channel(i)->Data(), frame_size_, true);
 				}
 				return processed;
 			}
-
-			/*int64_t Process(bool flush = false) override {
-				PullBuffers();
-				if (!enable_ || !channels_)return 0;
-				return ProcessFrame(flush);;
-			}
-
-			int64_t ProcessFrame(bool flush = false) override {
-				int64_t processed = 0;
-				if (!flush || (flush && !has_flush_)) {
-					for (int i = 0; i < channels_; i++) {
-						shifters_[i]->SetTempo(tempo_);
-						shifters_[i]->SetPitch(pitch_);
-						processed = shifters_[i]->Process(summing_buffer_->Channel(i)->Data(), summing_buffer_->Size(), result_buffer_->Channel(i)->Data());
-					}
-					if (flush) {
-						for (int i = 0; i < channels_; i++) {
-							shifters_[i]->SetTempo(tempo_);
-							shifters_[i]->SetPitch(pitch_);
-							shifters_[i]->Process(summing_buffer_->Channel(i)->Data(), shifters_[i]->HopSizeAna());
-						}
-						has_flush_ = true;
-					}
-				}
-				else {
-					for (int i = 0; i < channels_; i++) {
-						shifters_[i]->SetTempo(tempo_);
-						shifters_[i]->SetPitch(pitch_);
-						processed = shifters_[i]->Flush(result_buffer_->Channel(i)->Data(), frame_size_);
-					}
-					if (processed <= 0)processed = EOF;
-				}
-				if (processed > 0)
-					result_buffer_->silence_ = false;
-				else
-					result_buffer_->silence_ = true;
-				return processed;
-			}*/
 		};
 	}
 }

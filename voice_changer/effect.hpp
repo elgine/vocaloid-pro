@@ -22,9 +22,11 @@ namespace effect {
 		}
 
 		virtual void Dispose() {
-			gain_->Dispose();
-			delete gain_;
-			gain_ = nullptr;
+			if (gain_ != nullptr) {
+				gain_->Dispose();
+				delete gain_;
+				gain_ = nullptr;
+			}
 		}
 
 		void SetGain(float gain) {
@@ -39,9 +41,8 @@ namespace effect {
 			return id_;
 		}
 
-		virtual int64_t CalculateDuration(int64_t origin) {
-			return origin;
-		}
+		virtual float TimeScale() { return 1.0f; };
+		virtual float Delay() { return 0.0f; }
 		
 		virtual AudioNode* Input() {
 			return gain_;

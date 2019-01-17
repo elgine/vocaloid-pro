@@ -142,11 +142,6 @@ namespace vocaloid {
 				return OverlapAdd::Pop(out, len);
 			}
 
-			int64_t Flush(float *out, int64_t len) {
-				OverlapAdd::Process();
-				return OverlapAdd::Pop(out, len, true);
-			}
-
 			void SetPitch(float v) {
 				if (pitch_ == v)return;
 				pitch_ = v;

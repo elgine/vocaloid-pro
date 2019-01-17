@@ -25,6 +25,9 @@ private:
 	string path_;
 
 	VoiceRendererState state_;
+
+	int64_t timestamp_;
+	int64_t duration_;
 public:
 
 	explicit VoiceRenderer(int32_t sample_rate = 44100, int16_t channels = 2) {
@@ -64,35 +67,29 @@ public:
 	}
 
 	void SetOptions(float* options, int option_count) {
-		//ctx_->Lock();
 		{
 			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
 			if (effect_) {
 				effect_->SetOptions(options, option_count);
 			}
 		}
-		//ctx_->Unlock();
 	}
 
 	int RenderAll() {
 		auto ret = SUCCEED;
-		//ctx_->Lock();
 		{
 			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
 			ret = source_reader_->Start();
 		}
-		//ctx_->Unlock();
 		return ret;
 	}
 
 	int RenderSegments(int *segments, int segment_count) {
 		auto ret = SUCCEED;
-		//ctx_->Lock();
 		{
 			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
 			ret = source_reader_->StartWithSegments(segments, segment_count);
 		}
-		//ctx_->Unlock();
 		return ret;
 	}
 

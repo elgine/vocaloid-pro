@@ -10,7 +10,6 @@ namespace effect {
 	private:
 		BiquadNode *lowpass_;
 		Jungle *jungle_;
-		//PhaseVocoderNode *jungle_;
 	public:
 
 		static float LOWPASS_FREQ_DEFAULT;
@@ -25,10 +24,6 @@ namespace effect {
 			id_ = Effects::MALE;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;
-			/*jungle_ = new PhaseVocoderNode(ctx);
-			jungle_->pitch_ = 0.9f;
-			ctx->Connect(lowpass_, jungle_);
-			ctx->Connect(jungle_, gain_);*/
 			jungle_ = new Jungle(ctx);
 			jungle_->SetPitchOffset(PITCH_OFFSET_DEFAULT);
 

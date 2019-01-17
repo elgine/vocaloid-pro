@@ -111,10 +111,11 @@ namespace vocaloid {
 				mod2->SetBuffer(shift_down_buffer);
 				mod3->SetBuffer(shift_up_buffer);
 				mod4->SetBuffer(shift_up_buffer);
-				mod1->loop_ = true;
-				mod2->loop_ = true;
-				mod3->loop_ = true;
-				mod4->loop_ = true;
+
+				mod1->Loop(true);
+				mod2->Loop(true);
+				mod3->Loop(true);
+				mod4->Loop(true);
 
 				auto mod1_gain = new GainNode(ctx);
 				auto mod2_gain = new GainNode(ctx);
@@ -144,8 +145,8 @@ namespace vocaloid {
 				auto fade_buffer = CreateFadeBuffer(ctx, buffer_time, fade_time);
 				fade1->SetBuffer(fade_buffer);
 				fade2->SetBuffer(fade_buffer);
-				fade1->loop_ = true;
-				fade2->loop_ = true;
+				fade1->Loop(true);
+				fade2->Loop(true);
 
 				auto mix1 = new GainNode(ctx, 0);
 				auto mix2 = new GainNode(ctx, 0);

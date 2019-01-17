@@ -131,35 +131,11 @@ namespace vocaloid {
 						for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
 							auto node = FindNode(*iter);
 							cur_processed_frames = node->Process(last_all_input_eof);
-							/*if (node->watched_) {
-								if (node->Type() == AudioNodeType::INPUT) {
-									auto in_node = static_cast<InputNode*>(node);
-									if (in_node->loop_ || (!in_node->loop_ && cur_processed_frames > EOF)) {
-										all_input_eof = false;
-										all_eof = false;
-									}
-								}
-								else if (cur_processed_frames > EOF) {
-									all_eof = false;
-								}
-							}*/
 						}
-						/*if (all_eof) {
-							source_eof_ = all_eof;
-							destination_->Flush();
-						}
-						last_all_input_eof = all_input_eof;*/
 					}
 					on_tick_->Emit(0);
 					this_thread::sleep_for(chrono::milliseconds(sleep));
-					/*if (source_eof_) {
-						if (stop_eof_)break;
-					}*/
 				}
-				/*{
-					unique_lock<mutex> lck(audio_render_thread_mutex_);
-					state_ = AudioContextState::STOPPED;
-				}*/
 				on_end_->Emit(0);
 			}
 
@@ -319,8 +295,8 @@ namespace vocaloid {
 					for (auto node : traversal_nodes_) {
 						FindNode(node)->Stop();
 					}
+					state_ = AudioContextState::STOPPED;
 				}
-				state_ = AudioContextState::STOPPED;
 				if (audio_render_thread_ && audio_render_thread_->joinable()) {
 					audio_render_thread_->join();
 					delete audio_render_thread_;

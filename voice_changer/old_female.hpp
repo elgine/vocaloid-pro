@@ -60,9 +60,8 @@ namespace effect {
 			ctx->Connect(vibrato_->output_, gain_);
 		}
 
-		virtual int64_t CalculateDuration(int64_t origin) {
-			return origin * jungle_->tempo_ + vibrato_->Delay() * 1000;
-		}
+		float TimeScale() override { return jungle_->tempo_; }
+		float Delay() override { return vibrato_->Delay(); }
 
 		void Dispose() override {
 			if (jungle_) {

@@ -59,7 +59,6 @@ namespace vocaloid {
 				}
 #endif
 				path_ = path;
-				reader_->Dispose();
 				auto ret = reader_->Open(path_.c_str());
 				if (ret < 0)return ret;
 				reader_->GetFormat(format_);
@@ -97,6 +96,7 @@ namespace vocaloid {
 					}
 					return 0;
 				}
+				result_buffer_->silence_ = false;
 				if (resample_ratio_ != 1.0) {
 					summing_buffer_->FromByteArray(temp_buffer_, buf_size, bits_, channels_);
 					for (auto i = 0; i < channels_; i++) {

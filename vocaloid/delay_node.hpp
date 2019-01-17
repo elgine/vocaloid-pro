@@ -24,6 +24,15 @@ namespace vocaloid {
 				context_->Connect(delay_time_, this);
 			}
 
+			void Clear() override {
+				for (auto i = 0; i < channels_; i++) {
+					fill(buffers_[i].begin(), buffers_[i].end(), 0);
+				}
+				if(delay_time_)
+					delay_time_->Clear();
+				AudioNode::Clear();
+			}
+
 			void Dispose() override {
 				if (delay_time_) {
 					delay_time_->Dispose();
@@ -78,10 +87,6 @@ namespace vocaloid {
 				}
 				result_buffer_->silence_ = false;
 				return frame_size_;
-			}
-
-			void Clear() override {
-				delay_time_->Clear();
 			}
 		};
 	}

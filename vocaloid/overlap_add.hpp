@@ -107,6 +107,11 @@ namespace vocaloid {
 				return pop_size;
 			}
 
+			virtual void Clear() {
+				input_queue_->Clear();
+				output_queue_->Clear();
+			}
+
 			int64_t InputLeft() {
 				return input_queue_->Size();
 			}

@@ -25,9 +25,9 @@ const char *dependencies[dependency_count] = {
 	"VoiceChanger.dll"
 };
 
-struct TickData {
-	int64_t processed_time;
-	int64_t played_time;
+struct PlayerTickData {
+	int timestamp;
+	int duration;
 };
 
 bool inited = false;
@@ -50,7 +50,7 @@ int(*cancel_render_all)();
 int(*force_render_exit)();
 
 
-typedef void(*OnPlayerTick)(int);
+typedef void(*OnPlayerTick)(PlayerTickData);
 typedef void(*OnPlayerEnd)(int);
 typedef void(*OnRenderListProgress)(float*);
 typedef void(*OnRenderListEnd)(int*);
@@ -69,10 +69,10 @@ void(*subscribe_render_list_end)(OnRenderListEnd);
 #define RENDER_LIST_COMPLETE_CODE "renderListComplete"
 #define RENDER_LIST_END_CODE "renderListEnd"
 
-void SendPlayerTickMsg(int timestamp) {
+void SendPlayerTickMsg(PlayerTickData data) {
 	if (fre_context != nullptr) {
 		stringstream ss;
-		ss << "{\"played\": " << timestamp << "}";
+		ss << "{\"played\": " << data.timestamp << ", \"duration\": " << data.duration << "}";
 		const uint8_t* s = (const uint8_t*)ss.str().c_str();
 		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)PLAYER_TICK_CODE, (const uint8_t*)ss.str().c_str());
 	}
