@@ -24,10 +24,36 @@ private:
 	FileReaderNode *source_reader_;
 	string path_;
 
+	mutex tick_mutex_;
 	VoiceRendererState state_;
 
-	int64_t timestamp_;
-	int64_t duration_;
+	atomic<int64_t> timestamp_;
+	atomic<int64_t> duration_;
+
+	int64_t CalcCorrectPlayTime(int64_t delta) {
+		int64_t timestamp = 0;
+		auto source_sample_rate = source_reader_->SourceSampleRate();
+		auto resample_ratio = float(source_sample_rate) / ctx_->SampleRate();
+		// 当前播放片段
+		auto seg_index = source_reader_->Index();
+		auto seg = source_reader_->Segment(seg_index);
+		// 期望的播放位置
+		auto pos = source_reader_->Played();
+		// 递归，若当前播放片段的开始偏移大于期望，则
+		// 证明真实的播放位置应该在当前片段之前...
+		while (delta > 0 && seg.start > pos - delta) {
+			// 去掉当前片段相应的偏移量
+			delta -= pos - seg.start;
+			if (seg_index - 1 < 0) {
+				seg_index += source_reader_->SegmentCount();
+			}
+			seg = source_reader_->Segment(--seg_index);
+			pos = seg.end;
+		}
+		pos -= delta;
+		timestamp = FramesToMsec(source_sample_rate, pos);
+		return timestamp;
+	}
 public:
 
 	explicit VoiceRenderer(int32_t sample_rate = 44100, int16_t channels = 2) {
@@ -38,6 +64,26 @@ public:
 		source_reader_->watched_ = true;
 		state_ = VoiceRendererState::RENDERER_FREE;
 		effect_ = nullptr;
+		ctx_->on_tick_->On([&](int) {
+			bool need_update = true;
+			auto processed_player = 0;
+			auto processed = 0;
+			unique_lock<mutex> lck(tick_mutex_);
+			{
+				unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
+				processed = source_reader_->Processed();
+				processed_player = writer_->Processed();
+				if (effect_) {
+					processed_player = (processed_player - MsecToFrames(ctx_->SampleRate(), effect_->Delay() * 1000)) / effect_->TimeScale();
+				}
+				if (processed_player < 0) {
+					need_update = false;
+					processed_player = 0;
+				}
+				if (need_update)
+					timestamp_ = CalcCorrectPlayTime(processed - processed_player);
+			}
+		});
 	}
 
 	int SetEffect(Effects id) {
@@ -63,6 +109,7 @@ public:
 		auto ret = source_reader_->Open(path);
 		if (ret < 0)return ret;
 		path_ = path;
+		duration_ = source_reader_->Duration();
 		return ret;
 	}
 
@@ -112,6 +159,8 @@ public:
 		ret = ctx_->Prepare();
 		if (ret < 0)return ret;
 		state_ = VoiceRendererState::RENDERER_RENDERING;
+		timestamp_ = 0;
+		source_reader_->Seek(0);
 		ctx_->Start();
 		return ret;
 	}
@@ -153,6 +202,12 @@ public:
 	}
 
 	bool IsEnd() {
-		return ctx_->SourceEof();
+		unique_lock<mutex> lck(tick_mutex_);
+		return timestamp_ >= duration_;
+	}
+
+	float Progress() {
+		unique_lock<mutex> lck(tick_mutex_);
+		return float(timestamp_) / duration_;
 	}
 };

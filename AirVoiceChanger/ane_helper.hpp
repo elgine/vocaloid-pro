@@ -71,8 +71,8 @@ int* ToIntArray(FREObject obj) {
 		if (FRE_OK != FREGetArrayElementAt(obj, i, &item)) {
 			goto fail;
 		}
-		if (IsNumber(obj)) {
-			data[i] = ToInt(obj);
+		if (IsNumber(item)) {
+			data[i] = ToInt(item);
 		}
 		else {
 			goto fail;
@@ -94,8 +94,8 @@ double* ToDoubleArray(FREObject obj) {
 		if (FRE_OK != FREGetArrayElementAt(obj, i, &item)) {
 			goto fail;
 		}
-		if (IsNumber(obj)) {
-			data[i] = ToDouble(obj);
+		if (IsNumber(item)) {
+			data[i] = ToDouble(item);
 		}
 		else {
 			goto fail;
@@ -118,8 +118,8 @@ const char** ToStringArray(FREObject obj) {
 		if (FRE_OK != FREGetArrayElementAt(obj, i, &item)) {
 			goto fail;
 		}
-		if (IsString(obj)) {
-			data[i] = ToString(obj);
+		if (IsString(item)) {
+			data[i] = ToString(item);
 		}
 		else {
 			goto fail;

@@ -72,7 +72,7 @@ private:
 	}
 
 	void Tick() {
-		int timestamp = 0, duration = 0;
+		int timestamp = 0, duration = 0, last_timestamp = 0;
 		while (1) {
 			if (!Playing())break;
 			{
@@ -81,15 +81,18 @@ private:
 				timestamp = timestamp_;
 				duration = duration_;
 			}
-			on_tick_->Emit({timestamp, duration});
+			if (last_timestamp != timestamp) {
+				on_tick_->Emit({ timestamp, duration });
+				last_timestamp = timestamp;
+			}
 
 			if (timestamp >= duration) {
-				ctx_->Stop();
 				on_end_->Emit(0);
 				break;
 			}
 			this_thread::sleep_for(chrono::milliseconds(33));
 		}
+		ctx_->Stop();
 		{
 			unique_lock<mutex> lck(tick_mutex_);
 			state_ = VoicePlayerState::PLAYER_STOP;
@@ -281,29 +284,29 @@ public:
 
 	int Stop() {
 		if (Playing()) {
-			auto ret = ctx_->Stop();
+			// TODO: if can remove
+			// auto ret = ctx_->Stop();
 			{
 				unique_lock<mutex> lck(tick_mutex_);
 				state_ = VoicePlayerState::PLAYER_STOP;
 			}
 			Join();
-			return ret;
+			return SUCCEED;
 		}else
 			return SUCCEED;
 	}
 
 	int Seek(int64_t timestamp) {
 		int ret = SUCCEED;
+		ctx_->Clear();
 		{
+			unique_lock<mutex> render(ctx_->audio_render_thread_mutex_);
+			ret = source_reader_->Seek(timestamp);
+			source_reader_->Resume();
+		}
+		if(ret >= 0){
 			unique_lock<mutex> lck(tick_mutex_);
-			ctx_->Clear();
-			{
-				unique_lock<mutex> render(ctx_->audio_render_thread_mutex_);
-				ret = source_reader_->Seek(timestamp);
-			}
-			if(ret >= 0){
-				timestamp_ = timestamp;
-			}
+			timestamp_ = timestamp;
 		}
 		return ret;
 	}

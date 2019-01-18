@@ -69,9 +69,6 @@
     <ClInclude Include="player.h">
       <Filter>头文件\io</Filter>
     </ClInclude>
-    <ClInclude Include="pcm_player.hpp">
-      <Filter>头文件\io</Filter>
-    </ClInclude>
     <ClInclude Include="biquad.hpp">
       <Filter>头文件\dsp</Filter>
     </ClInclude>
@@ -176,6 +173,12 @@
     </ClInclude>
     <ClInclude Include="timeline.hpp">
       <Filter>头文件\node</Filter>
+    </ClInclude>
+    <ClInclude Include="wave_out_player.hpp">
+      <Filter>头文件\io</Filter>
+    </ClInclude>
+    <ClInclude Include="wasapi_player.hpp">
+      <Filter>头文件\io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

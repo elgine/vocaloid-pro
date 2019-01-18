@@ -1,6 +1,7 @@
 #pragma once
 #ifdef _WIN32 || _WIN64
-#include "pcm_player.hpp"
+//#include "wave_out_player.hpp"
+#include "wasapi_player.hpp"
 #endif
 #include "player.h"
 #include "destination_node.hpp"
@@ -15,7 +16,9 @@ namespace vocaloid {
 			explicit PlayerNode(BaseAudioContext *ctx) :DestinationNode(ctx) {
 				player_ = nullptr;
 #ifdef _WIN32 || _WIN64
-				player_ = new io::PCMPlayer();
+
+				//player_ = new io::WaveOutPlayer();
+				player_ = new io::WASAPIPlayer();
 #endif
 				bytes_ = new Buffer<char>();
 				sample_rate_ = 0;

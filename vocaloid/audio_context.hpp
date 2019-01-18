@@ -214,6 +214,10 @@ namespace vocaloid {
 					Disconnect(id, t_id);
 				}
 				nodes_.erase(id);
+				auto i = find(traversal_nodes_.begin(), traversal_nodes_.end(), id);
+				if (i != traversal_nodes_.end()) {
+					traversal_nodes_.erase(i);
+				}
 			}
 
 			void Connect(AudioNode *from_node, AudioNode *to_node, 
@@ -299,7 +303,6 @@ namespace vocaloid {
 				}
 				if (audio_render_thread_ && audio_render_thread_->joinable()) {
 					audio_render_thread_->join();
-					delete audio_render_thread_;
 					audio_render_thread_ = nullptr;
 				}	
 				return 0;

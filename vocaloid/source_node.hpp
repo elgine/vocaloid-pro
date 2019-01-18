@@ -45,6 +45,7 @@ namespace vocaloid {
 
 			int Seek(int64_t timestamp) {
 				auto frames = timestamp * 0.001f * SourceSampleRate();
+				if (play_pos_ == frames)return SUCCEED;
 				auto seg_index = Timeline::SeekSegmentIndex(frames);
 				if (seg_index > -1) {
 					auto seg = Timeline::Segment(seg_index);

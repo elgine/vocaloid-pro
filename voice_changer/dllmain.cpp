@@ -29,10 +29,6 @@ extern "C" {
 		GetRenderList()->SubscribeProgress(p);
 	}
 
-	DLLEXPORT void SubscribeRenderListComplete(OnRenderListComplete c) {
-		GetRenderList()->SubscribeComplete(c);
-	}
-
 	DLLEXPORT void SubscribeRenderListEnd(OnRenderListEnd c) {
 		GetRenderList()->SubscribeEnd(c);
 	}
@@ -90,28 +86,22 @@ extern "C" {
 		return GetPlayer()->Resume();
 	}
 
+	DLLEXPORT int SetMaxRenderersRunTogether(int c) {
+		return GetRenderList()->SetMaxRenderersRunTogether(c);
+	}
+
 	DLLEXPORT int Render(const char** sources, const char **dests, int *effect_ids,
 		float *options, int *option_counts, int* segments, int *segment_counts, int count) {
 		auto option_offset = 0;
 		auto segment_offset = 0;
 		for (auto i = 0; i < count; i++) {
-			render_list->AddRenderData(sources[i], dests[i], effect_ids[i], 
+			GetRenderList()->AddRenderData(sources[i], dests[i], effect_ids[i], 
 				options + option_offset, option_counts[i],
 				segments + segment_offset, segment_counts[i]);
 			option_offset += option_counts[i];
 			segment_offset += segment_counts[i];
 		}
-		render_list->Start();
-		return SUCCEED;
-	}
-
-	DLLEXPORT int StopRender(const char* source) {
-		GetRenderList()->Stop(source);
-		return SUCCEED;
-	}
-
-	DLLEXPORT int StopRenderAll() {
-		GetRenderList()->StopAll();
+		GetRenderList()->Start();
 		return SUCCEED;
 	}
 
@@ -125,9 +115,8 @@ extern "C" {
 		return SUCCEED;
 	}
 
-	DLLEXPORT int ForceExitRender() {
-		GetRenderList()->ForceExitRender();
-		DisposeAllTempResources();
+	DLLEXPORT int ClearRenderList() {
+		GetRenderList()->Clear();
 		return SUCCEED;
 	}
 }

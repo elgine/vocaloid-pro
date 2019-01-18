@@ -43,24 +43,26 @@ int(*start_preview)(bool);
 int(*stop_preview)();
 int(*seek)(int);
 int(*render)(const char**, const char**, int*,float*, int*, int*, int*, int);
-int(*stop_render)(const char*);
-int(*stop_render_all)();
 int(*cancel_render)(const char*);
 int(*cancel_render_all)();
-int(*force_render_exit)();
+int(*set_max_renderers_run_together)(int);
+int(*clear_render_list)();
 
+struct RenderMessage {
+	float* status;
+	int count;
+};
+
+typedef void(*OnRenderListProgress)(RenderMessage*);
+typedef void(*OnRenderListEnd)(RenderMessage*);
 
 typedef void(*OnPlayerTick)(PlayerTickData);
 typedef void(*OnPlayerEnd)(int);
-typedef void(*OnRenderListProgress)(float*);
-typedef void(*OnRenderListEnd)(int*);
-typedef void(*OnRenderListComplete)(char*);
 
 void(*subscribe_player_tick)(OnPlayerTick);
 void(*subscribe_player_end)(OnPlayerEnd);
 
 void(*subscribe_render_list_progress)(OnRenderListProgress);
-void(*subscribe_render_list_complete)(OnRenderListComplete);
 void(*subscribe_render_list_end)(OnRenderListEnd);
 
 #define PLAYER_TICK_CODE "playerTick"
@@ -87,14 +89,13 @@ void SendPlayerEndMsg(int flag) {
 	}
 }
 
-void SendRenderListProgressMsg(float *progress) {
+void SendRenderListProgressMsg(RenderMessage *progress) {
 	if (fre_context != nullptr) {
 		stringstream ss;
-		ss << "{\"progress\": [";
-		auto count = sizeof(progress) / sizeof(float);
-		for (auto i = 0; i < count; i++) {
-			ss << progress[i];
-			if (i != count - 1) {
+		ss << "{\"status\": [";
+		for (auto i = 0; i < progress->count; i++) {
+			ss << progress->status[i];
+			if (i != progress->count - 1) {
 				ss << ",";
 			}
 		}
@@ -103,22 +104,13 @@ void SendRenderListProgressMsg(float *progress) {
 	}
 }
 
-void SendRenderListCompleteMsg(char* source) {
-	if (fre_context != nullptr) {
-		stringstream ss;
-		ss << "{\"source\":" << source << "}";
-		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)RENDER_LIST_COMPLETE_CODE, (const uint8_t*)ss.str().c_str());
-	}
-}
-
-void SendRenderListEndMsg(int *status) {
+void SendRenderListEndMsg(RenderMessage *progress) {
 	if (fre_context != nullptr) {
 		stringstream ss;
 		ss << "{\"status\": [";
-		auto count = sizeof(status) / sizeof(int);
-		for (auto i = 0; i < count; i++) {
-			ss << status[i];
-			if (i != count - 1) {
+		for (auto i = 0; i < progress->count; i++) {
+			ss << progress->status[i];
+			if (i != progress->count - 1) {
 				ss << ",";
 			}
 		}
@@ -155,11 +147,9 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			subscribe_render_list_progress = (void(*)(OnRenderListProgress))GetProcAddress(handler, "SubscribeRenderListProgress");
 			if (subscribe_render_list_progress == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 
-			subscribe_render_list_complete = (void(*)(OnRenderListComplete))GetProcAddress(handler, "SubscribeRenderListComplete");
-			if (subscribe_render_list_complete == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-
 			subscribe_render_list_end = (void(*)(OnRenderListEnd))GetProcAddress(handler, "SubscribeRenderListEnd");
 			if (subscribe_render_list_end == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+
 			get_source_info = (void(*)(int*))GetProcAddress(handler, "GetSourceInfo");
 			if (get_source_info == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			set_temp_path = (int(*)(const char*))GetProcAddress(handler, "SetExtractTempPath");
@@ -184,22 +174,18 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			if (stop_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			render = (int(*)(const char**, const char**, int*, float*, int*, int*, int*, int))GetProcAddress(handler, "Render");
 			if (render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-			stop_render = (int(*)(const char*))GetProcAddress(handler, "StopRender");
-			if (stop_render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-			stop_render_all = (int(*)())GetProcAddress(handler, "StopRenderAll");
-			if (stop_render_all == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			cancel_render = (int(*)(const char*))GetProcAddress(handler, "CancelRender");
 			if (cancel_render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			cancel_render_all = (int(*)())GetProcAddress(handler, "CancelRenderAll");
 			if (cancel_render_all == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-			force_render_exit = (int(*)())GetProcAddress(handler, "ForceExitRender");
-			if (force_render_exit == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-
+			clear_render_list = (int(*)())GetProcAddress(handler, "ClearRenderList");
+			if(clear_render_list == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			set_max_renderers_run_together = (int(*)(int))GetProcAddress(handler, "SetMaxRenderersRunTogether");
+			if (set_max_renderers_run_together == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			// Subscribe event
 			subscribe_player_tick(SendPlayerTickMsg);
 			subscribe_player_end(SendPlayerEndMsg);
 			subscribe_render_list_progress(SendRenderListProgressMsg);
-			subscribe_render_list_complete(SendRenderListCompleteMsg);
 			subscribe_render_list_end(SendRenderListEndMsg);
 			inited = true;
 		}else
@@ -295,9 +281,7 @@ FREObject Render(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]
 	int* effects = ToIntArray(argv[2]);
 	if (effects == nullptr)goto param_not_match;
 	float* options = (float*)ToDoubleArray(argv[3]);
-	if (options == nullptr)goto param_not_match;
 	int* option_counts = ToIntArray(argv[4]);
-	if (option_counts == nullptr)goto param_not_match;
 	int* segments = ToIntArray(argv[5]);
 	int* segment_counts = ToIntArray(argv[6]);
 	int count = ToInt(argv[7]);
@@ -305,17 +289,6 @@ FREObject Render(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]
 	return FromInt(render(sources, dests, effects, options, option_counts, segments, segment_counts, count));
 param_not_match:
 	return FromInt(PARAM_NOT_MATCH);
-}
-
-FREObject StopRender(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
-	if (argc < 1)return FromInt(MISS_PARAM);
-	if (!inited)return FromInt(HAS_NOT_INITED);
-	return FromInt(stop_render(ToString(argv[0])));
-}
-
-FREObject StopRenderAll(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
-	if (!inited)return FromInt(HAS_NOT_INITED);
-	return FromInt(stop_render_all());
 }
 
 FREObject CancelRender(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
@@ -329,9 +302,15 @@ FREObject CancelRenderAll(FREContext ctx, void* funcData, uint32_t argc, FREObje
 	return FromInt(cancel_render_all());
 }
 
-FREObject ForceExitRender(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+FREObject SetMaxRenderersRunTogether(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+	if (argc < 1)return FromInt(MISS_PARAM);
 	if (!inited)return FromInt(HAS_NOT_INITED);
-	return FromInt(force_render_exit());
+	return FromInt(set_max_renderers_run_together(ToInt(argv[0])));
+}
+
+FREObject ClearRenderList(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+	if (!inited)return FromInt(HAS_NOT_INITED);
+	return FromInt(clear_render_list());
 }
 
 void ContextInitializer(
@@ -354,11 +333,10 @@ void ContextInitializer(
 		{ (const uint8_t*) "stopPreview", NULL, &StopPreview },
 		{ (const uint8_t*) "seek", NULL, &Seek },
 		{ (const uint8_t*) "render", NULL, &Render },
-		{ (const uint8_t*) "stopRender", NULL, &StopRender },
-		{ (const uint8_t*) "stopRenderAll", NULL, &StopRenderAll },
 		{ (const uint8_t*) "cancelRender", NULL, &CancelRender },
 		{ (const uint8_t*) "cancelRenderAll", NULL, &CancelRenderAll },
-		{ (const uint8_t*) "forceExitRender", NULL, &ForceExitRender }
+		{ (const uint8_t*) "setMaxRenderersRunTogether", NULL, &SetMaxRenderersRunTogether },
+		{ (const uint8_t*) "clearRenderList", NULL, &ClearRenderList }
 	};
 	*numFunctionsToSet = sizeof(fns) / sizeof(FRENamedFunction);
 	*functionsToSet = fns;

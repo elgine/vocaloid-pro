@@ -8,7 +8,7 @@ namespace vocaloid {
 		// 1024 * 16 * 8
 		#define MAX_BUFFER_SIZE (176000)
 		//Simple audio player for playing pcm data
-		class PCMPlayer: public Player {
+		class WaveOutPlayer: public Player {
 		private:
 			//Use event to control processing data
 			HANDLE play_event_;
@@ -36,7 +36,7 @@ namespace vocaloid {
 				return 0;
 			}
 		public:
-			PCMPlayer() {
+			WaveOutPlayer() {
 				wave_out_ = nullptr;
 				wave_header_[0].dwFlags = 0;
 				wave_header_[1].dwFlags = 0;
@@ -49,7 +49,7 @@ namespace vocaloid {
 				play_event_ = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 			}
 
-			~PCMPlayer() {
+			~WaveOutPlayer() {
 				Dispose();
 			}
 
