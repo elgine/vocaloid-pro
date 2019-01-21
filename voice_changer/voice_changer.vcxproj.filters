@@ -114,6 +114,9 @@
     <ClInclude Include="render_list.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="load_kernel.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Media Include="..\samples\church.wav">

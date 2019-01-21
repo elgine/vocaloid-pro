@@ -1,5 +1,6 @@
 #pragma once
 #include "convolver.hpp"
+#include "audio_node.hpp"
 using namespace vocaloid::dsp;
 namespace vocaloid {
 	namespace node {

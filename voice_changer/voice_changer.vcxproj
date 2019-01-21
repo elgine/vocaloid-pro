@@ -22,6 +22,7 @@
     <ClInclude Include="alien.hpp" />
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="balrog.hpp" />
+    <ClInclude Include="load_kernel.hpp" />
     <ClInclude Include="render_list.hpp" />
     <ClInclude Include="voice_renderer.hpp" />
     <ClInclude Include="extract_resource.hpp" />
@@ -196,6 +197,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN;WIN32;NDEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -217,6 +220,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN;NDEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -69,6 +69,8 @@ namespace vocaloid {
 			SwrContext *swr_ctx_;
 			int16_t a_stream_index_;
 
+			bool inited_;
+
 			thread *decode_thread_;
 			mutex decode_mutex_;
 			condition_variable can_decode_;
@@ -184,7 +186,6 @@ namespace vocaloid {
 
 			FFmpegFileReader(int64_t max_size = MAX_FFT_SIZE * 16) {
 				max_buffer_size_ = max_size;
-				buffer_ = new char[max_buffer_size_];
 				ctx_ = nullptr;
 				codec_ctx_ = nullptr;
 				packet_ = nullptr;
@@ -192,6 +193,8 @@ namespace vocaloid {
 				decode_frame_ = nullptr;
 				swr_ctx_ = nullptr;
 				decode_thread_ = nullptr;
+				buffer_ = nullptr;
+				inited_ = false;
 			}
 
 			~FFmpegFileReader() {
@@ -272,9 +275,10 @@ namespace vocaloid {
 
 			int16_t Open(const char *input_path) override {
 				int16_t ret = 0;
-				char* err_msg = new char[512];
+				static char* err_msg = new char[512];
 				av_register_all();
-				if (ctx_ != nullptr)Dispose();
+				Dispose();
+				buffer_ = new char[max_buffer_size_];
 				ctx_ = avformat_alloc_context();
 				ret = avformat_open_input(&ctx_, input_path, NULL, NULL);
 				if (ret < 0) {
@@ -339,9 +343,8 @@ namespace vocaloid {
 				swr_alloc_set_opts(swr_ctx_, out_ch_layout, out_sample_fmt, out_sample_rate, in_ch_layout, in_sample_fmt, in_sample_rate, 0, nullptr);
 				swr_init(swr_ctx_);
 
-				packet_ = (AVPacket*)av_malloc(sizeof(AVPacket));
-				packet_->data = nullptr;
-				packet_->size = 0;
+				packet_ = av_packet_alloc();
+
 				frame_ = av_frame_alloc();
 
 				// Initialize decode frame
@@ -363,6 +366,7 @@ namespace vocaloid {
 				frame_count_ = 0;
 				decoding_ = false;
 				is_end_ = false;
+				inited_ = true;
 				return ret;
 			}
 
@@ -384,16 +388,42 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
+				if (!inited_)return;
 				Stop();
-				av_packet_free(&packet_);
-				av_frame_free(&frame_);
-				av_frame_free(&decode_frame_);
-				swr_free(&swr_ctx_);
-				avcodec_close(codec_ctx_);
-				avformat_close_input(&ctx_);
-				avformat_free_context(ctx_);
-				codec_ctx_ = nullptr;
-				ctx_ = nullptr;
+				if (buffer_) {
+					delete[] buffer_;
+					buffer_ = nullptr;
+				}
+				if (packet_) {
+					av_packet_free(&packet_);
+					packet_ = nullptr;
+				}
+					
+				if (frame_) {
+					av_frame_free(&frame_);
+					frame_ = nullptr;
+				}
+					
+				if (decode_frame_) {
+					av_frame_free(&decode_frame_);
+					decode_frame_ = nullptr;
+				}
+					
+				if (swr_ctx_) {
+					swr_free(&swr_ctx_);
+					swr_ctx_ = nullptr;
+				}
+					
+				if (codec_ctx_) {
+					avcodec_close(codec_ctx_);
+					codec_ctx_ = nullptr;
+				}	
+				if (ctx_) {
+					avformat_close_input(&ctx_);
+					avformat_free_context(ctx_);
+					ctx_ = nullptr;
+				}
+				inited_ = false;
 			}
 
 			bool End() override {

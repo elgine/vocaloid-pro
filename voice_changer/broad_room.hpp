@@ -11,16 +11,14 @@ namespace effect {
 	class BroadRoom : public Effect {
 	private:
 		ConvolutionNode *convolution_;
+		AudioChannel* kernel_;
 	public:
 		explicit BroadRoom(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::BROAD_ROOM;
 			convolution_ = new ConvolutionNode(ctx);
-			auto channel_data = new AudioChannel();
-			auto buffer = new vocaloid::Buffer<char>();
-			auto format = new vocaloid::io::AudioFormat();
-			ReadFileBuffer(ExtractResource(IDR_LARGE_WIDE_ECHO_HALL, L"wav").data(), format, buffer);
-			channel_data->FromBuffer(buffer, format->bits, format->channels);
-			convolution_->kernel_ = channel_data;
+			kernel_ = new AudioChannel();
+			LoadKernel(IDR_LARGE_WIDE_ECHO_HALL, L"wav", kernel_);
+			convolution_->kernel_ = kernel_;
 			ctx->Connect(convolution_, gain_);
 		}
 
@@ -29,6 +27,11 @@ namespace effect {
 				convolution_->Dispose();
 				delete convolution_;
 				convolution_ = nullptr;
+			}
+			if (kernel_) {
+				kernel_->Dispose();
+				delete kernel_;
+				kernel_ = nullptr;
 			}
 			Effect::Dispose();
 		}

@@ -90,7 +90,7 @@ private:
 				on_end_->Emit(0);
 				break;
 			}
-			this_thread::sleep_for(chrono::milliseconds(33));
+			this_thread::sleep_for(chrono::milliseconds(16));
 		}
 		ctx_->Stop();
 		{
@@ -104,6 +104,27 @@ private:
 			tick_thread_->join();
 			delete tick_thread_;
 			tick_thread_ = nullptr;
+		}
+	}
+
+	void UpdateTimestamp() {
+		bool need_update = true;
+		auto processed_player = 0;
+		auto processed = 0;
+		unique_lock<mutex> lck(tick_mutex_);
+		{
+			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
+			processed = source_reader_->Processed();
+			processed_player = player_->Processed();
+			if (effect_) {
+				processed_player = (processed_player) / effect_->TimeScale() - MsecToFrames(ctx_->SampleRate(), effect_->Delay() * 1000);
+			}
+			if (processed_player < 0) {
+				need_update = false;
+				processed_player = 0;
+			}
+			if (need_update)
+				timestamp_ = CalcCorrectPlayTime(processed - processed_player);
 		}
 	}
 
@@ -124,24 +145,7 @@ public:
 		timestamp_ = 0;
 		duration_ = 0;
 		ctx_->on_tick_->On([&](int) {
-			bool need_update = true;
-			auto processed_player = 0;
-			auto processed = 0;
-			unique_lock<mutex> lck(tick_mutex_);
-			{
-				unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
-				processed = source_reader_->Processed();
-				processed_player = player_->Processed();
-				if (effect_) {
-					processed_player = (processed_player) / effect_->TimeScale() - MsecToFrames(ctx_->SampleRate(), effect_->Delay() * 1000);
-				}
-				if (processed_player < 0) {
-					need_update = false;
-					processed_player = 0;
-				}
-				if(need_update)
-					timestamp_ = CalcCorrectPlayTime(processed - processed_player);
-			}
+			UpdateTimestamp();
 		});
 	}
 
@@ -204,6 +208,11 @@ public:
 	}
 
 	int SetEffect(Effects id) {
+		int64_t timestamp = 0;
+		{
+			unique_lock<mutex> lck(tick_mutex_);
+			timestamp = timestamp_;
+		}
 		if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
 			auto playing = Playing();
 			Stop();
@@ -216,7 +225,7 @@ public:
 			effect_ = new_effect;
 			if (playing) {
 				Start(true); 
-				Seek(timestamp_);
+				Seek(timestamp);
 			}
 		}
 		return SUCCEED;

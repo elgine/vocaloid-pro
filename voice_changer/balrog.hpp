@@ -4,13 +4,10 @@
 #include "../vocaloid/convolution_node.hpp"
 #include "../vocaloid/dynamic_compressor_node.hpp"
 #include "../vocaloid/biquad_node.hpp"
-#include "../utility/buffer.hpp"
-#include "../vocaloid/read_file_buffer.hpp"
 #include "../vocaloid/file_reader_node.hpp"
 #include "effects.h"
 #include "effect.hpp"
-#include "extract_resource.hpp"
-#include "resource.h"
+#include "load_kernel.hpp"
 namespace effect {
 
 	class Balrog : public Effect {
@@ -26,6 +23,7 @@ namespace effect {
 		GainNode *no_conv_gain_;
 		FileReaderNode *fire_;
 		BiquadNode *filter2_;
+		AudioChannel *kernel_;
 	public:
 		static float LFO_FREQ_DEFAULT;
 		static float LFO_FREQ_MIN;
@@ -134,13 +132,9 @@ namespace effect {
 			osc_gain_->gain_->value_ = LFO_GAIN_DEFAULT;
 
 			convolver_ = new ConvolutionNode(ctx);
-			auto buf = new vocaloid::Buffer<char>();
-			auto format = new vocaloid::io::AudioFormat();
-			ReadFileBuffer(ExtractResource(IDR_LARGE_WIDE_ECHO_HALL, L"wav").data(), format, buf);
-			auto channel = new AudioChannel();
-			channel->FromBuffer(buf, format->bits, format->channels);
-			convolver_->kernel_ = channel;
-			buf->Dispose();
+			kernel_ = new AudioChannel();
+			LoadKernel(IDR_LARGE_WIDE_ECHO_HALL, L"wav", kernel_);
+			convolver_->kernel_ = kernel_;
 
 			convolver_gain_ = new GainNode(ctx);
 			convolver_gain_->gain_->value_ = ECHO_GAIN_DEFAULT;
@@ -174,6 +168,11 @@ namespace effect {
 		}
 
 		void Dispose() override {
+			if (kernel_) {
+				kernel_->Dispose();
+				delete kernel_;
+				kernel_ = nullptr;
+			}
 			if (filter_) {
 				filter_->Dispose();
 				delete filter_; filter_ = nullptr;

@@ -4,6 +4,7 @@
 #include "status.h"
 #include "../utility/buffer.hpp"
 #include <windows.h>
+#include <atomic>
 #pragma comment(lib, "winmm.lib")
 namespace vocaloid {
 	namespace io {
@@ -16,12 +17,17 @@ namespace vocaloid {
 			HWAVEOUT wave_out_;
 			Buffer<char> *buf_;
 			atomic<bool> playing_;
+			atomic<bool> feeding_;
 			atomic<int64_t> processed_;
 			thread *playback_thread_;
 			mutex playback_mutex_;
-			atomic<bool> feed_;
 			condition_variable can_play_;
-			LPWAVEHDR header_;
+			
+			WAVEHDR header_[2];
+
+			// Play index
+			int play_index_;
+
 
 			bool CanPlay() {
 				return buf_->Size() >= BUFFER_SIZE;
@@ -29,13 +35,7 @@ namespace vocaloid {
 
 			void NotifyToPlay() {
 				unique_lock<mutex> lck(playback_mutex_);
-				if (nullptr != header_){
-					::waveOutUnprepareHeader(wave_out_, header_, sizeof(WAVEHDR));
-					delete[] header_->lpData;
-					delete   header_;
-					header_ = nullptr;
-				}
-				feed_ = true;
+				feeding_ = true;
 				can_play_.notify_one();
 			}
 
@@ -52,20 +52,12 @@ namespace vocaloid {
 
 			void Play(int64_t buf_size) {
 				// Playback
-				LPWAVEHDR header = new WAVEHDR;
-				memset(header, 0, sizeof(WAVEHDR));
-				header->dwLoops = 1;
-				header->dwBufferLength = buf_size;
-				header->lpData = new char[buf_size];
-
-				auto ret = waveOutPrepareHeader(wave_out_, header, sizeof(WAVEHDR));
-				if (ret == MMSYSERR_NOERROR) {
-					buf_->Pop(header->lpData, buf_size);
-					waveOutWrite(wave_out_, header, sizeof(WAVEHDR));
-					processed_ += buf_size / format_.nBlockAlign;
-				}
-				feed_ = false;
-				header_ = header;
+				header_[play_index_].dwBufferLength = buf_size;
+				buf_->Pop(header_[play_index_].lpData, buf_size);
+				waveOutWrite(wave_out_, &header_[play_index_], sizeof(WAVEHDR));
+				processed_ += buf_size / format_.nBlockAlign;
+				play_index_ = !play_index_;
+				feeding_ = false;
 			}
 
 			void PlayLoop() {
@@ -73,21 +65,27 @@ namespace vocaloid {
 				while (true) {
 					unique_lock<mutex> lck(playback_mutex_);
 					if (!playing_)break;
-					while (!feed_ || !CanPlay())can_play_.wait(lck);
+					while (!feeding_ || !CanPlay())can_play_.wait(lck);
 					// Playback
 					Play(BUFFER_SIZE);
+					this_thread::sleep_for(chrono::milliseconds(5));
 				}
 			}
 
 		public:
 			WaveOutPlayer() {
 				wave_out_ = nullptr;
-				header_ = nullptr;
 				buf_ = new Buffer<char>();
 				playing_ = false;
+				feeding_ = false;
 				playback_thread_ = nullptr;
 				processed_ = 0;
-				feed_ = false;
+				header_[0].dwFlags = 0;
+				header_[1].dwFlags = 0;
+				header_[0].lpData = (char*)malloc(BUFFER_SIZE);
+				header_[1].lpData = (char*)malloc(BUFFER_SIZE);
+				header_[0].dwBufferLength = BUFFER_SIZE;
+				header_[1].dwBufferLength = BUFFER_SIZE;
 			}
 
 			~WaveOutPlayer() {
@@ -109,6 +107,15 @@ namespace vocaloid {
 					return ret;
 				}
 				ret = waveOutOpen(&wave_out_, WAVE_MAPPER, &format_, (DWORD)WaveOutProc, (DWORD)this, CALLBACK_FUNCTION);
+				if (ret != MMSYSERR_NOERROR) {
+					return ret;
+				}
+				waveOutPrepareHeader(wave_out_, &header_[0], sizeof(WAVEHDR));
+				waveOutPrepareHeader(wave_out_, &header_[1], sizeof(WAVEHDR));
+				if (!(header_[0].dwFlags & WHDR_PREPARED) || !(header_[1].dwFlags & WHDR_PREPARED)) {
+					return UNKNOWN_EXCEPTION;
+				}
+				play_index_ = 0;
 				return ret;
 			}
 
@@ -164,12 +171,15 @@ namespace vocaloid {
 			int Flush() override {
 				{
 					unique_lock<mutex> lck(playback_mutex_);
+					while (buf_->Size() > 0) {
+						Play(min(BUFFER_SIZE, buf_->Size()));
+					}
 				}
 				return 0;
 			}
 		};
 
-		const int WaveOutPlayer::BUFFER_SIZE = 16384;
+		const int WaveOutPlayer::BUFFER_SIZE = 16384 * 8;
 	}
 }
 #endif

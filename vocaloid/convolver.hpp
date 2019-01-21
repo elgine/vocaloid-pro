@@ -234,7 +234,7 @@ namespace vocaloid {
 				main_imag_ = nullptr;
 				segment_buffer_ = nullptr;
 				overlap_add_thread_ = nullptr;
-				thread_count_ = 8;
+				thread_count_ = 4;
 				seg_index_ = 0;
 				compose_index_ = 0;
 			}

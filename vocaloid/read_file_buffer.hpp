@@ -49,6 +49,8 @@ namespace vocaloid {
 			}
 			reader->Stop();
 			reader->Dispose();
+			delete[] temp;
+			temp = nullptr;
 			return sum;
 		}
 	}
