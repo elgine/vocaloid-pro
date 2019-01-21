@@ -1,52 +1,93 @@
 #pragma once
 #ifdef _WIN32 || _WIN64
 #include "player.h"
+#include "status.h"
+#include "../utility/buffer.hpp"
 #include <windows.h>
 #pragma comment(lib, "winmm.lib")
 namespace vocaloid {
 	namespace io {
-		// 1024 * 16 * 8
-		#define MAX_BUFFER_SIZE (176000)
 		//Simple audio player for playing pcm data
 		class WaveOutPlayer: public Player {
 		private:
-			//Use event to control processing data
-			HANDLE play_event_;
-			HWAVEOUT wave_out_;
-			// Double caching
-			WAVEHDR wave_header_[2];
-			// Buffer caching pcm data
-			char* caching_buf_;
-			// Buffer offset
-			int buf_offset_;
-			// Play index
-			int play_index_;
-			// Has played
-			bool has_began_;
+			static const int BUFFER_SIZE;
 
-			int Play(const char* buf, int size) {
-				WaitForSingleObject(play_event_, INFINITE);
-				wave_header_[play_index_].dwBufferLength = size;
-				memcpy(wave_header_[play_index_].lpData, buf, size);
-				if (waveOutWrite(wave_out_, &wave_header_[play_index_], sizeof(WAVEHDR))) {
-					SetEvent(play_event_);
-					return -1;
-				}
-				play_index_ = !play_index_;
-				return 0;
+			WAVEFORMATEX format_;
+			HWAVEOUT wave_out_;
+			Buffer<char> *buf_;
+			atomic<bool> playing_;
+			atomic<int64_t> processed_;
+			thread *playback_thread_;
+			mutex playback_mutex_;
+			atomic<bool> feed_;
+			condition_variable can_play_;
+			LPWAVEHDR header_;
+
+			bool CanPlay() {
+				return buf_->Size() >= BUFFER_SIZE;
 			}
+
+			void NotifyToPlay() {
+				unique_lock<mutex> lck(playback_mutex_);
+				if (nullptr != header_){
+					::waveOutUnprepareHeader(wave_out_, header_, sizeof(WAVEHDR));
+					delete[] header_->lpData;
+					delete   header_;
+					header_ = nullptr;
+				}
+				feed_ = true;
+				can_play_.notify_one();
+			}
+
+			static void CALLBACK WaveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD instance, DWORD dwParam1, DWORD dwParam2){
+				WaveOutPlayer* p_this = (WaveOutPlayer*)instance;
+				switch (uMsg) {
+				case WOM_DONE:
+				case WOM_OPEN:
+					p_this->NotifyToPlay();
+					break;
+				}
+				return;
+			}
+
+			void Play(int64_t buf_size) {
+				// Playback
+				LPWAVEHDR header = new WAVEHDR;
+				memset(header, 0, sizeof(WAVEHDR));
+				header->dwLoops = 1;
+				header->dwBufferLength = buf_size;
+				header->lpData = new char[buf_size];
+
+				auto ret = waveOutPrepareHeader(wave_out_, header, sizeof(WAVEHDR));
+				if (ret == MMSYSERR_NOERROR) {
+					buf_->Pop(header->lpData, buf_size);
+					waveOutWrite(wave_out_, header, sizeof(WAVEHDR));
+					processed_ += buf_size / format_.nBlockAlign;
+				}
+				feed_ = false;
+				header_ = header;
+			}
+
+			void PlayLoop() {
+				int ret = 0;
+				while (true) {
+					unique_lock<mutex> lck(playback_mutex_);
+					if (!playing_)break;
+					while (!feed_ || !CanPlay())can_play_.wait(lck);
+					// Playback
+					Play(BUFFER_SIZE);
+				}
+			}
+
 		public:
 			WaveOutPlayer() {
 				wave_out_ = nullptr;
-				wave_header_[0].dwFlags = 0;
-				wave_header_[1].dwFlags = 0;
-				wave_header_[0].lpData = (CHAR*)malloc(MAX_BUFFER_SIZE);
-				wave_header_[1].lpData = (CHAR*)malloc(MAX_BUFFER_SIZE);
-				wave_header_[0].dwBufferLength = MAX_BUFFER_SIZE;
-				wave_header_[1].dwBufferLength = MAX_BUFFER_SIZE;
-
-				caching_buf_ = (CHAR*)malloc(MAX_BUFFER_SIZE);
-				play_event_ = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+				header_ = nullptr;
+				buf_ = new Buffer<char>();
+				playing_ = false;
+				playback_thread_ = nullptr;
+				processed_ = 0;
+				feed_ = false;
 			}
 
 			~WaveOutPlayer() {
@@ -54,115 +95,81 @@ namespace vocaloid {
 			}
 
 			int Open(int32_t nSamplesPerSec, int16_t wBitsPerSample, int16_t nChannels) override {
-				WAVEFORMATEX wfx;
-				if (!caching_buf_ || !play_event_ || !wave_header_[0].lpData || !wave_header_[1].lpData) {
-					return -1;
+				format_.wFormatTag = WAVE_FORMAT_PCM;
+				format_.nChannels = nChannels;
+				format_.nSamplesPerSec = nSamplesPerSec;
+				format_.wBitsPerSample = wBitsPerSample;
+				format_.cbSize = 0;
+				format_.nBlockAlign = (WORD)(format_.wBitsPerSample * format_.nChannels / 8);
+				format_.nAvgBytesPerSec = format_.nChannels * format_.nSamplesPerSec * format_.wBitsPerSample / 8;
+
+				// Support format?
+				auto ret = waveOutOpen(0, WAVE_MAPPER, &format_, 0, 0, WAVE_FORMAT_QUERY);
+				if (ret != MMSYSERR_NOERROR){
+					return ret;
 				}
-				wfx.wFormatTag = WAVE_FORMAT_PCM;
-				wfx.nChannels = nChannels;
-				wfx.nSamplesPerSec = nSamplesPerSec;
-				wfx.wBitsPerSample = wBitsPerSample;
-				wfx.cbSize = 0;
-				wfx.nBlockAlign = (WORD)(wfx.wBitsPerSample * wfx.nChannels / 8);
-				wfx.nAvgBytesPerSec = wfx.nChannels * wfx.nSamplesPerSec * wfx.wBitsPerSample / 8;
-				if (waveOutOpen(&wave_out_, WAVE_MAPPER, &wfx, (DWORD_PTR)play_event_, 0, CALLBACK_EVENT)) {
-					return UNKNOWN_EXCEPTION;
+				ret = waveOutOpen(&wave_out_, WAVE_MAPPER, &format_, (DWORD)WaveOutProc, (DWORD)this, CALLBACK_FUNCTION);
+				return ret;
+			}
+
+			int Start() override {
+				{
+					unique_lock<mutex> lck(playback_mutex_);
+					if (playing_)return 0;
 				}
-				waveOutPrepareHeader(wave_out_, &wave_header_[0], sizeof(WAVEHDR));
-				waveOutPrepareHeader(wave_out_, &wave_header_[1], sizeof(WAVEHDR));
-				if (!(wave_header_[0].dwFlags & WHDR_PREPARED) || !(wave_header_[1].dwFlags & WHDR_PREPARED)) {
-					return UNKNOWN_EXCEPTION;
+				Stop();
+				playing_ = true;
+				playback_thread_ = new thread(&WaveOutPlayer::PlayLoop, this);
+				return 0;
+			}
+
+			int Stop() override {
+				{
+					unique_lock<mutex> lck(playback_mutex_);
+					playing_ = false;
 				}
-				buf_offset_ = 0;
-				play_index_ = 0;
-				has_began_ = false;
+				if (playback_thread_ && playback_thread_->joinable()) {
+					playback_thread_->join();
+					delete playback_thread_;
+					playback_thread_ = nullptr;
+				}
 				return 0;
 			}
 
 			int64_t Played() override {
-				MMTIME time = {TIME_SAMPLES};
-				waveOutGetPosition(wave_out_, &time, sizeof(time));
-				return time.u.sample;
+				unique_lock<mutex> lck(playback_mutex_);
+				return processed_;
 			}
 
 			void Clear() override {
-				if (wave_out_ == nullptr)return;
-				Stop();
-				buf_offset_ = 0;
-				waveOutReset(wave_out_);
-				Resume();
-			}
-
-			void Resume() override {
-				waveOutRestart(wave_out_);
-			}
-
-			void Stop() override {
-				waveOutPause(wave_out_);
+				unique_lock<mutex> lck(playback_mutex_);
+				processed_ = 0;
+				buf_->SetSize(0);
 			}
 
 			void Dispose() override {
-				if (wave_header_[0].lpData != nullptr) {
-					free(wave_header_[0].lpData);
-					wave_header_[0].lpData = nullptr;
-				}
-				if (wave_header_[1].lpData != nullptr) {
-					free(wave_header_[1].lpData);
-					wave_header_[1].lpData = nullptr;
-				}
-				if (caching_buf_ != nullptr) {
-					free(caching_buf_);
-					caching_buf_ = nullptr;
-				}
-				CloseHandle(play_event_);
-				waveOutUnprepareHeader(wave_out_, &wave_header_[0], sizeof(WAVEHDR));
-				waveOutUnprepareHeader(wave_out_, &wave_header_[1], sizeof(WAVEHDR));
+				Stop();
+				buf_->Dispose();
 				waveOutClose(wave_out_);
 				wave_out_ = nullptr;
 			}
 
 			int Push(const char* buf, size_t size) override {
-			again:
-				if (buf_offset_ + size < MAX_BUFFER_SIZE) {
-					memcpy(caching_buf_ + buf_offset_, buf, size);
-					buf_offset_ += size;
-				}
-				else {
-					memcpy(caching_buf_ + buf_offset_, buf, MAX_BUFFER_SIZE - buf_offset_);
-					if (!has_began_) {
-						if (0 == play_index_) {
-							memcpy(wave_header_[0].lpData, caching_buf_, MAX_BUFFER_SIZE);
-							play_index_ = 1;
-						}
-						else {
-							ResetEvent(play_event_);
-							memcpy(wave_header_[1].lpData, caching_buf_, MAX_BUFFER_SIZE);
-							waveOutWrite(wave_out_, &wave_header_[0], sizeof(WAVEHDR));
-							waveOutWrite(wave_out_, &wave_header_[1], sizeof(WAVEHDR));
-							has_began_ = true;
-							play_index_ = 0;
-						}
-					}
-					else if (Play(caching_buf_, MAX_BUFFER_SIZE) < 0) {
-						return -1;
-					}
-					size -= MAX_BUFFER_SIZE - buf_offset_;
-					buf += MAX_BUFFER_SIZE - buf_offset_;
-					buf_offset_ = 0;
-					if (size > 0) goto again;
-				}
-				return 0;
+				unique_lock<mutex> lck(playback_mutex_);
+				buf_->Add((char*)buf, size);
+				can_play_.notify_all();
+				return size;
 			}
 
 			int Flush() override {
-				if (buf_offset_ > 0) {
-					auto ret = Play(caching_buf_, buf_offset_);
-					buf_offset_ = 0;
-					return ret;
+				{
+					unique_lock<mutex> lck(playback_mutex_);
 				}
 				return 0;
 			}
 		};
+
+		const int WaveOutPlayer::BUFFER_SIZE = 16384;
 	}
 }
 #endif

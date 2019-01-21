@@ -1,7 +1,6 @@
 #pragma once
 #ifdef _WIN32 || _WIN64
-//#include "wave_out_player.hpp"
-#include "wasapi_player.hpp"
+#include "wave_out_player.hpp"
 #endif
 #include "player.h"
 #include "destination_node.hpp"
@@ -17,8 +16,7 @@ namespace vocaloid {
 				player_ = nullptr;
 #ifdef _WIN32 || _WIN64
 
-				//player_ = new io::WaveOutPlayer();
-				player_ = new io::WASAPIPlayer();
+				player_ = new io::WaveOutPlayer();
 #endif
 				bytes_ = new Buffer<char>();
 				sample_rate_ = 0;
@@ -45,6 +43,7 @@ namespace vocaloid {
 					bytes_->SetSize(size);
 					inited_ = true;
 				}
+				player_->Start();
 				return ret;
 			}
 

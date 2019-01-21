@@ -177,9 +177,6 @@
     <ClInclude Include="wave_out_player.hpp">
       <Filter>头文件\io</Filter>
     </ClInclude>
-    <ClInclude Include="wasapi_player.hpp">
-      <Filter>头文件\io</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="input_node.hpp">

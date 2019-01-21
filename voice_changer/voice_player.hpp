@@ -133,7 +133,7 @@ public:
 				processed = source_reader_->Processed();
 				processed_player = player_->Processed();
 				if (effect_) {
-					processed_player = (processed_player - MsecToFrames(ctx_->SampleRate(), effect_->Delay() * 1000)) / effect_->TimeScale();
+					processed_player = (processed_player) / effect_->TimeScale() - MsecToFrames(ctx_->SampleRate(), effect_->Delay() * 1000);
 				}
 				if (processed_player < 0) {
 					need_update = false;
@@ -298,9 +298,10 @@ public:
 
 	int Seek(int64_t timestamp) {
 		int ret = SUCCEED;
-		ctx_->Clear();
 		{
 			unique_lock<mutex> render(ctx_->audio_render_thread_mutex_);
+			source_reader_->Clear();
+			player_->Clear();
 			ret = source_reader_->Seek(timestamp);
 			source_reader_->Resume();
 		}
