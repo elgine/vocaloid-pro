@@ -77,10 +77,10 @@ namespace vocaloid {
 			void ComposeFrame(float *main_real, int index) {
 				{
 					unique_lock<mutex> lck(compose_mutex_);
-					if (!processing_)return;
-					while (compose_index_ < index) {
+					while (processing_ && compose_index_ < index) {
 						compose_condition_.wait(lck);
 					}
+					if (!processing_)return;
 					for (int i = 0; i < seg_fft_size_; i++) {
 						segment_buffer_[i] += main_real[i];
 					}
@@ -165,6 +165,10 @@ namespace vocaloid {
 					}
 					this_thread::sleep_for(chrono::milliseconds(index < 0 ? MINUS_SLEEP_UNIT : 1));
 				}
+				DeleteArray(&main_real);
+				DeleteArray(&main_imag);
+				DeleteArray(&kernel_real);
+				DeleteArray(&kernel_imag);
 			}
 
 			void ProcessBackground(float *in, int64_t size) {
@@ -179,7 +183,7 @@ namespace vocaloid {
 				int64_t len = 0;
 				{
 					unique_lock<mutex> lck(compose_mutex_);
-					while (output_->Size() < input_size_) {
+					while (processing_ && output_->Size() < input_size_) {
 						take_condition_.wait(lck);
 					}
 					len = output_->Pop(out, input_size_);
@@ -240,7 +244,7 @@ namespace vocaloid {
 			}
 
 			void Initialize(int64_t input_size, float* k, int64_t kernel_len, float normal_scale = 1.0f) {
-				Stop();
+				Dispose();
 				seg_index_ = -1;
 				compose_index_ = 0;
 				input_size_ = input_size;
@@ -266,22 +270,9 @@ namespace vocaloid {
 					thread_count_ = max_thread_count_;
 				if (thread_count_ > 1 && new_segments > 1) {
 					seg_fft_size_ = input_size_ * 2;
-					DeleteArray(&main_real_);
 					AllocArray(seg_fft_size_, &main_real_);
-					DeleteArray(&main_imag_);
 					AllocArray(seg_fft_size_, &main_imag_);
-					DeleteArray(&segment_buffer_);
 					AllocArray(seg_fft_size_, &segment_buffer_);
-					if (kernel_real_segs_ != nullptr && kernel_imag_segs_ != nullptr) {
-						for (auto i = 0; i < kernel_segments_; i++) {
-							DeleteArray(kernel_real_segs_ + i);
-							DeleteArray(kernel_imag_segs_ + i);
-						}
-						delete[] kernel_real_segs_;
-						kernel_real_segs_ = nullptr;
-						delete[] kernel_imag_segs_;
-						kernel_imag_segs_ = nullptr;
-					}
 
 					kernel_segments_ = new_segments;
 					kernel_real_segs_ = new float*[kernel_segments_];
@@ -310,13 +301,8 @@ namespace vocaloid {
 					overlap_add_thread_ = new thread(&Convolver::OverlapAddLoop, this);
 				}
 				else {
-					DeleteArray(&main_real_);
 					AllocArray(fft_size_, &main_real_);
-					DeleteArray(&main_imag_);
 					AllocArray(fft_size_, &main_imag_);
-
-					DeleteArray(&kernel_real_);
-					DeleteArray(&kernel_imag_);
 					AllocArray(fft_size_, &kernel_real_);
 					AllocArray(fft_size_, &kernel_imag_);
 					memcpy(kernel_real_, k, kernel_len * sizeof(float));
@@ -335,7 +321,11 @@ namespace vocaloid {
 			}
 
 			void Stop() {
-				processing_ = false;
+				{
+					unique_lock<mutex> lck(compose_mutex_);
+					processing_ = false;
+				}
+				compose_condition_.notify_all();
 				if(overlap_add_thread_ != nullptr && overlap_add_thread_->joinable()){
 					overlap_add_thread_->join();
 					delete overlap_add_thread_;
@@ -346,8 +336,6 @@ namespace vocaloid {
 					if (thread->joinable()) {
 						thread->join();
 					}
-					delete thread;
-					thread = nullptr;
 				}
 				thread_pool_.clear();
 			}

@@ -136,6 +136,10 @@ namespace vocaloid {
 					on_tick_->Emit(0);
 					this_thread::sleep_for(chrono::milliseconds(sleep));
 				}
+				{
+					unique_lock<mutex> lck(audio_render_thread_mutex_);
+					destination_->Flush();
+				}
 				on_end_->Emit(0);
 			}
 

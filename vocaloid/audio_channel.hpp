@@ -231,8 +231,16 @@ namespace vocaloid {
 			}
 
 			void Dispose() {
-				for (auto i = 0; i < channels_; i++) {
-					data_[i]->Dispose();
+				if (data_ != nullptr) {
+					for (auto i = 0; i < 8; i++) {
+						if (data_[i] != nullptr) {
+							data_[i]->Dispose();
+							delete data_[i];
+							data_[i] = nullptr;
+						}
+					}
+					delete data_;
+					data_ = nullptr;
 				}
 			}
 

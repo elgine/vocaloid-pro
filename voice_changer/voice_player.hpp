@@ -1,4 +1,5 @@
 #pragma once
+#include "../utility/logger.hpp"
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/file_reader_node.hpp"
 #include "../vocaloid/player_node.hpp"
@@ -90,7 +91,7 @@ private:
 				on_end_->Emit(0);
 				break;
 			}
-			this_thread::sleep_for(chrono::milliseconds(16));
+			this_thread::sleep_for(chrono::milliseconds(33));
 		}
 		ctx_->Stop();
 		{
@@ -111,9 +112,12 @@ private:
 		bool need_update = true;
 		auto processed_player = 0;
 		auto processed = 0;
-		unique_lock<mutex> lck(tick_mutex_);
+		auto timestamp = 0;
 		{
-			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
+			unique_lock<mutex> tick_lck(tick_mutex_);
+			timestamp = timestamp_;
+
+			unique_lock<mutex> ctx_lck(ctx_->audio_render_thread_mutex_);
 			processed = source_reader_->Processed();
 			processed_player = player_->Processed();
 			if (effect_) {
@@ -123,8 +127,11 @@ private:
 				need_update = false;
 				processed_player = 0;
 			}
-			if (need_update)
-				timestamp_ = CalcCorrectPlayTime(processed - processed_player);
+			if (need_update) {
+				timestamp = CalcCorrectPlayTime(processed - processed_player);
+			}
+
+			timestamp_ = timestamp;
 		}
 	}
 
@@ -147,6 +154,10 @@ public:
 		ctx_->on_tick_->On([&](int) {
 			UpdateTimestamp();
 		});
+
+#ifdef _DEBUG
+		logger::LogStart("C:\\Users\\Elgine\\Desktop\\log.txt");
+#endif
 	}
 
 	void SubscribeTick(OnPlayerTick h) {
@@ -209,25 +220,61 @@ public:
 
 	int SetEffect(Effects id) {
 		int64_t timestamp = 0;
+		auto playing = Playing();
 		{
 			unique_lock<mutex> lck(tick_mutex_);
 			timestamp = timestamp_;
 		}
-		if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
-			auto playing = Playing();
+#ifdef _DEBUG
+		LOG_PRINT("Change effect %d ==================", id);
+#endif
+
+		//if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
+			
+#ifdef _DEBUG
+			LOG_PRINT("Try to stop");
+#endif
 			Stop();
+#ifdef _DEBUG
+			LOG_PRINT("Stopped");
+#endif
+#ifdef _DEBUG
+			LOG_PRINT("Try to new effect");
+#endif
 			Effect* new_effect = EffectFactory(id, ctx_);
+#ifdef _DEBUG
+			LOG_PRINT("New effect complete");
+#endif
+#ifdef _DEBUG
+			LOG_PRINT("Try to free last effect");
+#endif
 			if (effect_ != nullptr) {
 				effect_->Dispose();
 				delete effect_;
 				effect_ = nullptr;
 			}
+#ifdef _DEBUG
+			LOG_PRINT("Free last effect complete");
+#endif
 			effect_ = new_effect;
+
 			if (playing) {
-				Start(true); 
+#ifdef _DEBUG
+				LOG_PRINT("Seek");
+#endif
 				Seek(timestamp);
+#ifdef _DEBUG
+				LOG_PRINT("Seek completed");
+#endif
+#ifdef _DEBUG
+				LOG_PRINT("Start context");
+#endif
+				Start(true); 
+#ifdef _DEBUG
+				LOG_PRINT("Context started");
+#endif
 			}
-		}
+		//}
 		return SUCCEED;
 	}
 
@@ -253,7 +300,6 @@ public:
 		unique_lock<mutex> lck(tick_mutex_);
 		return state_ == VoicePlayerState::PLAYER_PLAYING;
 	}
-
 
 	int Start(int restart = true) {
 		if (Playing())return SUCCEED;
@@ -314,7 +360,7 @@ public:
 			ret = source_reader_->Seek(timestamp);
 			source_reader_->Resume();
 		}
-		if(ret >= 0){
+		{
 			unique_lock<mutex> lck(tick_mutex_);
 			timestamp_ = timestamp;
 		}

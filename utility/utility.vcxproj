@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="buffer.hpp" />
     <ClInclude Include="emitter.hpp" />
+    <ClInclude Include="logger.hpp" />
     <ClInclude Include="module.hpp" />
     <ClInclude Include="os_detection.hpp" />
     <ClInclude Include="path.hpp" />

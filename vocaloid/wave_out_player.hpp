@@ -63,12 +63,14 @@ namespace vocaloid {
 			void PlayLoop() {
 				int ret = 0;
 				while (true) {
-					unique_lock<mutex> lck(playback_mutex_);
-					if (!playing_)break;
-					while (!feeding_ || !CanPlay())can_play_.wait(lck);
-					// Playback
-					Play(BUFFER_SIZE);
-					this_thread::sleep_for(chrono::milliseconds(5));
+					{
+						unique_lock<mutex> lck(playback_mutex_);
+						if (!playing_)break;
+						while (playing_ && (!feeding_ || !CanPlay()))can_play_.wait(lck);
+						// Playback
+						Play(BUFFER_SIZE);
+					}
+					this_thread::sleep_for(chrono::milliseconds(1));
 				}
 			}
 
@@ -120,10 +122,7 @@ namespace vocaloid {
 			}
 
 			int Start() override {
-				{
-					unique_lock<mutex> lck(playback_mutex_);
-					if (playing_)return 0;
-				}
+				if (Playing())return 0;
 				Stop();
 				playing_ = true;
 				playback_thread_ = new thread(&WaveOutPlayer::PlayLoop, this);
@@ -135,6 +134,7 @@ namespace vocaloid {
 					unique_lock<mutex> lck(playback_mutex_);
 					playing_ = false;
 				}
+				can_play_.notify_one();
 				if (playback_thread_ && playback_thread_->joinable()) {
 					playback_thread_->join();
 					delete playback_thread_;
@@ -154,6 +154,11 @@ namespace vocaloid {
 				buf_->SetSize(0);
 			}
 
+			bool Playing() {
+				unique_lock<mutex> lck(playback_mutex_);
+				return playing_;
+			}
+
 			void Dispose() override {
 				Stop();
 				buf_->Dispose();
@@ -162,19 +167,16 @@ namespace vocaloid {
 			}
 
 			int Push(const char* buf, size_t size) override {
-				unique_lock<mutex> lck(playback_mutex_);
-				buf_->Add((char*)buf, size);
-				can_play_.notify_all();
+				if (!Playing())Start();
+				{
+					unique_lock<mutex> lck(playback_mutex_);
+					buf_->Add((char*)buf, size);
+					can_play_.notify_all();
+				}
 				return size;
 			}
 
 			int Flush() override {
-				{
-					unique_lock<mutex> lck(playback_mutex_);
-					while (buf_->Size() > 0) {
-						Play(min(BUFFER_SIZE, buf_->Size()));
-					}
-				}
 				return 0;
 			}
 		};

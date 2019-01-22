@@ -83,8 +83,8 @@ namespace vocaloid{
 				AllocArray(size, &new_data);
 				if (data_ != nullptr) {
 					memcpy(new_data, data_, max_size_ * sizeof(T));
-					DeleteArray(&data_);
 				}
+				DeleteArray(&data_);
 				data_ = new_data;
                 max_size_ = size;
             }

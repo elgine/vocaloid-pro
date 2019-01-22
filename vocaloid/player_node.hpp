@@ -55,6 +55,10 @@ namespace vocaloid {
 				player_->Clear();
 			}
 
+			void Stop() override {
+				player_->Stop();
+			}
+
 			int64_t Processed() override {
 				return player_->Played();
 			}

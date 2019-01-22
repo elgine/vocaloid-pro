@@ -21,7 +21,6 @@ namespace vocaloid {
 			virtual void Close() {}
 
 			void Stop() override {
-				Flush();
 			}
 
 			OutputType OutputType() {

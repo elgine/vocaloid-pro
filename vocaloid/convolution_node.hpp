@@ -53,6 +53,8 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
+#ifdef _DEBUG
+#endif
 				for (auto i = 0; i < channels_; i++) {
 					if (convolver_[i] != nullptr) {
 						convolver_[i]->Dispose();

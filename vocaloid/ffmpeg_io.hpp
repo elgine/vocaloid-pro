@@ -204,7 +204,7 @@ namespace vocaloid {
 			void SetMaxBufferSize(int64_t max_size) {
 				max_buffer_size_ = max_size;
 				DeleteArray(&buffer_);
-				buffer_ = new char[max_buffer_size_];
+				AllocArray(max_buffer_size_, &buffer_);
 			}
 
 			int64_t FileLength() override {

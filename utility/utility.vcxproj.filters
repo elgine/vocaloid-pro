@@ -48,5 +48,8 @@
     <ClInclude Include="os_detection.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="logger.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

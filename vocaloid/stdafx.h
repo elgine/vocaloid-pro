@@ -36,7 +36,7 @@ void DeleteArray(T **arr) {
 	if (*arr != nullptr) {
 		free(*arr);
 		*arr = nullptr;
-		/*delete[](*arr);
-		(*arr) = nullptr;*/
+		//delete[](*arr);
+		(*arr) = nullptr;
 	}
 }

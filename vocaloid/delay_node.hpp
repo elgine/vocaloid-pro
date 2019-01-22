@@ -34,6 +34,10 @@ namespace vocaloid {
 			}
 
 			void Dispose() override {
+				for (auto i = 0; i < channels_; i++) {
+					buffers_[i].clear();
+					buffers_[i].shrink_to_fit();
+				}
 				if (delay_time_) {
 					delay_time_->Dispose();
 					delete delay_time_;
@@ -47,6 +51,8 @@ namespace vocaloid {
 				max_delay_size_ = int64_t((max_delay_time_ + 1) * sample_rate);
 				delay_time_->Initialize(sample_rate, frame_size);
 				for (auto i = 0; i < channels_; i++) {
+					buffers_[i].clear();
+					buffers_[i].shrink_to_fit();
 					buffers_[i].resize(max_delay_size_);
 				}
 				return SUCCEED;
