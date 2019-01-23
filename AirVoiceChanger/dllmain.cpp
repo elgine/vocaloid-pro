@@ -35,7 +35,7 @@ int(*set_temp_path)(const char*);
 void(*get_source_info)(int*);
 int(*dispose_temps)();
 int(*set_effect)(int);
-int(*set_effect_options)(float*, int);
+int(*set_effect_options)(double*, int);
 int(*set_segments)(int*, int);
 void(*set_loop)(bool);
 int(*open_preview)(const char*);
@@ -166,7 +166,7 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			if (set_effect == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			open_preview = (int(*)(const char*))GetProcAddress(handler, "OpenPreview");
 			if (open_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-			set_effect_options = (int(*)(float*, int))GetProcAddress(handler, "SetEffectOptionsPreview");
+			set_effect_options = (int(*)(double*, int))GetProcAddress(handler, "SetEffectOptionsPreview");
 			if (set_effect_options == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			start_preview = (int(*)())GetProcAddress(handler, "StartPreview");
 			if (start_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
@@ -248,7 +248,7 @@ FREObject OpenPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject a
 FREObject SetEffectOptionsPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 	if (argc < 2)return FromInt(MISS_PARAM);
 	if (!inited)return FromInt(HAS_NOT_INITED);
-	float* arr = (float*)ToDoubleArray(argv[0]);
+	double* arr = ToDoubleArray(argv[0]);
 	if (arr == nullptr)return FromInt(PARAM_NOT_MATCH);
 	int count = ToInt(argv[1]);
 	if (count <= 0)return FromInt(PARAM_NOT_MATCH);

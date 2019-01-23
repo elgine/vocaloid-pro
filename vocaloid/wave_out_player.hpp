@@ -69,7 +69,7 @@ namespace vocaloid {
 						free_block_count_ = max(0, free_block_count_ - 1);
 						LeaveCriticalSection(&wave_sec_);
 					}
-					this_thread::sleep_for(chrono::milliseconds(1));
+					this_thread::sleep_for(chrono::milliseconds(10));
 				}
 			}
 

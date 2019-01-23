@@ -175,18 +175,21 @@ public:
 		}
 	}
 
-	int SetOptions(float* options, int option_count) {
+	int SetOptions(double* options, int option_count) {
+		static float* options_float = new float[500];
+		for (auto i = 0; i < option_count; i++) {
+			options_float[i] = options[i];
+		}
 		int ret = SUCCEED;
 		{
 			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
 			if (effect_) {
-				effect_->SetOptions(options, option_count); 
-				source_reader_->Clear();
-				player_->Clear();
+				effect_->SetOptions(options_float, option_count);
 			}
 			else
 				ret = NO_SUCH_EFFECT;
 		}
+		Seek(timestamp_);
 		return ret;
 	}
 
@@ -213,12 +216,8 @@ public:
 	}
 
 	int SetEffect(Effects id) {
-		int64_t timestamp = 0;
+		int64_t timestamp = timestamp_;;
 		auto playing = Playing();
-		{
-			unique_lock<mutex> lck(tick_mutex_);
-			timestamp = timestamp_;
-		}
 		if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
 			Stop();
 			Effect* new_effect = EffectFactory(id, ctx_);
@@ -265,7 +264,7 @@ public:
 		auto ret = SUCCEED;
 		source_reader_->Resume();
 		if (effect_) {
-			effect_->Resume();
+			effect_->Start();
 		}
 		if (!inited_) {
 			if (effect_) {

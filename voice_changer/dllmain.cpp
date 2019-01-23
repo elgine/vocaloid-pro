@@ -70,7 +70,7 @@ extern "C" {
 		return GetPlayer()->Open(path);
 	}
 
-	DLLEXPORT int SetEffectOptionsPreview(float* options, int count) {
+	DLLEXPORT int SetEffectOptionsPreview(double* options, int count) {
 		return GetPlayer()->SetOptions(options, count);
 	}
 

@@ -18,7 +18,7 @@ using namespace std;
 #define DEFAULT_FRAME_SIZE 4096
 #define MAX_FFT_SIZE 32768
 #define MAX_FRAME_SIZE MAX_FFT_SIZE * 10
-#define MINUS_SLEEP_UNIT 5
+#define MINUS_SLEEP_UNIT 10
 #define BITS_PER_SEC 16
 #define EOF -1
 

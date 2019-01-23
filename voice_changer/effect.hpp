@@ -34,7 +34,8 @@ namespace effect {
 		}
 
 		virtual void SetOptions(float* options, int option_count) {
-			
+			if (option_count < 0)return;
+			SetGain(options[0]);
 		}
 
 		Effects Id() {
