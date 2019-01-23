@@ -39,8 +39,8 @@ private:
 
 	string path_;
 
-	int64_t timestamp_;
-	int64_t duration_;
+	atomic<int64_t> timestamp_;
+	atomic<int64_t> duration_;
 	int64_t last_processed_player_;
 
 	thread *tick_thread_;
@@ -76,17 +76,13 @@ private:
 		int timestamp = 0, duration = 0, last_timestamp = 0;
 		while (1) {
 			if (!Playing())break;
-			{
-				unique_lock<mutex> lck(tick_mutex_);
-				if (state_ == VoicePlayerState::PLAYER_STOP)break;
-				timestamp = timestamp_;
-				duration = duration_;
-			}
+			if (state_ == VoicePlayerState::PLAYER_STOP)break;
+			timestamp = timestamp_;
+			duration = duration_;
 			if (last_timestamp != timestamp) {
 				on_tick_->Emit({ timestamp, duration });
 				last_timestamp = timestamp;
 			}
-
 			if (timestamp >= duration) {
 				on_end_->Emit(0);
 				break;
@@ -112,11 +108,8 @@ private:
 		bool need_update = true;
 		auto processed_player = 0;
 		auto processed = 0;
-		auto timestamp = 0;
+		int64_t timestamp = timestamp_;
 		{
-			unique_lock<mutex> tick_lck(tick_mutex_);
-			timestamp = timestamp_;
-
 			unique_lock<mutex> ctx_lck(ctx_->audio_render_thread_mutex_);
 			processed = source_reader_->Processed();
 			processed_player = player_->Processed();
@@ -130,7 +123,9 @@ private:
 			if (need_update) {
 				timestamp = CalcCorrectPlayTime(processed - processed_player);
 			}
-
+		}
+		{
+			unique_lock<mutex> tick_lck(tick_mutex_);
 			timestamp_ = timestamp;
 		}
 	}
@@ -297,7 +292,6 @@ public:
 	}
 
 	bool Playing() {
-		unique_lock<mutex> lck(tick_mutex_);
 		return state_ == VoicePlayerState::PLAYER_PLAYING;
 	}
 
@@ -339,8 +333,6 @@ public:
 
 	int Stop() {
 		if (Playing()) {
-			// TODO: if can remove
-			// auto ret = ctx_->Stop();
 			{
 				unique_lock<mutex> lck(tick_mutex_);
 				state_ = VoicePlayerState::PLAYER_STOP;
@@ -353,6 +345,7 @@ public:
 
 	int Seek(int64_t timestamp) {
 		int ret = SUCCEED;
+		unique_lock<mutex> lck(tick_mutex_);
 		{
 			unique_lock<mutex> render(ctx_->audio_render_thread_mutex_);
 			source_reader_->Clear();
@@ -360,10 +353,7 @@ public:
 			ret = source_reader_->Seek(timestamp);
 			source_reader_->Resume();
 		}
-		{
-			unique_lock<mutex> lck(tick_mutex_);
-			timestamp_ = timestamp;
-		}
+		timestamp_ = timestamp;
 		return ret;
 	}
 

@@ -13,41 +13,35 @@ namespace vocaloid {
 		private:
 			static const int BUFFER_SIZE;
 
+			volatile int free_block_count_;
+			CRITICAL_SECTION wave_sec_;
+
 			WAVEFORMATEX format_;
 			HWAVEOUT wave_out_;
 			Buffer<char> *buf_;
 			atomic<bool> playing_;
-			atomic<bool> feeding_;
+			// Play index
+			atomic<int> play_index_;
 			atomic<int64_t> processed_;
 			thread *playback_thread_;
 			mutex playback_mutex_;
-			condition_variable can_play_;
-			
 			WAVEHDR header_[2];
 
-			// Play index
-			int play_index_;
-
-
-			bool CanPlay() {
-				return buf_->Size() >= BUFFER_SIZE;
-			}
-
-			void NotifyToPlay() {
-				unique_lock<mutex> lck(playback_mutex_);
-				feeding_ = true;
-				can_play_.notify_one();
-			}
-
 			static void CALLBACK WaveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD instance, DWORD dwParam1, DWORD dwParam2){
-				WaveOutPlayer* p_this = (WaveOutPlayer*)instance;
+				WaveOutPlayer* this_pointer = (WaveOutPlayer*)instance;
 				switch (uMsg) {
 				case WOM_DONE:
-				case WOM_OPEN:
-					p_this->NotifyToPlay();
+					this_pointer->Notify();
 					break;
 				}
 				return;
+			}
+
+			void Notify() {
+				EnterCriticalSection(&wave_sec_);
+				free_block_count_++;
+				free_block_count_ %= 2;
+				LeaveCriticalSection(&wave_sec_);
 			}
 
 			void Play(int64_t buf_size) {
@@ -57,18 +51,24 @@ namespace vocaloid {
 				waveOutWrite(wave_out_, &header_[play_index_], sizeof(WAVEHDR));
 				processed_ += buf_size / format_.nBlockAlign;
 				play_index_ = !play_index_;
-				feeding_ = false;
+			}
+
+			bool CanPlay() {
+				unique_lock<mutex> lck(playback_mutex_);
+				return buf_->Size() >= BUFFER_SIZE;
 			}
 
 			void PlayLoop() {
 				int ret = 0;
-				while (true) {
-					{
-						unique_lock<mutex> lck(playback_mutex_);
-						if (!playing_)break;
-						while (playing_ && (!feeding_ || !CanPlay()))can_play_.wait(lck);
-						// Playback
-						Play(BUFFER_SIZE);
+				while (playing_) {
+					while (playing_ && free_block_count_ > 0 && CanPlay()) {
+						{
+							unique_lock<mutex> lck(playback_mutex_);
+							Play(BUFFER_SIZE);
+						}
+						EnterCriticalSection(&wave_sec_);
+						free_block_count_--;
+						LeaveCriticalSection(&wave_sec_);
 					}
 					this_thread::sleep_for(chrono::milliseconds(1));
 				}
@@ -79,15 +79,17 @@ namespace vocaloid {
 				wave_out_ = nullptr;
 				buf_ = new Buffer<char>();
 				playing_ = false;
-				feeding_ = false;
+				free_block_count_ = 2;
 				playback_thread_ = nullptr;
 				processed_ = 0;
+				play_index_ = 0;
 				header_[0].dwFlags = 0;
 				header_[1].dwFlags = 0;
 				header_[0].lpData = (char*)malloc(BUFFER_SIZE);
 				header_[1].lpData = (char*)malloc(BUFFER_SIZE);
 				header_[0].dwBufferLength = BUFFER_SIZE;
 				header_[1].dwBufferLength = BUFFER_SIZE;
+				InitializeCriticalSection(&wave_sec_);
 			}
 
 			~WaveOutPlayer() {
@@ -108,7 +110,7 @@ namespace vocaloid {
 				if (ret != MMSYSERR_NOERROR){
 					return ret;
 				}
-				ret = waveOutOpen(&wave_out_, WAVE_MAPPER, &format_, (DWORD)WaveOutProc, (DWORD)this, CALLBACK_FUNCTION);
+				ret = waveOutOpen(&wave_out_, WAVE_MAPPER, &format_, (DWORD_PTR)WaveOutProc, (DWORD_PTR)this, CALLBACK_FUNCTION);
 				if (ret != MMSYSERR_NOERROR) {
 					return ret;
 				}
@@ -122,7 +124,7 @@ namespace vocaloid {
 			}
 
 			int Start() override {
-				if (Playing())return 0;
+				if (playing_)return 0;
 				Stop();
 				playing_ = true;
 				playback_thread_ = new thread(&WaveOutPlayer::PlayLoop, this);
@@ -134,7 +136,6 @@ namespace vocaloid {
 					unique_lock<mutex> lck(playback_mutex_);
 					playing_ = false;
 				}
-				can_play_.notify_one();
 				if (playback_thread_ && playback_thread_->joinable()) {
 					playback_thread_->join();
 					delete playback_thread_;
@@ -144,19 +145,15 @@ namespace vocaloid {
 			}
 
 			int64_t Played() override {
-				unique_lock<mutex> lck(playback_mutex_);
 				return processed_;
 			}
 
 			void Clear() override {
-				unique_lock<mutex> lck(playback_mutex_);
-				processed_ = 0;
-				buf_->SetSize(0);
-			}
-
-			bool Playing() {
-				unique_lock<mutex> lck(playback_mutex_);
-				return playing_;
+				{
+					unique_lock<mutex> lck(playback_mutex_);
+					processed_ = 0;
+					buf_->SetSize(0);
+				}
 			}
 
 			void Dispose() override {
@@ -164,15 +161,13 @@ namespace vocaloid {
 				buf_->Dispose();
 				waveOutClose(wave_out_);
 				wave_out_ = nullptr;
+				DeleteCriticalSection(&wave_sec_);
 			}
 
 			int Push(const char* buf, size_t size) override {
-				if (!Playing())Start();
-				{
-					unique_lock<mutex> lck(playback_mutex_);
-					buf_->Add((char*)buf, size);
-					can_play_.notify_all();
-				}
+				if (!playing_)Start();
+				unique_lock<mutex> lck(playback_mutex_);
+				buf_->Add((char*)buf, size);
 				return size;
 			}
 
@@ -181,7 +176,7 @@ namespace vocaloid {
 			}
 		};
 
-		const int WaveOutPlayer::BUFFER_SIZE = 16384 * 8;
+		const int WaveOutPlayer::BUFFER_SIZE = 16384;
 	}
 }
 #endif
