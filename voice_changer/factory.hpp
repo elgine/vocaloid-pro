@@ -24,28 +24,29 @@
 namespace effect {
 
 	Effect* EffectFactory(Effects id, BaseAudioContext *ctx) {
+		Effect *effect = nullptr;
 		switch (id) {
-		case Effects::ALIEN:return new Alien(ctx);
-		case Effects::ROBOT1:return new Robot1(ctx);
-		case Effects::ROBOT2:return new Robot2(ctx);
-		case Effects::ASTRONAUT:return new Astronaut(ctx);
-		case Effects::UNCLE:return new Uncle(ctx);
-		case Effects::FEMALE:return new Female(ctx);
-		case Effects::CHILD:return new Child(ctx);
-		case Effects::MALE:return new Male(ctx);
-		case Effects::OLD_MALE:return new OldMale(ctx);
-		case Effects::OLD_FEMALE:return new OldFemale(ctx);
-		case Effects::TRANSFORMER:return new Transformer(ctx);
-		case Effects::BALROG:return new Balrog(ctx);
-		case Effects::CAVE:return new Cave(ctx);
-		case Effects::BROAD_ROOM:return new BroadRoom(ctx);
-		case Effects::UNDER_WATER:return new UnderWater(ctx);
-		case Effects::HALL:return new Hall(ctx);
-		case Effects::MUFFLER:return new Muffler(ctx);
-		case Effects::TELEPHONE:return new Telephone(ctx);
-		case Effects::RADIO:return new Radio(ctx);
-		case Effects::MEGAPHONE:return new Megaphone(ctx);
+		case Effects::ALIEN:effect = new Alien(ctx); break;
+		case Effects::ROBOT1:effect = new Robot1(ctx); break;
+		case Effects::ROBOT2:effect = new Robot2(ctx); break;
+		case Effects::ASTRONAUT:effect = new Astronaut(ctx); break;
+		case Effects::UNCLE:effect = new Uncle(ctx); break;
+		case Effects::FEMALE:effect = new Female(ctx); break;
+		case Effects::CHILD:effect = new Child(ctx); break;
+		case Effects::MALE:effect = new Male(ctx); break;
+		case Effects::OLD_MALE:effect = new OldMale(ctx); break;
+		case Effects::OLD_FEMALE:effect = new OldFemale(ctx); break;
+		case Effects::TRANSFORMER:effect = new Transformer(ctx); break;
+		case Effects::BALROG:effect = new Balrog(ctx); break;
+		case Effects::CAVE:effect = new Cave(ctx); break;
+		case Effects::BROAD_ROOM:effect = new BroadRoom(ctx); break;
+		case Effects::UNDER_WATER:effect = new UnderWater(ctx); break;
+		case Effects::HALL:effect = new Hall(ctx); break;
+		case Effects::MUFFLER:effect = new Muffler(ctx); break;
+		case Effects::TELEPHONE:effect = new Telephone(ctx); break;
+		case Effects::RADIO:effect = new Radio(ctx); break;
+		case Effects::MEGAPHONE:effect = new Megaphone(ctx); break;
 		}
-		return nullptr;
+		return effect;
 	}
 }

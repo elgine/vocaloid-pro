@@ -41,7 +41,6 @@ namespace vocaloid {
 		public:
 
 			bool enable_;
-			bool watched_;
 
 			explicit AudioNode(BaseAudioContext *ctx, AudioNodeType type = AudioNodeType::NORMAL,
 				bool can_be_connected = true,
@@ -55,7 +54,6 @@ namespace vocaloid {
 				sample_rate_ = 0;
 				channels_ = 2;
 				enable_ = true;
-				watched_ = false;
 				summing_buffer_ = new AudioChannel(channels_, frame_size_);
 				result_buffer_ = new AudioChannel(channels_, frame_size_);
 			}

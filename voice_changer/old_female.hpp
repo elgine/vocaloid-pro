@@ -46,7 +46,6 @@ namespace effect {
 			highpass_->type_ = dsp::BIQUAD_TYPE::HIGH_PASS;
 			highpass_->frequency_->value_ = HIGHPASS_FREQ_DEFAULT;
 			jungle_ = new PhaseVocoderNode(ctx);
-			jungle_->watched_ = true;
 			jungle_->pitch_ = PITCH_DEFAULT;
 			jungle_->tempo_ = TEMPO_DEFAULT;
 			vibrato_ = new composite::Vibrato(ctx);

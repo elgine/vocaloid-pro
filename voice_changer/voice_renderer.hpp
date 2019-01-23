@@ -61,7 +61,6 @@ public:
 		ctx_->SetOutput(OutputType::RECORDER, sample_rate, channels);
 		writer_ = static_cast<FileWriterNode*>(ctx_->Destination());
 		source_reader_ = new FileReaderNode(ctx_);
-		source_reader_->watched_ = true;
 		state_ = VoiceRendererState::RENDERER_FREE;
 		effect_ = nullptr;
 		ctx_->on_tick_->On([&](int) {

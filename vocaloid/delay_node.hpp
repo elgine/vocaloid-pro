@@ -19,7 +19,6 @@ namespace vocaloid {
 				delay_time_->value_ = delay_time;
 				max_delay_size_ = 0;
 				write_index_ = 0;
-				watched_ = true;
 				buffers_ = new vector<float>[8];
 				context_->Connect(delay_time_, this);
 			}
@@ -57,12 +56,6 @@ namespace vocaloid {
 				}
 				return SUCCEED;
 			}
-
-			//int64_t Process(bool flush = false)override {
-			//	PullBuffers();
-			//	if (!enable_)return 0;
-			//	if()
-			//}
 
 			int64_t ProcessFrame(bool flush = false) override {
 				auto delay_buffer = delay_time_->GetResult()->Channel(0)->Data();

@@ -39,7 +39,7 @@ int(*set_effect_options)(float*, int);
 int(*set_segments)(int*, int);
 void(*set_loop)(bool);
 int(*open_preview)(const char*);
-int(*start_preview)(bool);
+int(*start_preview)();
 int(*stop_preview)();
 int(*seek)(int);
 int(*render)(const char**, const char**, int*,float*, int*, int*, int*, int);
@@ -168,7 +168,7 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			if (open_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			set_effect_options = (int(*)(float*, int))GetProcAddress(handler, "SetEffectOptionsPreview");
 			if (set_effect_options == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-			start_preview = (int(*)(bool))GetProcAddress(handler, "StartPreview");
+			start_preview = (int(*)())GetProcAddress(handler, "StartPreview");
 			if (start_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			stop_preview = (int(*)())GetProcAddress(handler, "StopPreview");
 			if (stop_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
@@ -257,7 +257,7 @@ FREObject SetEffectOptionsPreview(FREContext ctx, void* funcData, uint32_t argc,
 
 FREObject StartPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 	if (!inited)return FromInt(HAS_NOT_INITED);
-	return FromInt(start_preview(ToBool(argv[0])));
+	return FromInt(start_preview());
 }
 
 FREObject StopPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {

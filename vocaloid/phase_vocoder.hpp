@@ -82,6 +82,7 @@ namespace vocaloid {
 
 			void Initialize(int64_t fft_size, float overlap, WINDOW_TYPE win = WINDOW_TYPE::HAMMING, int64_t sample_rate = 44100) {
 				OverlapAdd::Initialize(fft_size, fft_size * overlap, fft_size * overlap, win);
+				UpdateHopSize();
 				sample_rate_ = sample_rate;
 				overlap_ = overlap;
 
@@ -101,9 +102,14 @@ namespace vocaloid {
 				for (int i = 0; i < fft_size; i++) {
 					omega_[i] = (float)(M_PI * 2.0f * hop_ana_ * i / fft_size);
 				}
-				//input_queue_->Alloc(fft_size * 2);
-				//input_queue_->SetSize(fft_size);
-				//output_queue_->Alloc(fft_size * 2);
+			}
+
+			void Clear() override {
+				memset(last_phase_, 0, sizeof(float) * frame_size_);
+				memset(new_phase_, 0, sizeof(float) * frame_size_);
+				memset(real_, 0, sizeof(float) * frame_size_);
+				memset(imag_, 0, sizeof(float) * frame_size_);
+				OverlapAdd::Clear();
 			}
 
 			void Analyse() override {
@@ -165,10 +171,7 @@ namespace vocaloid {
 			void Dispose() {
 				OverlapAdd::Dispose();
 				DeleteArray(&win_);
-				DeleteArray(&buffer_);
-				DeleteArray(&out_);
 				DeleteArray(&omega_);
-				DeleteArray(&frame_);
 				DeleteArray(&last_phase_);
 				DeleteArray(&new_phase_);
 			}

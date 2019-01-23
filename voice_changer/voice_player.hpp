@@ -47,6 +47,8 @@ private:
 	mutex tick_mutex_;
 	atomic<VoicePlayerState> state_;
 
+	bool inited_;
+
 	int64_t CalcCorrectPlayTime(int64_t delta) {
 		int64_t timestamp = 0;
 		auto source_sample_rate = source_reader_->SourceSampleRate();
@@ -114,7 +116,7 @@ private:
 			processed = source_reader_->Processed();
 			processed_player = player_->Processed();
 			if (effect_) {
-				processed_player = (processed_player) / effect_->TimeScale() - MsecToFrames(ctx_->SampleRate(), effect_->Delay() * 1000);
+				processed_player = (processed_player - MsecToFrames(ctx_->SampleRate(), effect_->Delay() * 1000)) / effect_->TimeScale();
 			}
 			if (processed_player < 0) {
 				need_update = false;
@@ -138,7 +140,6 @@ public:
 		ctx_->stop_eof_ = true;
 		player_ = static_cast<PlayerNode*>(ctx_->Destination());
 		source_reader_ = new FileReaderNode(ctx_);
-		source_reader_->watched_ = true;
 		tick_thread_ = nullptr;
 		state_ = VoicePlayerState::PLAYER_STOP;
 		effect_ = nullptr;
@@ -146,13 +147,10 @@ public:
 		on_end_ = new Signal<int>();
 		timestamp_ = 0;
 		duration_ = 0;
+		inited_ = false;
 		ctx_->on_tick_->On([&](int) {
 			UpdateTimestamp();
 		});
-
-#ifdef _DEBUG
-		logger::LogStart("C:\\Users\\Elgine\\Desktop\\log.txt");
-#endif
 	}
 
 	void SubscribeTick(OnPlayerTick h) {
@@ -202,6 +200,7 @@ public:
 		source_reader_->Clear();
 		player_->Clear();
 		duration_ = SourceDuration();
+		inited_ = false;
 		return ret;
 	}
 
@@ -220,56 +219,21 @@ public:
 			unique_lock<mutex> lck(tick_mutex_);
 			timestamp = timestamp_;
 		}
-#ifdef _DEBUG
-		LOG_PRINT("Change effect %d ==================", id);
-#endif
-
-		//if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
-			
-#ifdef _DEBUG
-			LOG_PRINT("Try to stop");
-#endif
+		if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
 			Stop();
-#ifdef _DEBUG
-			LOG_PRINT("Stopped");
-#endif
-#ifdef _DEBUG
-			LOG_PRINT("Try to new effect");
-#endif
 			Effect* new_effect = EffectFactory(id, ctx_);
-#ifdef _DEBUG
-			LOG_PRINT("New effect complete");
-#endif
-#ifdef _DEBUG
-			LOG_PRINT("Try to free last effect");
-#endif
 			if (effect_ != nullptr) {
 				effect_->Dispose();
 				delete effect_;
 				effect_ = nullptr;
 			}
-#ifdef _DEBUG
-			LOG_PRINT("Free last effect complete");
-#endif
 			effect_ = new_effect;
-
+			inited_ = false;
+			Seek(timestamp);
 			if (playing) {
-#ifdef _DEBUG
-				LOG_PRINT("Seek");
-#endif
-				Seek(timestamp);
-#ifdef _DEBUG
-				LOG_PRINT("Seek completed");
-#endif
-#ifdef _DEBUG
-				LOG_PRINT("Start context");
-#endif
-				Start(true); 
-#ifdef _DEBUG
-				LOG_PRINT("Context started");
-#endif
+				Start(); 
 			}
-		//}
+		}
 		return SUCCEED;
 	}
 
@@ -295,40 +259,31 @@ public:
 		return state_ == VoicePlayerState::PLAYER_PLAYING;
 	}
 
-	int Start(int restart = true) {
+	int Start() {
 		if (Playing())return SUCCEED;
 		Stop();
 		auto ret = SUCCEED;
-		if (effect_) {
-			ctx_->Disconnect(source_reader_, player_);
-			ctx_->Connect(source_reader_, effect_->Input());
-			ctx_->Connect(effect_->Output(), player_);
-		}
-		else {
-			ctx_->Connect(source_reader_, player_);
-		}
 		source_reader_->Resume();
 		if (effect_) {
-			effect_->Start();
+			effect_->Resume();
 		}
-		if (restart) {
+		if (!inited_) {
+			if (effect_) {
+				ctx_->Disconnect(source_reader_, player_);
+				ctx_->Connect(source_reader_, effect_->Input());
+				ctx_->Connect(effect_->Output(), player_);
+			}
+			else {
+				ctx_->Connect(source_reader_, player_);
+			}
 			ret = ctx_->Prepare();
 			if (ret < 0)return ret;
+			inited_ = true;
 		}
 		ctx_->Start();
 		state_ = VoicePlayerState::PLAYER_PLAYING;
 		tick_thread_ = new thread(&VoicePlayer::Tick, this);
 		return ret;
-	}
-
-	int Resume() {
-		if (Playing())return SUCCEED;
-		source_reader_->Resume();
-		if (effect_) {
-			effect_->Resume();
-		}
-		ctx_->Start();
-		return SUCCEED;
 	}
 
 	int Stop() {
@@ -346,10 +301,9 @@ public:
 	int Seek(int64_t timestamp) {
 		int ret = SUCCEED;
 		unique_lock<mutex> lck(tick_mutex_);
+		ctx_->Clear();
 		{
 			unique_lock<mutex> render(ctx_->audio_render_thread_mutex_);
-			source_reader_->Clear();
-			player_->Clear();
 			ret = source_reader_->Seek(timestamp);
 			source_reader_->Resume();
 		}

@@ -39,8 +39,7 @@ namespace vocaloid {
 
 			void Notify() {
 				EnterCriticalSection(&wave_sec_);
-				free_block_count_++;
-				free_block_count_ %= 2;
+				free_block_count_ = min(2, free_block_count_ + 1);
 				LeaveCriticalSection(&wave_sec_);
 			}
 
@@ -67,7 +66,7 @@ namespace vocaloid {
 							Play(BUFFER_SIZE);
 						}
 						EnterCriticalSection(&wave_sec_);
-						free_block_count_--;
+						free_block_count_ = max(0, free_block_count_ - 1);
 						LeaveCriticalSection(&wave_sec_);
 					}
 					this_thread::sleep_for(chrono::milliseconds(1));

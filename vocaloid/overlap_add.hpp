@@ -108,7 +108,9 @@ namespace vocaloid {
 			}
 
 			virtual void Clear() {
-				input_queue_->Clear();
+				memset(buffer_, 0, sizeof(float) * frame_size_);
+				memset(frame_, 0, sizeof(float) * frame_size_);
+				input_queue_->SetSize(hop_ana_);
 				output_queue_->Clear();
 			}
 
@@ -130,15 +132,18 @@ namespace vocaloid {
 
 			virtual void Dispose() {
 				if (input_queue_) {
+					input_queue_->Dispose();
 					delete input_queue_;
 					input_queue_ = nullptr;
 				}
 				if (output_queue_) {
+					output_queue_->Dispose();
 					delete output_queue_;
 					output_queue_ = nullptr;
 				}
 				
 				if (out_) {
+					out_->Dispose();
 					delete out_;
 					out_ = nullptr;
 				}

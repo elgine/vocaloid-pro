@@ -74,16 +74,12 @@ extern "C" {
 		return GetPlayer()->SetOptions(options, count);
 	}
 
-	DLLEXPORT int StartPreview(bool v) {
-		return GetPlayer()->Start(v);
+	DLLEXPORT int StartPreview() {
+		return GetPlayer()->Start();
 	}
 
 	DLLEXPORT int StopPreview() {
 		return GetPlayer()->Stop();
-	}
-
-	DLLEXPORT int Resume() {
-		return GetPlayer()->Resume();
 	}
 
 	DLLEXPORT int SetMaxRenderersRunTogether(int c) {

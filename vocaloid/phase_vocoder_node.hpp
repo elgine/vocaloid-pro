@@ -7,8 +7,6 @@ namespace vocaloid {
 		private:
 			dsp::PhaseVocoder **shifters_;
 			float overlap_;
-			bool has_flush_;
-			int64_t left = 0;
 		public:
 			float pitch_;
 			float tempo_;
@@ -19,8 +17,6 @@ namespace vocaloid {
 				tempo_ = 1.0f;
 				overlap_ = 0.25f;
 				channels_ = 1;
-				left = -1;
-				watched_ = true;
 			}
 
 			void Clear() override {
@@ -51,13 +47,12 @@ namespace vocaloid {
 					}
 					shifters_[i]->Initialize(frame_size, overlap_);
 				}
-				has_flush_ = false;
 				return SUCCEED;
 			}
 
 			int64_t Process(bool flush = false) override {
 				PullBuffers();
-				if (channels_ < 1 || !enable_ || (summing_buffer_->silence_ && shifters_[0]->InputLeft() <= 0 && shifters_[0]->OutputLeft() <= 0))return 0;
+				//if (channels_ < 1 || !enable_ || (summing_buffer_->silence_ && shifters_[0]->OutputLeft() <= frame_size_))return 0;
 				return ProcessFrame();
 			}
 
@@ -73,8 +68,10 @@ namespace vocaloid {
 				for (int i = 0; i < channels_; i++) {
 					shifters_[i]->SetTempo(tempo_);
 					shifters_[i]->SetPitch(pitch_);
-					processed = shifters_[i]->Pop(result_buffer_->Channel(i)->Data(), frame_size_, true);
+					processed = shifters_[i]->Pop(result_buffer_->Channel(i)->Data(), frame_size_);
 				}
+				if (processed > 0)result_buffer_->silence_ = false;
+				else result_buffer_->silence_ = true;
 				return processed;
 			}
 		};

@@ -49,7 +49,6 @@ namespace effect {
 			jungle_ = new PhaseVocoderNode(ctx);
 			jungle_->pitch_ = PITCH_DEFAULT;
 			jungle_->tempo_ = TEMPO_DEFAULT;
-			jungle_->watched_ = true;
 			vibrato_ = new Vibrato(ctx);
 			vibrato_->SetOptions({
 				VIBRATO_DELAY_DEFAULT,
@@ -140,7 +139,7 @@ namespace effect {
 	float OldMale::VIBRATO_DEPTH_MIN = Vibrato::VIBRATO_DEPTH_MIN;
 	float OldMale::VIBRATO_DEPTH_MAX = Vibrato::VIBRATO_DEPTH_MAX;
 
-	float OldMale::VIBRATO_SPEED_DEFAULT = Vibrato::VIBRATO_SPEED_DEFAULT;
+	float OldMale::VIBRATO_SPEED_DEFAULT = 30;
 	float OldMale::VIBRATO_SPEED_MIN = Vibrato::VIBRATO_SPEED_MIN;
 	float OldMale::VIBRATO_SPEED_MAX = Vibrato::VIBRATO_SPEED_MAX;
 }
