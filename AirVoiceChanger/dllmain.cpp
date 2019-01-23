@@ -42,7 +42,7 @@ int(*open_preview)(const char*);
 int(*start_preview)();
 int(*stop_preview)();
 int(*seek)(int);
-int(*render)(const char**, const char**, int*,float*, int*, int*, int*, int);
+int(*render)(const char**, const char**, int*,double*, int*, int*, int*, int);
 int(*cancel_render)(const char*);
 int(*cancel_render_all)();
 int(*set_max_renderers_run_together)(int);
@@ -172,7 +172,7 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			if (start_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			stop_preview = (int(*)())GetProcAddress(handler, "StopPreview");
 			if (stop_preview == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
-			render = (int(*)(const char**, const char**, int*, float*, int*, int*, int*, int))GetProcAddress(handler, "Render");
+			render = (int(*)(const char**, const char**, int*, double*, int*, int*, int*, int))GetProcAddress(handler, "Render");
 			if (render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			cancel_render = (int(*)(const char*))GetProcAddress(handler, "CancelRender");
 			if (cancel_render == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
@@ -280,7 +280,7 @@ FREObject Render(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]
 	if (dests == nullptr)goto param_not_match;
 	int* effects = ToIntArray(argv[2]);
 	if (effects == nullptr)goto param_not_match;
-	float* options = (float*)ToDoubleArray(argv[3]);
+	double* options = ToDoubleArray(argv[3]);
 	int* option_counts = ToIntArray(argv[4]);
 	int* segments = ToIntArray(argv[5]);
 	int* segment_counts = ToIntArray(argv[6]);

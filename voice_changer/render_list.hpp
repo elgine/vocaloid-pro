@@ -12,7 +12,7 @@ struct RenderData {
 	int* segments;
 	int segment_count;
 	int effect_id;
-	float* options;
+	double* options;
 	int option_count;
 };
 
@@ -219,7 +219,7 @@ public:
 		on_end_->On(handler);
 	}
 
-	void AddRenderData(const char* source, const char* dest, int effect_id, float* options = nullptr, int option_count = 0, 
+	void AddRenderData(const char* source, const char* dest, int effect_id, double* options = nullptr, int option_count = 0, 
 				int* segments = nullptr, int segment_count = 0) {
 		unique_lock<mutex> lck(render_thread_mutex_);
 		if (find(list_.begin(), list_.end(), source) != list_.end())return;

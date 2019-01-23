@@ -112,11 +112,15 @@ public:
 		return ret;
 	}
 
-	void SetOptions(float* options, int option_count) {
+	void SetOptions(double* options, int option_count) {
+		static float* options_float = new float[500];
+		for (auto i = 0; i < option_count; i++) {
+			options_float[i] = options[i];
+		}
 		{
 			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
 			if (effect_) {
-				effect_->SetOptions(options, option_count);
+				effect_->SetOptions(options_float, option_count);
 			}
 		}
 	}

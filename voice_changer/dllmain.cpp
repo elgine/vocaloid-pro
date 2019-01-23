@@ -87,7 +87,7 @@ extern "C" {
 	}
 
 	DLLEXPORT int Render(const char** sources, const char **dests, int *effect_ids,
-		float *options, int *option_counts, int* segments, int *segment_counts, int count) {
+		double *options, int *option_counts, int* segments, int *segment_counts, int count) {
 		auto option_offset = 0;
 		auto segment_offset = 0;
 		for (auto i = 0; i < count; i++) {
