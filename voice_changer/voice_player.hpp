@@ -25,12 +25,14 @@ struct PlayerTickData {
 
 typedef void(*OnPlayerTick)(PlayerTickData);
 typedef void(*OnPlayerEnd)(int);
+typedef void(*OnPlayerStop)(int);
 
 class VoicePlayer {
 
 private:
 	Signal<PlayerTickData> *on_tick_;
 	Signal<int> *on_end_;
+	Signal<int> *on_stop_;
 
 	AudioContext *ctx_;
 	PlayerNode *player_;
@@ -40,8 +42,12 @@ private:
 	string path_;
 
 	atomic<int64_t> timestamp_;
+	atomic<int64_t> start_timestamp_;
+	atomic<int64_t> end_timestamp_;
 	atomic<int64_t> duration_;
 	int64_t last_processed_player_;
+
+	atomic<bool> loop_;
 
 	thread *tick_thread_;
 	mutex tick_mutex_;
@@ -75,19 +81,20 @@ private:
 	}
 
 	void Tick() {
-		int timestamp = 0, duration = 0, last_timestamp = 0;
+		int last_timestamp = 0;
 		while (1) {
 			if (!Playing())break;
 			if (state_ == VoicePlayerState::PLAYER_STOP)break;
-			timestamp = timestamp_;
-			duration = duration_;
-			if (last_timestamp != timestamp) {
-				on_tick_->Emit({ timestamp, duration });
-				last_timestamp = timestamp;
+			if (last_timestamp != timestamp_) {
+				on_tick_->Emit({ timestamp_, duration_ });
+				last_timestamp = timestamp_;
 			}
-			if (timestamp >= duration) {
-				on_end_->Emit(0);
-				break;
+			if (timestamp_ >= end_timestamp_) {
+				if (!loop_) {
+					on_end_->Emit(0);
+					break;
+				}
+				Seek(start_timestamp_);
 			}
 			this_thread::sleep_for(chrono::milliseconds(33));
 		}
@@ -96,6 +103,7 @@ private:
 			unique_lock<mutex> lck(tick_mutex_);
 			state_ = VoicePlayerState::PLAYER_STOP;
 		}
+		on_stop_->Emit(0);
 	}
 
 	void Join() {
@@ -145,12 +153,19 @@ public:
 		effect_ = nullptr;
 		on_tick_ = new Signal<PlayerTickData>();
 		on_end_ = new Signal<int>();
+		on_stop_ = new Signal<int>();
 		timestamp_ = 0;
+		end_timestamp_ = 0;
 		duration_ = 0;
 		inited_ = false;
+		loop_ = false;
 		ctx_->on_tick_->On([&](int) {
 			UpdateTimestamp();
 		});
+	}
+
+	void SubscribeStop(OnPlayerStop h) {
+		on_stop_->On(h);
 	}
 
 	void SubscribeTick(OnPlayerTick h) {
@@ -164,7 +179,8 @@ public:
 	void Loop(bool v) {
 		{
 			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
-			source_reader_->Loop(v);
+			//source_reader_->Loop(v);
+			loop_ = v;
 		}
 	}
 
@@ -202,7 +218,10 @@ public:
 		PlayAll();
 		source_reader_->Clear();
 		player_->Clear();
-		duration_ = SourceDuration();
+		timestamp_ = 0;
+		duration_ = source_reader_->Duration();
+		start_timestamp_ = FramesToMsec(source_reader_->SourceSampleRate(), source_reader_->FirstSegment().start);
+		end_timestamp_ = FramesToMsec(source_reader_->SourceSampleRate(), source_reader_->LastSegment().end);
 		inited_ = false;
 		return ret;
 	}

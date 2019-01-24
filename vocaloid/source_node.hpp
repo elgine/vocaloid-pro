@@ -133,7 +133,9 @@ namespace vocaloid {
 					play_pos_ += count;
 				}
 			end:
-				processed_ += frame_size;
+				if (frame_count > 0) {
+					processed_ += frame_size_;
+				}
 				return frame_count;
 			}
 

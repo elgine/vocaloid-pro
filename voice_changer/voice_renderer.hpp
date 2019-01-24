@@ -29,6 +29,7 @@ private:
 
 	atomic<int64_t> timestamp_;
 	atomic<int64_t> duration_;
+	atomic<int64_t> end_timestamp_;
 
 	int64_t CalcCorrectPlayTime(int64_t delta) {
 		int64_t timestamp = 0;
@@ -108,7 +109,9 @@ public:
 		auto ret = source_reader_->Open(path);
 		if (ret < 0)return ret;
 		path_ = path;
+		timestamp_ = 0;
 		duration_ = source_reader_->Duration();
+		end_timestamp_ = FramesToMsec(source_reader_->SourceSampleRate(), source_reader_->LastSegment().end);
 		return ret;
 	}
 
@@ -205,12 +208,10 @@ public:
 	}
 
 	bool IsEnd() {
-		unique_lock<mutex> lck(tick_mutex_);
-		return timestamp_ >= duration_;
+		return timestamp_ >= end_timestamp_;
 	}
 
 	float Progress() {
-		unique_lock<mutex> lck(tick_mutex_);
-		return float(timestamp_) / duration_;
+		return float(timestamp_) / end_timestamp_;
 	}
 };

@@ -1,6 +1,7 @@
 #pragma once
 #include <atomic>
 #include <thread>
+#include <time.h>
 #include "stdafx.h"
 #include "audio_node.hpp"
 #include "input_node.hpp"
@@ -21,6 +22,8 @@ namespace vocaloid {
 			
 			vector<int64_t> traversal_nodes_;
 			int64_t frame_size_;
+
+			atomic<int64_t> processed_frames_;
 
 			atomic<bool> source_eof_;
 
@@ -117,23 +120,38 @@ namespace vocaloid {
 			}
 
 			void Run() {
-				bool all_input_eof = false;
-				bool last_all_input_eof = false;
-				bool all_eof = false;
-				int64_t cur_processed_frames = 0;
-				int64_t sleep = destination_ && destination_->OutputType() == OutputType::PLAYER ? MINUS_SLEEP_UNIT : 2;
+				bool playing_mode = false;
+				clock_t process_start, process_end;
+				int64_t sleep = 0;
+				int64_t cur_process = 0;
+				int64_t input_out_delay = 0;
+				int64_t frame_dur = 0;
+				{
+					unique_lock<mutex> lck(audio_render_thread_mutex_);
+					playing_mode = destination_ && destination_->OutputType() == OutputType::PLAYER;
+					frame_dur = FramesToMsec(SampleRate(), frame_size_);
+				}
 				while (true) {
+					process_start = clock();
 					{
 						unique_lock<mutex> lck(audio_render_thread_mutex_);
 						if (state_ != AudioContextState::PLAYING)break;
-						if (!all_input_eof)all_input_eof = true;
-						if (!all_eof)all_eof = true;
 						for (auto iter = traversal_nodes_.begin(); iter != traversal_nodes_.end(); iter++) {
 							auto node = FindNode(*iter);
-							cur_processed_frames = node->Process(last_all_input_eof);
+							cur_process = node->Process(false);
 						}
+						processed_frames_ += cur_process;
+						input_out_delay = FramesToMsec(SampleRate(), processed_frames_ - destination_->Processed());
 					}
+					process_end = clock();
 					on_tick_->Emit(0);
+					if (playing_mode && input_out_delay > frame_dur) {
+						sleep = MINUS_SLEEP_UNIT;
+					}
+					else {
+						sleep = 2;
+					}
+					// Calculate delay
 					this_thread::sleep_for(chrono::milliseconds(sleep));
 				}
 				{
@@ -315,6 +333,7 @@ namespace vocaloid {
 			void Clear() override {
 				{
 					unique_lock<mutex> lck(audio_render_thread_mutex_);
+					processed_frames_ = 0;
 					for (auto node : traversal_nodes_) {
 						FindNode(node)->Clear();
 					}
@@ -336,6 +355,7 @@ namespace vocaloid {
 					node.second = nullptr;
 				}
 				nodes_.clear();
+				map<int64_t, AudioNode*>().swap(nodes_);
 			}
 
 			int64_t FrameSize() {

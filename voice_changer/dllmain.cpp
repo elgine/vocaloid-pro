@@ -25,6 +25,10 @@ extern "C" {
 		GetPlayer()->SubscribeEnd(end);
 	}
 
+	DLLEXPORT void SubscribePlayerStop(OnPlayerStop stop) {
+		GetPlayer()->SubscribeStop(stop);
+	}
+
 	DLLEXPORT void SubscribeRenderListProgress(OnRenderListProgress p) {
 		GetRenderList()->SubscribeProgress(p);
 	}

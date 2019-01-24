@@ -10,12 +10,14 @@ namespace vocaloid {
 			// Loop bytes
 			bool loop_;
 			bool eof_;
+			bool flushed_;
 		public:
 
 			explicit InputNode(BaseAudioContext *ctx) :AudioNode(ctx, AudioNodeType::INPUT, false, true) {
 				active_ = false;
 				loop_ = false;
 				eof_ = false;
+				flushed_ = false;
 			}
 
 			int Initialize(int32_t sample_rate, int64_t frame_size) override {
@@ -31,8 +33,11 @@ namespace vocaloid {
 				if (!active_)return 0;
 				result_buffer_->Zero();
 				if (eof_) {
-					result_buffer_->silence_ = false;
-					return frame_size_;
+					if (!flushed_) {
+						result_buffer_->silence_ = false;
+						flushed_ = true;
+						return frame_size_;
+					}
 				}
 				return ProcessFrame(flush);
 			}
@@ -42,6 +47,7 @@ namespace vocaloid {
 				if (loop_) {
 					active_ = true;
 					eof_ = false;
+					flushed_ = false;
 				}
 			}
 

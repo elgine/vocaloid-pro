@@ -58,14 +58,17 @@ typedef void(*OnRenderListEnd)(RenderMessage*);
 
 typedef void(*OnPlayerTick)(PlayerTickData);
 typedef void(*OnPlayerEnd)(int);
+typedef void(*OnPlayerStop)(int);
 
 void(*subscribe_player_tick)(OnPlayerTick);
 void(*subscribe_player_end)(OnPlayerEnd);
+void(*subscribe_player_stop)(OnPlayerStop);
 
 void(*subscribe_render_list_progress)(OnRenderListProgress);
 void(*subscribe_render_list_end)(OnRenderListEnd);
 
 #define PLAYER_TICK_CODE "playerTick"
+#define PLAYER_STOP_CODE "playerStop"
 #define PLAYER_END_CODE "playerEnd"
 #define RENDER_LIST_PROGRESS_CODE "renderListProgress"
 #define RENDER_LIST_COMPLETE_CODE "renderListComplete"
@@ -77,6 +80,15 @@ void SendPlayerTickMsg(PlayerTickData data) {
 		ss << "{\"played\": " << data.timestamp << ", \"duration\": " << data.duration << "}";
 		const uint8_t* s = (const uint8_t*)ss.str().c_str();
 		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)PLAYER_TICK_CODE, (const uint8_t*)ss.str().c_str());
+	}
+}
+
+void SendPlayerStopMsg(int flag) {
+	if (fre_context != nullptr) {
+		stringstream ss;
+		ss << "{\"flag\": " << flag << "}";
+		const uint8_t* s = (const uint8_t*)ss.str().c_str();
+		FREDispatchStatusEventAsync(fre_context, (const uint8_t*)PLAYER_STOP_CODE, (const uint8_t*)ss.str().c_str());
 	}
 }
 
@@ -141,6 +153,9 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			subscribe_player_tick = (void(*)(OnPlayerTick))GetProcAddress(handler, "SubscribePlayerTick");
 			if (subscribe_player_tick == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 
+			subscribe_player_stop = (void(*)(OnPlayerStop))GetProcAddress(handler, "SubscribePlayerStop");
+			if (subscribe_player_stop == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+
 			subscribe_player_end = (void(*)(OnPlayerEnd))GetProcAddress(handler, "SubscribePlayerEnd");
 			if (subscribe_player_end == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 
@@ -183,6 +198,7 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			set_max_renderers_run_together = (int(*)(int))GetProcAddress(handler, "SetMaxRenderersRunTogether");
 			if (set_max_renderers_run_together == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			// Subscribe event
+			subscribe_player_stop(SendPlayerStopMsg);
 			subscribe_player_tick(SendPlayerTickMsg);
 			subscribe_player_end(SendPlayerEndMsg);
 			subscribe_render_list_progress(SendRenderListProgressMsg);

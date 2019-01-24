@@ -13,6 +13,7 @@ namespace vocaloid {
 			bool inited_;
 		public:
 			explicit PlayerNode(BaseAudioContext *ctx) :DestinationNode(ctx) {
+				output_type_ = OutputType::PLAYER;
 				player_ = nullptr;
 #ifdef _WIN32 || _WIN64
 

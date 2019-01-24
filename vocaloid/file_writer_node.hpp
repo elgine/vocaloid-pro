@@ -16,6 +16,7 @@ namespace vocaloid {
 			Buffer<char> *buf_;
 		public:
 			explicit FileWriterNode(BaseAudioContext *ctx): DestinationNode(ctx){
+				output_type_ = OutputType::RECORDER;
 #ifdef WIN
 				writer_ = new io::FFmpegFileWriter();
 #else
