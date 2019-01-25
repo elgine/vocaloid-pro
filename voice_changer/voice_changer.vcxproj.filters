@@ -122,9 +122,6 @@
     <Media Include="..\samples\church.wav">
       <Filter>资源文件</Filter>
     </Media>
-    <Media Include="..\samples\female-voice.wav">
-      <Filter>资源文件</Filter>
-    </Media>
     <Media Include="..\samples\large-long-echo-hall.wav">
       <Filter>资源文件</Filter>
     </Media>

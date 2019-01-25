@@ -297,9 +297,9 @@ FREObject Render(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]
 	int* effects = ToIntArray(argv[2]);
 	if (effects == nullptr)goto param_not_match;
 	double* options = ToDoubleArray(argv[3]);
-	int* option_counts = ToIntArray(argv[4]);
+	int* option_counts = options == nullptr?0:ToIntArray(argv[4]);
 	int* segments = ToIntArray(argv[5]);
-	int* segment_counts = ToIntArray(argv[6]);
+	int* segment_counts = segments == nullptr?0:ToIntArray(argv[6]);
 	int count = ToInt(argv[7]);
 	if (count <= 0)goto param_not_match;
 	return FromInt(render(sources, dests, effects, options, option_counts, segments, segment_counts, count));

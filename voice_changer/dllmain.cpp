@@ -94,12 +94,16 @@ extern "C" {
 		double *options, int *option_counts, int* segments, int *segment_counts, int count) {
 		auto option_offset = 0;
 		auto segment_offset = 0;
+		if (options == nullptr)option_counts = 0;
+		if (segments == nullptr)segment_counts = 0;
 		for (auto i = 0; i < count; i++) {
+			auto segment_count = segment_counts == nullptr ? 0 : segment_counts[i];
+			auto option_count = option_counts == nullptr ? 0 : option_counts[i];
 			GetRenderList()->AddRenderData(sources[i], dests[i], effect_ids[i], 
-				options + option_offset, option_counts[i],
-				segments + segment_offset, segment_counts[i]);
-			option_offset += option_counts[i];
-			segment_offset += segment_counts[i];
+				options + option_offset, option_count,
+				segments + segment_offset, segment_count);
+			option_offset += option_count;
+			segment_offset += segment_count;
 		}
 		GetRenderList()->Start();
 		return SUCCEED;

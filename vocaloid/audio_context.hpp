@@ -132,7 +132,6 @@ namespace vocaloid {
 					frame_dur = FramesToMsec(SampleRate(), frame_size_);
 				}
 				while (true) {
-					process_start = clock();
 					{
 						unique_lock<mutex> lck(audio_render_thread_mutex_);
 						if (state_ != AudioContextState::PLAYING)break;
@@ -143,7 +142,6 @@ namespace vocaloid {
 						processed_frames_ += cur_process;
 						input_out_delay = FramesToMsec(SampleRate(), processed_frames_ - destination_->Processed());
 					}
-					process_end = clock();
 					on_tick_->Emit(0);
 					if (playing_mode && input_out_delay > frame_dur) {
 						sleep = MINUS_SLEEP_UNIT;
@@ -349,13 +347,20 @@ namespace vocaloid {
 			void Dispose() override {
 				Stop();
 				Close();
-				for (auto node : nodes_) {
-					node.second->Dispose();
-					delete node.second;
-					node.second = nullptr;
-				}
-				nodes_.clear();
-				map<int64_t, AudioNode*>().swap(nodes_);
+				//// Safe remove
+				//vector<AudioNode*> nodes;
+				//for (auto it = nodes_.begin(); it != nodes_.end(); it++)
+				//	nodes.push_back(it->second);
+
+				//for (auto it = nodes.begin(); it != nodes.end();) {
+				//	auto node = *it;
+				//	node->Dispose();
+				//	delete node;
+				//	it = nodes.erase(it);
+				//}
+				//
+				//vector<AudioNode*>().swap(nodes);
+				//map<int64_t, AudioNode*>().swap(nodes_);
 			}
 
 			int64_t FrameSize() {

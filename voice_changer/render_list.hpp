@@ -253,7 +253,7 @@ public:
 		auto renderer = FindRenderer(s);
 		if (renderer) {
 			renderer->Dispose();
-			RemoveFile(renderer->Path().c_str());
+			RemoveFile(data_[s].dest.c_str());
 		}
 	}
 
@@ -268,7 +268,7 @@ public:
 		Join();
 		for (int i = 0; i < renderer_count_; i++) {
 			renderers_[i]->Dispose();
-			RemoveFile(renderers_[i]->Path().c_str());
+			RemoveFile(data_[renderers_[i]->Path().c_str()].dest.c_str());
 		}
 	}
 

@@ -55,7 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <Media Include="..\samples\church.wav" />
-    <Media Include="..\samples\female-voice.wav" />
     <Media Include="..\samples\fire.mp3" />
     <Media Include="..\samples\large-long-echo-hall.wav" />
     <Media Include="..\samples\large-wide-echo-hall.wav" />

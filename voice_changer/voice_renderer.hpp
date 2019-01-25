@@ -29,6 +29,7 @@ private:
 
 	atomic<int64_t> timestamp_;
 	atomic<int64_t> duration_;
+	atomic<int64_t> start_timestamp_;
 	atomic<int64_t> end_timestamp_;
 
 	int64_t CalcCorrectPlayTime(int64_t delta) {
@@ -109,9 +110,6 @@ public:
 		auto ret = source_reader_->Open(path);
 		if (ret < 0)return ret;
 		path_ = path;
-		timestamp_ = 0;
-		duration_ = source_reader_->Duration();
-		end_timestamp_ = FramesToMsec(source_reader_->SourceSampleRate(), source_reader_->LastSegment().end);
 		return ret;
 	}
 
@@ -148,7 +146,6 @@ public:
 
 	int Start() {
 		Stop();
-		ctx_->stop_eof_ = true; 
 		auto ret = SUCCEED;
 		if (effect_) {
 			ctx_->Connect(source_reader_, effect_->Input());
@@ -166,7 +163,10 @@ public:
 		if (ret < 0)return ret;
 		state_ = VoiceRendererState::RENDERER_RENDERING;
 		timestamp_ = 0;
-		source_reader_->Seek(0);
+		duration_ = source_reader_->Duration();
+		start_timestamp_ = FramesToMsec(source_reader_->SourceSampleRate(), source_reader_->FirstSegment().start);
+		end_timestamp_ = FramesToMsec(source_reader_->SourceSampleRate(), source_reader_->LastSegment().end);
+		source_reader_->Seek(start_timestamp_);
 		ctx_->Start();
 		return ret;
 	}
@@ -194,7 +194,11 @@ public:
 
 	void Dispose() {
 		Close();
-		ctx_->Dispose();
+		if (effect_) {
+			effect_->Dispose();
+			delete effect_;
+			effect_ = nullptr;
+		}
 	}
 
 	void Clear() {
