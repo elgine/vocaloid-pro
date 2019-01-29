@@ -15,6 +15,8 @@ namespace vocaloid {
 			// Flush buffers left
 			virtual int Flush() = 0;
 
+			virtual bool Empty() = 0;
+
 			// Buffer size has played 
 			virtual int64_t Played() = 0;
 

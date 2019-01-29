@@ -85,7 +85,6 @@ namespace vocaloid {
 						SeekInternal(play_pos_);
 					}
 				}
-
 				int64_t byte_left = 0, count = 0;
 				int64_t prev_segment_index = Timeline::Index(), cur_segment_index = Timeline::Index();
 				TimeSegment last_segment = Timeline::LastSegment(), 

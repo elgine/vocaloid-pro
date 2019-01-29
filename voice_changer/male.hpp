@@ -72,10 +72,10 @@ namespace effect {
 	};
 
 	float Male::LOWPASS_FREQ_DEFAULT = 4000.0f;
-	float Male::LOWPASS_FREQ_MIN = 2000.0f;
-	float Male::LOWPASS_FREQ_MAX = 20000.0f;
+	float Male::LOWPASS_FREQ_MIN = FLT_MIN;
+	float Male::LOWPASS_FREQ_MAX = FLT_MAX;
 
 	float Male::PITCH_OFFSET_DEFAULT = -0.1f;
-	float Male::PITCH_OFFSET_MIN = -0.5f;
-	float Male::PITCH_OFFSET_MAX = 2.0f;
+	float Male::PITCH_OFFSET_MIN = -1.0f;
+	float Male::PITCH_OFFSET_MAX = 1.0f;
 }

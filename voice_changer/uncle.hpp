@@ -81,10 +81,10 @@ namespace effect {
 	};
 
 	float Uncle::LOWPASS_FREQ_DEFAULT = 4500;
-	float Uncle::LOWPASS_FREQ_MIN = 500;
-	float Uncle::LOWPASS_FREQ_MAX = 20000;
+	float Uncle::LOWPASS_FREQ_MIN = FLT_MIN;
+	float Uncle::LOWPASS_FREQ_MAX = FLT_MAX;
 
 	float Uncle::PITCH_OFFSET_DEFAULT = -0.3f;
 	float Uncle::PITCH_OFFSET_MIN = -1.0f;
-	float Uncle::PITCH_OFFSET_MAX = 0.0f;
+	float Uncle::PITCH_OFFSET_MAX = 1.0f;
 }

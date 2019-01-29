@@ -89,10 +89,10 @@ namespace effect {
 	};
 
 	float Alien::LFO_FREQ_DEFAULT = 5.0f;
-	float Alien::LFO_FREQ_MIN = 20.0f;
-	float Alien::LFO_FREQ_MAX = 40.0f;
+	float Alien::LFO_FREQ_MIN = -22050;
+	float Alien::LFO_FREQ_MAX = 22050;
 
 	float Alien::LFO_GAIN_DEFAULT = 0.05f;
-	float Alien::LFO_GAIN_MIN = 0.01f;
-	float Alien::LFO_GAIN_MAX = 0.05f;
+	float Alien::LFO_GAIN_MIN = 0.0;
+	float Alien::LFO_GAIN_MAX = 4.0f;
 }

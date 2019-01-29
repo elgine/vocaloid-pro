@@ -58,7 +58,7 @@ namespace effect {
 		virtual void Start() {}
 	};
 
-	float Effect::GAIN_DEFAULT = 0.8f;
+	float Effect::GAIN_DEFAULT = 1.0f;
 	float Effect::GAIN_MIN = 0.0f;
 	float Effect::GAIN_MAX = 4.0f;
 }

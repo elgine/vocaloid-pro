@@ -48,6 +48,10 @@ namespace vocaloid {
 				return ret;
 			}
 
+			bool Empty() {
+				return player_->Empty();
+			}
+
 			int64_t Flush() override {
 				return player_->Flush();
 			}

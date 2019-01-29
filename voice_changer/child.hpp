@@ -92,8 +92,8 @@ namespace effect {
 	};
 
 	float Child::HIGHPASS_DEFAULT = 50.0f;
-	float Child::HIGHPASS_MIN = 120.0f;
-	float Child::HIGHPASS_MAX = 500.0f;
+	float Child::HIGHPASS_MIN = FLT_MIN;
+	float Child::HIGHPASS_MAX = FLT_MAX;
 
 	float Child::LOWSHELF_GAIN_DEFAULT = Equalizer3Band::LOWSHELF_GAIN_DEFAULT;
 	float Child::LOWSHELF_GAIN_MIN = Equalizer3Band::LOWSHELF_GAIN_MIN;
@@ -108,6 +108,6 @@ namespace effect {
 	float Child::HIGHSHELF_GAIN_MAX = Equalizer3Band::HIGHSHELF_GAIN_MAX;
 
 	float Child::PITCH_DEFAULT = 1.5f;
-	float Child::PITCH_MIN = 1.0f;
-	float Child::PITCH_MAX = 1.8f;
+	float Child::PITCH_MIN = 0.5f;
+	float Child::PITCH_MAX = 2.0f;
 }

@@ -44,6 +44,7 @@ namespace vocaloid {
 			}
 
 			void Play(int64_t buf_size) {
+				if (buf_->Size() < BUFFER_SIZE)return;
 				// Playback
 				header_[play_index_].dwBufferLength = buf_size;
 				buf_->Pop(header_[play_index_].lpData, buf_size);
@@ -53,21 +54,20 @@ namespace vocaloid {
 			}
 
 			bool CanPlay() {
-				unique_lock<mutex> lck(playback_mutex_);
 				return buf_->Size() >= BUFFER_SIZE;
 			}
 
 			void PlayLoop() {
 				int ret = 0;
 				while (playing_) {
-					while (playing_ && free_block_count_ > 0 && CanPlay()) {
-						{
-							unique_lock<mutex> lck(playback_mutex_);
+					{
+						unique_lock<mutex> lck(playback_mutex_);
+						while (playing_ && free_block_count_ > 0 && CanPlay()) {
 							Play(BUFFER_SIZE);
+							EnterCriticalSection(&wave_sec_);
+							free_block_count_ = max(0, free_block_count_ - 1);
+							LeaveCriticalSection(&wave_sec_);
 						}
-						EnterCriticalSection(&wave_sec_);
-						free_block_count_ = max(0, free_block_count_ - 1);
-						LeaveCriticalSection(&wave_sec_);
 					}
 					this_thread::sleep_for(chrono::milliseconds(2));
 				}
@@ -153,6 +153,11 @@ namespace vocaloid {
 					processed_ = 0;
 					buf_->SetSize(0);
 				}
+			}
+
+			bool Empty() override {
+				unique_lock<mutex> lck(playback_mutex_);
+				return buf_->Size() <= 0;
 			}
 
 			void Dispose() override {

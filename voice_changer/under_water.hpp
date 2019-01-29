@@ -139,8 +139,8 @@ namespace effect {
 	};
 
 	float UnderWater::LOWPASS_FREQ_DEFAULT = 500;
-	float UnderWater::LOWPASS_FREQ_MIN = 50;
-	float UnderWater::LOWPASS_FREQ_MAX = 2500;
+	float UnderWater::LOWPASS_FREQ_MIN = FLT_MIN;
+	float UnderWater::LOWPASS_FREQ_MAX = FLT_MAX;
 
 	float UnderWater::ENVELOPE_FOllOWER_FILTER_FREQ_DEFAULT = AutoWah::ENVELOPE_FOLLOWER_FILTER_FREQUENCY_DEFAULT;
 	float UnderWater::ENVELOPE_FOllOWER_FILTER_FREQ_MIN = AutoWah::ENVELOPE_FOLLOWER_FILTER_FREQUENCY_MIN;
@@ -156,9 +156,9 @@ namespace effect {
 
 	float UnderWater::INPUT_GAIN_DEFAULT = 0.5f;
 	float UnderWater::INPUT_GAIN_MIN = 0.0f;
-	float UnderWater::INPUT_GAIN_MAX = 1.0f;
+	float UnderWater::INPUT_GAIN_MAX = 4.0f;
 
 	float UnderWater::UNDER_WATER_BACKGROUND_GAIN_DEFAULT = 0.3f;
 	float UnderWater::UNDER_WATER_BACKGROUND_GAIN_MIN = 0.0f;
-	float UnderWater::UNDER_WATER_BACKGROUND_GAIN_MAX = 1.0f;
+	float UnderWater::UNDER_WATER_BACKGROUND_GAIN_MAX = 4.0f;
 }

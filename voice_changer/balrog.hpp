@@ -245,32 +245,32 @@ namespace effect {
 	};
 
 	float Balrog::LFO_FREQ_DEFAULT = 50.0f;
-	float Balrog::LFO_FREQ_MIN = 20.0f;
-	float Balrog::LFO_FREQ_MAX = 70.0f;
+	float Balrog::LFO_FREQ_MIN = -22050.0f;
+	float Balrog::LFO_FREQ_MAX = 22050.0f;
 
 	float Balrog::LFO_GAIN_DEFAULT = 0.004f;
-	float Balrog::LFO_GAIN_MIN = 0.001f;
-	float Balrog::LFO_GAIN_MAX = 0.1f;
+	float Balrog::LFO_GAIN_MIN = 0.0f;
+	float Balrog::LFO_GAIN_MAX = 4.0f;
 
 	float Balrog::DELAY_DEFAULT = 0.01f;
-	float Balrog::DELAY_MIN = 0.005f;
-	float Balrog::DELAY_MAX = 0.02f;
+	float Balrog::DELAY_MIN = 0.0f;
+	float Balrog::DELAY_MAX = 1.0f;
 
 	float Balrog::HIGHSHELF_FREQ_DEFAULT = 1000.0f;
-	float Balrog::HIGHSHELF_FREQ_MIN = 500.0f;
-	float Balrog::HIGHSHELF_FREQ_MAX = 2000.0f;
+	float Balrog::HIGHSHELF_FREQ_MIN = FLT_MIN;
+	float Balrog::HIGHSHELF_FREQ_MAX = FLT_MAX;
 
 	float Balrog::HIGHSHELF_GAIN_DEFAULT = 10.0f;
-	float Balrog::HIGHSHELF_GAIN_MIN = -40.0f;
-	float Balrog::HIGHSHELF_GAIN_MAX = 40.0f;
+	float Balrog::HIGHSHELF_GAIN_MIN = FLT_MIN;
+	float Balrog::HIGHSHELF_GAIN_MAX = FLT_MAX;
 
 	float Balrog::LOWPASS_FREQ_DEFAULT = 2000.0f;
-	float Balrog::LOWPASS_FREQ_MIN = 500.0f;
-	float Balrog::LOWPASS_FREQ_MAX = 20000.0f;
+	float Balrog::LOWPASS_FREQ_MIN = FLT_MIN;
+	float Balrog::LOWPASS_FREQ_MAX = FLT_MAX;
 
 	float Balrog::COMPRESSOR_THRESHOLD_DEFAULT = -50.0f;
-	float Balrog::COMPRESSOR_THRESHOLD_MIN = -100.0f;
-	float Balrog::COMPRESSOR_THRESHOLD_MAX = 0.0f;
+	float Balrog::COMPRESSOR_THRESHOLD_MIN = -100;
+	float Balrog::COMPRESSOR_THRESHOLD_MAX = 0;
 
 	float Balrog::COMPRESSOR_RATIO_DEFAULT = 16.0f;
 	float Balrog::COMPRESSOR_RATIO_MIN = 1;
@@ -281,10 +281,10 @@ namespace effect {
 	float Balrog::ECHO_GAIN_MAX = 1.0f;
 
 	float Balrog::MAIN_GAIN_DEFAULT = 2.0f;
-	float Balrog::MAIN_GAIN_MIN = 0.5f;
+	float Balrog::MAIN_GAIN_MIN = 0.0f;
 	float Balrog::MAIN_GAIN_MAX = 4.0f;
 
 	float Balrog::FIRE_GAIN_DEFAULT = 0.3f;
 	float Balrog::FIRE_GAIN_MIN = 0.0f;
-	float Balrog::FIRE_GAIN_MAX = 1.0f;
+	float Balrog::FIRE_GAIN_MAX = 4.0f;
 }

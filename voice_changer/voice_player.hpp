@@ -89,7 +89,7 @@ private:
 				on_tick_->Emit({ timestamp_, duration_ });
 				last_timestamp = timestamp_;
 			}
-			if (timestamp_ >= end_timestamp_) {
+			if (End()) {
 				if (!loop_) {
 					on_end_->Emit(0);
 					break;
@@ -112,6 +112,11 @@ private:
 			delete tick_thread_;
 			tick_thread_ = nullptr;
 		}
+	}
+
+	bool End() {
+		unique_lock<mutex> ctx_lck(ctx_->audio_render_thread_mutex_);
+		return timestamp_ >= end_timestamp_ || (source_reader_->Eof() && player_->Empty());
 	}
 
 	void UpdateTimestamp() {
@@ -179,7 +184,6 @@ public:
 	void Loop(bool v) {
 		{
 			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
-			//source_reader_->Loop(v);
 			loop_ = v;
 		}
 	}
@@ -216,8 +220,9 @@ public:
 		if (ret < 0)return ret;
 		path_ = path;
 		PlayAll();
-		source_reader_->Clear();
-		player_->Clear();
+		/*source_reader_->Clear();
+		player_->Clear();*/
+		ctx_->Clear();
 		timestamp_ = 0;
 		duration_ = source_reader_->Duration();
 		start_timestamp_ = FramesToMsec(source_reader_->SourceSampleRate(), source_reader_->FirstSegment().start);

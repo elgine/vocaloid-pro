@@ -65,6 +65,6 @@ namespace effect {
 	};
 
 	float Female::PITCH_OFFSET_DEFAULT = 0.45;
-	float Female::PITCH_OFFSET_MIN = -0.5f;
+	float Female::PITCH_OFFSET_MIN = -1.0f;
 	float Female::PITCH_OFFSET_MAX = 1.0f;
 }

@@ -119,16 +119,16 @@ namespace effect {
 	};
 
 	float OldFemale::HIGHPASS_FREQ_DEFAULT = 120.0f;
-	float OldFemale::HIGHPASS_FREQ_MIN = 100.0f;
-	float OldFemale::HIGHPASS_FREQ_MAX = 4000.0f;
+	float OldFemale::HIGHPASS_FREQ_MIN = FLT_MIN;
+	float OldFemale::HIGHPASS_FREQ_MAX = FLT_MAX;
 
 	float OldFemale::PITCH_DEFAULT = 1.3f;
-	float OldFemale::PITCH_MIN = 1.0f;
+	float OldFemale::PITCH_MIN = 0.5f;
 	float OldFemale::PITCH_MAX = 2.0f;
 
 	float OldFemale::TEMPO_DEFAULT = 1.2f;
-	float OldFemale::TEMPO_MIN = 1.0f;
-	float OldFemale::TEMPO_MAX = 1.5f;
+	float OldFemale::TEMPO_MIN = 0.5f;
+	float OldFemale::TEMPO_MAX = 2.0f;
 
 	float OldFemale::VIBRATO_DELAY_DEFAULT = Vibrato::VIBRATO_DELAY_DEFAULT;
 	float OldFemale::VIBRATO_DELAY_MIN = Vibrato::VIBRATO_DELAY_MIN;

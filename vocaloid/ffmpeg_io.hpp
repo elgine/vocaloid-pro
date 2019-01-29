@@ -87,7 +87,6 @@ namespace vocaloid {
 			int Decode(AVPacket *packet) {
 				auto got_frame = 0;
 				auto ret = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet);
-				// && frame_->nb_samples == codec_ctx_->frame_size
 				if (got_frame > 0) {
 					frame_count_++;
 					Convert((const uint8_t**)frame_->data, frame_->nb_samples);
@@ -100,15 +99,9 @@ namespace vocaloid {
 				auto samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples,
 					frame_data, nb_samples);
 				if (samples > 0) {
-					if (!EnableToDecode()) {
-						char* new_buf;
-						AllocArray(buffer_size_ + output_frame_size_, &new_buf);
-						memcpy(new_buf, buffer_, buffer_size_);
-						DeleteArray(&buffer_);
-						buffer_ = new_buf;
-					}
-					memcpy(buffer_ + buffer_size_, decode_frame_->data[0], samples * decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format)));
-					buffer_size_ += output_frame_size_;
+					auto size = samples * decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format));
+					memcpy(buffer_ + buffer_size_, decode_frame_->data[0], size);
+					buffer_size_ += size;
 				}
 				return samples;
 			}
@@ -119,7 +112,7 @@ namespace vocaloid {
 			// queue size, if it's capable for output, pop buffer and loop.
 			void FlushConvertor() {
 				int fifo_size = swr_get_out_samples(swr_ctx_, 0);
-				while (fifo_size >= decode_frame_->nb_samples) {
+				while (fifo_size >= decode_frame_->nb_samples && EnableToDecode()) {
 					auto samples = Convert(nullptr, 0);
 					fifo_size -= samples;
 				}
@@ -195,6 +188,7 @@ namespace vocaloid {
 				decode_thread_ = nullptr;
 				buffer_ = nullptr;
 				inited_ = false;
+				AllocArray(max_size, &buffer_);
 			}
 
 			~FFmpegFileReader() {
@@ -278,7 +272,6 @@ namespace vocaloid {
 				static char* err_msg = new char[512];
 				av_register_all();
 				Dispose();
-				buffer_ = new char[max_buffer_size_];
 				ctx_ = avformat_alloc_context();
 				ret = avformat_open_input(&ctx_, input_path, NULL, NULL);
 				if (ret < 0) {
@@ -372,6 +365,7 @@ namespace vocaloid {
 
 			void Clear() override {
 				unique_lock<mutex> lck(decode_mutex_);
+				buffer_size_ = 0;
 				if (ctx_ != nullptr) {
 					avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
 				}
@@ -390,10 +384,6 @@ namespace vocaloid {
 			void Dispose() override {
 				if (!inited_)return;
 				Stop();
-				if (buffer_) {
-					delete[] buffer_;
-					buffer_ = nullptr;
-				}
 				if (packet_) {
 					av_packet_free(&packet_);
 					packet_ = nullptr;
@@ -435,22 +425,22 @@ namespace vocaloid {
 				return buffer_size_ >= len;
 			}
 
-			int64_t FramesToPTS(int64_t frames) {
+			int64_t FramesToPTS(int64_t frames, int32_t sample_rate) {
 				if (!ctx_)return 0;
 				auto stream = ctx_->streams[a_stream_index_];
-				return float(frames) / codec_ctx_->sample_rate / av_q2d(stream->time_base);
+				return float(frames) / sample_rate / av_q2d(stream->time_base);
 			}
 
-			int64_t PTSToFrames(int64_t pts) {
+			int64_t PTSToFrames(int64_t pts, int32_t sample_rate) {
 				if (!ctx_)return 0;
 				auto stream = ctx_->streams[a_stream_index_];
-				return pts * av_q2d(stream->time_base) * codec_ctx_->sample_rate;
+				return pts * av_q2d(stream->time_base) * sample_rate;
 			}
 
 			int64_t Seek(int64_t frame_offset) override {
 				{
 					unique_lock<mutex> lck(decode_mutex_);
-					auto pts = FramesToPTS(frame_offset);
+					auto pts = FramesToPTS(frame_offset, decode_frame_->sample_rate);
 					if (ctx_ != nullptr) {
 						auto ret = av_seek_frame(ctx_, a_stream_index_, pts, AVSEEK_FLAG_BACKWARD);
 						avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
@@ -470,16 +460,19 @@ namespace vocaloid {
 							}
 							else {
 								if (packet_->duration <= 0)break;
-								if (packet_->pts >= pts) {
+								if (packet_->pts + packet_->duration > pts && pts >= packet_->pts) {
 									auto decoded = 0, got_frame = 0;
+									auto offset = PTSToFrames(pts - packet_->pts, codec_ctx_->sample_rate);
 									while (packet_->size > 0) {
 										decoded = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet_);
 										if (got_frame > 0) {
-											auto samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples,
-												(const uint8_t**)frame_->data, frame_->nb_samples);
+											auto samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples, (const uint8_t**)frame_->data, frame_->nb_samples) - offset;
 											if (samples > 0) {
-												memcpy(buffer_ + buffer_size_, decode_frame_->data[0], samples * decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format)));
-												buffer_size_ += output_frame_size_;
+												auto bytes_one_frame = decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format));
+												auto offset_bytes = offset * bytes_one_frame;
+												auto size = samples * bytes_one_frame;
+												memcpy(buffer_ + buffer_size_, decode_frame_->data[0] + offset_bytes, size);
+												buffer_size_ += size;
 											}
 										}
 										if (decoded < 0)break;
@@ -492,12 +485,12 @@ namespace vocaloid {
 											break;
 										}
 									}
-									frame_offset = PTSToFrames(packet_->pts + packet_->duration);
 									break;
 								}
 							}
 							av_packet_unref(packet_);
 						}
+						av_packet_unref(packet_);
 					}
 					else
 						return HAVE_NOT_DEFINED_SOURCE;
