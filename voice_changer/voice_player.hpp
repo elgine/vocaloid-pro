@@ -167,6 +167,8 @@ public:
 		ctx_->on_tick_->On([&](int) {
 			UpdateTimestamp();
 		});
+
+		logger::LogStart("C:\\Users\\Elgine\\Desktop\\log.txt");
 	}
 
 	void SubscribeStop(OnPlayerStop h) {

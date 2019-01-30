@@ -7,6 +7,7 @@
 #include <atomic>
 #include <iostream>
 #include <condition_variable>
+#include "../utility/logger.hpp"
 #ifdef _WIN64
 extern "C"
 {
@@ -76,6 +77,8 @@ namespace vocaloid {
 			condition_variable can_decode_;
 			atomic<bool> is_end_;
 			atomic<bool> decoding_;
+
+			char* err_msg_;
 
 			int64_t frame_count_;
 			int64_t output_frame_size_;
@@ -178,6 +181,7 @@ namespace vocaloid {
 		public:
 
 			FFmpegFileReader(int64_t max_size = MAX_FFT_SIZE * 16) {
+				err_msg_ = new char[512];
 				max_buffer_size_ = max_size;
 				ctx_ = nullptr;
 				codec_ctx_ = nullptr;
@@ -269,20 +273,19 @@ namespace vocaloid {
 
 			int16_t Open(const char *input_path) override {
 				int16_t ret = 0;
-				static char* err_msg = new char[512];
 				av_register_all();
 				Dispose();
 				ctx_ = avformat_alloc_context();
 				ret = avformat_open_input(&ctx_, input_path, NULL, NULL);
 				if (ret < 0) {
-					av_strerror(ret, err_msg, 512);
+					av_strerror(ret, err_msg_, 512);
 					// TODO: Log error
 					return ret;
 				}
 				ret = avformat_find_stream_info(ctx_, NULL);
 				if (ret < 0) {
 					// TODO: Log error
-					av_strerror(ret, err_msg, 512);
+					av_strerror(ret, err_msg_, 512);
 					return ret;
 				}
 
@@ -312,7 +315,7 @@ namespace vocaloid {
 				if (ret < 0) {
 					// TODO: Log error
 					// Can't open decoder
-					av_strerror(ret, err_msg, 512);
+					av_strerror(ret, err_msg_, 512);
 					return -1;
 				}
 
@@ -462,17 +465,24 @@ namespace vocaloid {
 								if (packet_->duration <= 0)break;
 								if (packet_->pts + packet_->duration > pts && pts >= packet_->pts) {
 									auto decoded = 0, got_frame = 0;
-									auto offset = PTSToFrames(pts - packet_->pts, codec_ctx_->sample_rate);
+									auto bytes_one_frame = decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format));
 									while (packet_->size > 0) {
 										decoded = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet_);
+										int64_t offset = PTSToFrames(pts - frame_->pts, codec_ctx_->sample_rate);
+										int64_t offset_bytes = offset * bytes_one_frame;
 										if (got_frame > 0) {
-											auto samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples, (const uint8_t**)frame_->data, frame_->nb_samples) - offset;
+											int samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples, (const uint8_t**)frame_->data, frame_->nb_samples);
 											if (samples > 0) {
-												auto bytes_one_frame = decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format));
-												auto offset_bytes = offset * bytes_one_frame;
-												auto size = samples * bytes_one_frame;
-												memcpy(buffer_ + buffer_size_, decode_frame_->data[0] + offset_bytes, size);
-												buffer_size_ += size;
+												int size = samples * bytes_one_frame;
+												if (offset_bytes < size) {
+													size -= offset_bytes;
+													memcpy(buffer_ + buffer_size_, decode_frame_->data[0] + offset_bytes, size);
+													buffer_size_ += size;
+													offset_bytes = 0;
+												}
+												else {
+													offset_bytes -= size;
+												}
 											}
 										}
 										if (decoded < 0)break;
@@ -490,7 +500,6 @@ namespace vocaloid {
 							}
 							av_packet_unref(packet_);
 						}
-						av_packet_unref(packet_);
 					}
 					else
 						return HAVE_NOT_DEFINED_SOURCE;
