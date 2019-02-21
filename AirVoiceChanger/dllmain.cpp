@@ -360,6 +360,13 @@ void ContextInitializer(
 }
 
 void ContextFinalizer(FREContext ctx) {
+	HMODULE handler;
+	for (auto i = dependency_count - 1; i >= 0; i--) {
+		wchar_t* dll_name = StringToWString(dependencies[i]);
+		handler = GetModuleHandle(dll_name);
+		if (handler == nullptr)continue;
+		FreeLibrary(handler);
+	}
 	return;
 }
 

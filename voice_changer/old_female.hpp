@@ -101,7 +101,7 @@ namespace effect {
 				vibrato_->SetSpeed(options[5]);
 			}
 			if (option_count > 6) {
-				SetGain(options[5]);
+				SetGain(options[6]);
 			}
 		}
 

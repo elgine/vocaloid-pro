@@ -83,7 +83,7 @@ namespace effect {
 			if (option_count > 0) {
 				jungle_->pitch_ = Clamp(PITCH_MIN, PITCH_MAX, options[0]);
 			}
-			if (option_count > 0) {
+			if (option_count > 1) {
 				jungle_->tempo_ = Clamp(TEMPO_MIN, TEMPO_MAX, options[1]);
 			}
 			if (option_count > 2) {

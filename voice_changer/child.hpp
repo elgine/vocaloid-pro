@@ -37,7 +37,7 @@ namespace effect {
 		// [pitch, lowshelf_gain, peaking_gain, highshelf_gain, highpass]
 		void SetOptions(float *options, int option_count) override {
 			if (option_count > 0) {
-				phase_vocoder_->pitch_ = Clamp(PITCH_MIN, PITCH_MAX, options[0]);
+				highpass_->frequency_->value_ = Clamp(HIGHPASS_MIN, HIGHPASS_MAX, options[0]);
 			}
 			if (option_count > 1) {
 				equalizer_->SetLowShelfGain(options[1]);
@@ -49,6 +49,9 @@ namespace effect {
 				equalizer_->SetHighShelfGain(options[3]);
 			}
 			if (option_count > 4) {
+				phase_vocoder_->pitch_ = Clamp(PITCH_MIN, PITCH_MAX, options[0]);
+			}
+			if (option_count > 5) {
 				SetGain(options[4]);
 			}
 		}

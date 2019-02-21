@@ -49,7 +49,8 @@ namespace vocaloid {
 				auto seg_index = Timeline::SeekSegmentIndex(frames);
 				if (seg_index > -1) {
 					auto seg = Timeline::Segment(seg_index);
-					if (frames < seg.start || frames >= seg.end) {
+					// frames
+					if (play_pos_ < seg.start || play_pos_ >= seg.end) {
 						Timeline::SetSegmentIndex(seg_index);
 					}
 					auto ret = SeekInternal(frames);
@@ -144,6 +145,7 @@ namespace vocaloid {
 				auto ret = InputNode::Start();
 				if (ret < 0)return ret;
 				delay_ = delay;
+				Timeline::Dispose();
 				try {
 					int64_t last = 0, start_timestamp, end_timestamp, start_bytes = 0, end_bytes = 0;
 					for (auto i = 0; i < segment_count; i+=2) {

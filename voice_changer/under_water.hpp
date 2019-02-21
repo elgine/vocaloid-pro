@@ -99,6 +99,30 @@ namespace effect {
 			Effect::Dispose();
 		}
 
+		void SetOptions(float *options, int option_count) override {
+			if (option_count > 0) {
+				SetLowpassFrequency(options[0]);
+			}
+			if (option_count > 1) {
+				SetEnvelopeFollowerFilterFrequency(options[1]);
+			}
+			if (option_count > 2) {
+				SetFilterDepth(options[2]);
+			}
+			if (option_count > 3) {
+				SetFilterQ(options[3]);
+			}
+			if (option_count > 4) {
+				SetInputGain(options[4]);
+			}
+			if (option_count > 5) {
+				SetUnderWaterBackgroundGain(options[5]);
+			}
+			if (option_count > 6) {
+				SetGain(options[6]);
+			}
+		}
+
 		void SetLowpassFrequency(float v) {
 			lowpass_->frequency_->value_ = Clamp(LOWPASS_FREQ_MIN, LOWPASS_FREQ_MAX, v);
 		}
