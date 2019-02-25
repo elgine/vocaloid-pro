@@ -13,6 +13,7 @@
 
 FREContext fre_context = nullptr;
 const int dependency_count = 9;
+#ifdef _WIN32
 const char *dependencies[dependency_count] = {
 	"avutil-55.dll",
 	"swresample-2.dll",
@@ -24,6 +25,20 @@ const char *dependencies[dependency_count] = {
 	"avdevice-57.dll",
 	"VoiceChanger.dll"
 };
+#else
+const char *dependencies[dependency_count] = {
+	"avutil-56.dll",
+	"swresample-3.dll",
+	"avcodec-58.dll",
+	"avformat-58.dll",
+	"postproc-55.dll",
+	"swscale-5.dll",
+	"avfilter-7.dll",
+	"avdevice-58.dll",
+	"VoiceChanger.dll"
+};
+#endif
+
 
 struct PlayerTickData {
 	int timestamp;
@@ -335,37 +350,41 @@ void ContextInitializer(
 	FREContext				   ctx,
 	uint32_t				 * numFunctionsToSet,
 	const FRENamedFunction	** functionsToSet) {
-	static FRENamedFunction fns[] = {
-		{ (const uint8_t*) "getSourceInfo", NULL, &GetSourceInfo },
-		{ (const uint8_t*) "initialize", NULL, &Initialize },
-		{ (const uint8_t*) "setTempPath", NULL, &SetExtractTempPath },
-		{ (const uint8_t*) "disposeTemps", NULL, &DisposeTemps },
-		{ (const uint8_t*) "setEffectPreview", NULL, &SetEffectPreview },
-		{ (const uint8_t*) "setLoopPreview", NULL, &SetLoopPreview },
-		{ (const uint8_t*) "setSegmentsPreview", NULL, &SetSegmentsPreview },
-		{ (const uint8_t*) "openPreview", NULL, &OpenPreview },
-		{ (const uint8_t*) "setEffectOptionsPreview", NULL, &SetEffectOptionsPreview },
-		{ (const uint8_t*) "startPreview", NULL, &StartPreview },
-		{ (const uint8_t*) "stopPreview", NULL, &StopPreview },
-		{ (const uint8_t*) "seek", NULL, &Seek },
-		{ (const uint8_t*) "render", NULL, &Render },
-		{ (const uint8_t*) "cancelRender", NULL, &CancelRender },
-		{ (const uint8_t*) "cancelRenderAll", NULL, &CancelRenderAll },
-		{ (const uint8_t*) "setMaxRenderersRunTogether", NULL, &SetMaxRenderersRunTogether },
-		{ (const uint8_t*) "clearRenderList", NULL, &ClearRenderList }
-	};
-	*numFunctionsToSet = sizeof(fns) / sizeof(FRENamedFunction);
+	
+	auto fns = (FRENamedFunction*)malloc(17 * sizeof(FRENamedFunction));
+	fns[0] = { (const uint8_t*) "getSourceInfo", NULL, &GetSourceInfo };
+	fns[1] = { (const uint8_t*) "initialize", NULL, &Initialize };
+	fns[2] = { (const uint8_t*) "setTempPath", NULL, &SetExtractTempPath };
+	fns[3] = { (const uint8_t*) "disposeTemps", NULL, &DisposeTemps };
+	fns[4] = { (const uint8_t*) "setEffectPreview", NULL, &SetEffectPreview };
+	fns[5] = { (const uint8_t*) "setLoopPreview", NULL, &SetLoopPreview };
+	fns[6] = { (const uint8_t*) "setSegmentsPreview", NULL, &SetSegmentsPreview };
+	fns[7] = { (const uint8_t*) "openPreview", NULL, &OpenPreview };
+	fns[8] = { (const uint8_t*) "setEffectOptionsPreview", NULL, &SetEffectOptionsPreview };
+	fns[9] = { (const uint8_t*) "startPreview", NULL, &StartPreview };
+	fns[10] = { (const uint8_t*) "stopPreview", NULL, &StopPreview };
+	fns[11] = { (const uint8_t*) "seek", NULL, &Seek };
+	fns[12] = { (const uint8_t*) "render", NULL, &Render };
+	fns[13] = { (const uint8_t*) "cancelRender", NULL, &CancelRender };
+	fns[14] = { (const uint8_t*) "cancelRenderAll", NULL, &CancelRenderAll };
+	fns[15] = { (const uint8_t*) "setMaxRenderersRunTogether", NULL, &SetMaxRenderersRunTogether };
+	fns[16] = { (const uint8_t*) "clearRenderList", NULL, &ClearRenderList };
+	*numFunctionsToSet = 17;
 	*functionsToSet = fns;
 	fre_context = ctx;
 }
 
 void ContextFinalizer(FREContext ctx) {
 	HMODULE handler;
-	for (auto i = dependency_count - 1; i >= 0; i--) {
-		wchar_t* dll_name = StringToWString(dependencies[i]);
-		handler = GetModuleHandle(dll_name);
-		if (handler == nullptr)continue;
-		FreeLibrary(handler);
+	if (inited) {
+		for (auto i = dependency_count - 1; i >= 0; i--) {
+			wchar_t* dll_name = StringToWString(dependencies[i]);
+			handler = GetModuleHandle(dll_name);
+			if (handler == nullptr)continue;
+			FreeLibrary(handler);
+		}
+		inited = false;
+		fre_context = nullptr;
 	}
 	return;
 }

@@ -241,8 +241,16 @@ public:
 		return rendering_;
 	}
 
+	void Stop() {
+		{
+			unique_lock<mutex> lck(render_thread_mutex_);
+			rendering_ = false;
+		}
+		Join();
+	}
+
 	void Start() {
-		if (Rendering())return;
+		if (Rendering())Stop();
 		rendering_ = true;
 		render_thread_ = new thread(&RenderList::RenderLoop, this);
 	}
@@ -273,7 +281,7 @@ public:
 	}
 
 	void Clear() {
-		CancelAll();
+		Stop();
 		list_.clear();
 		state_.clear();
 		data_.clear();

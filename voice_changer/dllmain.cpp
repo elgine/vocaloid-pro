@@ -92,7 +92,6 @@ extern "C" {
 
 	DLLEXPORT int Render(const char** sources, const char **dests, int *effect_ids,
 		double *options, int *option_counts, int* segments, int *segment_counts, int count) {
-		GetRenderList()->Clear();
 		auto option_offset = 0;
 		auto segment_offset = 0;
 		if (options == nullptr)option_counts = 0;
