@@ -123,5 +123,18 @@ extern "C" {
 		GetRenderList()->Clear();
 		return SUCCEED;
 	}
+
+	DLLEXPORT void Dispose() {
+		if (player != nullptr) {
+			player->Dispose();
+			delete player;
+			player = nullptr;
+		}
+		if (render_list != nullptr) {
+			render_list->Dispose();
+			delete render_list;
+			render_list = nullptr;
+		}
+	}
 }
 

@@ -1,6 +1,8 @@
 #pragma once
 #include "ane.h"
 #include <string>
+#include "../utility/string_wstring.hpp"
+#include "../utility/utf8_string.hpp"
 using namespace std;
 
 FREObjectType GetType(FREObject obj) {
@@ -37,7 +39,8 @@ const char* ToString(FREObject obj) {
 	const uint8_t *str = 0;
 	uint32_t len = 0;
 	if (FRE_OK != FREGetObjectAsUTF8(obj, &len, &str))return nullptr;
-	return (const char*)(str);
+	//return WStringToString(StringToWString((const char*)str));
+	return UTF8ToGBK((const char*)str);
 }
 
 bool ToBool(FREObject obj) {

@@ -130,6 +130,7 @@
     <ClInclude Include="buffer.hpp" />
     <ClInclude Include="emitter.hpp" />
     <ClInclude Include="logger.hpp" />
+    <ClInclude Include="mem_leak_detect.h" />
     <ClInclude Include="module.hpp" />
     <ClInclude Include="os_detection.hpp" />
     <ClInclude Include="path.hpp" />

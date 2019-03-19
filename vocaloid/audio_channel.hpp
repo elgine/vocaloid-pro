@@ -1,5 +1,6 @@
 #pragma once
 #include <math.h>
+#include <assert.h>
 #include "channel.h"
 #include "maths.hpp"
 #include "../utility/buffer.hpp"
@@ -18,7 +19,7 @@ namespace vocaloid {
 			explicit AudioChannel(int16_t channels = 2, int64_t max_size = 1024, int32_t sample_rate = 44100) {
 				sample_rate_ = sample_rate;
 				channels_ = 0;
-				data_ = new PBuffer[8]{nullptr};
+				data_ = new PBuffer[8]{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 				silence_ = true;
 				Alloc(channels, max_size);
 			}
@@ -105,7 +106,7 @@ namespace vocaloid {
 				}
 			}
 
-			void Mix(AudioChannel *in) {
+			void Mix(AudioChannel *in) {		
 				silence_ &= in->silence_;
 				int16_t out_channels = channels_, in_channels = in->Channels();
 				int64_t size = in->Size();

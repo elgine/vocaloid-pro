@@ -277,6 +277,10 @@ namespace vocaloid {
 					kernel_segments_ = new_segments;
 					kernel_real_segs_ = new float*[kernel_segments_];
 					kernel_imag_segs_ = new float*[kernel_segments_];
+					for (auto i = 0; i < kernel_segments_; i++) {
+						kernel_real_segs_[i] = nullptr;
+						kernel_imag_segs_[i] = nullptr;
+					}
 					
 					int64_t k_start = 0;
 					int64_t k_len = 0;

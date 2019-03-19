@@ -336,6 +336,45 @@ public:
 		return ret;
 	}
 
+	void Dispose() {
+		Stop();
+		if (on_tick_ != nullptr) {
+			on_tick_->Clear();
+			delete on_tick_;
+			on_tick_ = nullptr;
+		}
+		if (on_end_ != nullptr) {
+			on_end_->Clear();
+			delete on_end_;
+			on_end_ = nullptr;
+		}
+		if (on_stop_ != nullptr) {
+			on_stop_->Clear();
+			delete on_stop_;
+			on_stop_ = nullptr;
+		}
+		if (source_reader_ != nullptr) {
+			source_reader_->Dispose();
+			delete source_reader_;
+			source_reader_ = nullptr;
+		}
+		if (player_ != nullptr) {
+			player_->Dispose();
+			delete player_;
+			player_ = nullptr;
+		}
+		if (effect_ != nullptr) {
+			effect_->Dispose();
+			delete effect_;
+			effect_ = nullptr;
+		}
+		if (ctx_ != nullptr) {
+			ctx_->Dispose();
+			delete ctx_;
+			ctx_ = nullptr;
+		}
+	}
+
 	string Path() {
 		return path_;
 	}

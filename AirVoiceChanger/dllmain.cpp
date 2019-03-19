@@ -13,19 +13,7 @@
 
 FREContext fre_context = nullptr;
 const int dependency_count = 9;
-#ifdef _WIN32
-const char *dependencies[dependency_count] = {
-	"avutil-55.dll",
-	"swresample-2.dll",
-	"avcodec-57.dll",
-	"avformat-57.dll",
-	"postproc-54.dll",
-	"swscale-4.dll",
-	"avfilter-6.dll",
-	"avdevice-57.dll",
-	"VoiceChanger.dll"
-};
-#else
+#ifdef _WIN64
 const char *dependencies[dependency_count] = {
 	"avutil-56.dll",
 	"swresample-3.dll",
@@ -35,6 +23,18 @@ const char *dependencies[dependency_count] = {
 	"swscale-5.dll",
 	"avfilter-7.dll",
 	"avdevice-58.dll",
+	"VoiceChanger.dll"
+};
+#else
+const char *dependencies[dependency_count] = {
+	"avutil-55.dll",
+	"swresample-2.dll",
+	"avcodec-57.dll",
+	"avformat-57.dll",
+	"postproc-54.dll",
+	"swscale-4.dll",
+	"avfilter-6.dll",
+	"avdevice-57.dll",
 	"VoiceChanger.dll"
 };
 #endif
@@ -62,6 +62,7 @@ int(*cancel_render)(const char*);
 int(*cancel_render_all)();
 int(*set_max_renderers_run_together)(int);
 int(*clear_render_list)();
+void(*dispose)();
 
 struct RenderMessage {
 	float* status;
@@ -212,6 +213,8 @@ FREObject Initialize(FREContext ctx, void* funcData, uint32_t argc, FREObject ar
 			if(clear_render_list == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			set_max_renderers_run_together = (int(*)(int))GetProcAddress(handler, "SetMaxRenderersRunTogether");
 			if (set_max_renderers_run_together == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
+			dispose = (void(*)())GetProcAddress(handler, "Dispose");
+			if (dispose == nullptr)return FromInt(LOAD_LIBRARY_FAILED);
 			// Subscribe event
 			subscribe_player_stop(SendPlayerStopMsg);
 			subscribe_player_tick(SendPlayerTickMsg);
@@ -240,16 +243,18 @@ FREObject GetSourceInfo(FREContext ctx, void* funcData, uint32_t argc, FREObject
 
 FREObject SetExtractTempPath(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 	if (argc < 1)return FromInt(MISS_PARAM);
+	if (!inited)return FromInt(HAS_NOT_INITED);
 	return FromInt(set_temp_path(ToString(argv[0])));
 }
 
 FREObject DisposeTemps(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+	if (!inited)return FromInt(HAS_NOT_INITED);
 	return FromInt(dispose_temps());
 }
 
 FREObject SetEffectPreview(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 	if (argc < 1)return FromInt(MISS_PARAM);
-	if (!inited)return FromInt(HAS_NOT_INITED);
+	if (!inited || set_effect == nullptr)return FromInt(HAS_NOT_INITED);
 	return FromInt(set_effect(ToInt(argv[0])));
 }
 
@@ -375,31 +380,34 @@ void ContextInitializer(
 }
 
 void ContextFinalizer(FREContext ctx) {
-	HMODULE handler;
-	if (inited) {
-		for (auto i = dependency_count - 1; i >= 0; i--) {
-			wchar_t* dll_name = StringToWString(dependencies[i]);
-			handler = GetModuleHandle(dll_name);
-			if (handler == nullptr)continue;
-			FreeLibrary(handler);
-		}
-		inited = false;
-		fre_context = nullptr;
+	HMODULE handler = GetModuleHandle(L"VoiceChanger.dll");
+	if (handler) {
+		dispose();
+		FreeLibrary(handler);
 	}
+	inited = false;
+	fre_context = nullptr;
 	return;
 }
 
 
 extern "C"
 {
-	__declspec(dllexport) void ExtensionInitializer(void** extData, FREContextInitializer* ctxInitializer, FREContextFinalizer* ctxFinalizer)
+	__declspec(dllexport) void VoiceChangerInitializer(void** extData, FREContextInitializer* ctxInitializer, FREContextFinalizer* ctxFinalizer)
 	{
 		*ctxInitializer = &ContextInitializer; // The name of function that will intialize the extension context
 		*ctxFinalizer = &ContextFinalizer; // The name of function that will finalize the extension context
 	}
 
-	__declspec(dllexport) void ExtensionFinalizer(void* extData)
+	__declspec(dllexport) void VoiceChangerFinalizer(void* extData)
 	{
+		HMODULE handler = nullptr;
+		for (auto i = dependency_count - 1; i >= 0; i--) {
+			wchar_t* dll_name = StringToWString(dependencies[i]);
+			handler = GetModuleHandle(dll_name);
+			if (handler == nullptr)continue;
+			FreeLibrary(handler);
+		}
 		return;
 	}
 }

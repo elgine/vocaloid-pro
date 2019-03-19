@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <memory>
+#include "mem_leak_detect.h"
 using namespace std;
 namespace vocaloid{
     template<typename T>
@@ -79,13 +80,15 @@ namespace vocaloid{
 
         void Alloc(int64_t size){
             if(max_size_ < size){
-				T* new_data = nullptr;
+				/*T* new_data = nullptr;
 				AllocArray(size, &new_data);
 				if (data_ != nullptr) {
 					memcpy(new_data, data_, max_size_ * sizeof(T));
 				}
 				DeleteArray(&data_);
-				data_ = new_data;
+				data_ = new_data;*/
+				AllocArray(size, &data_);
+				memset(data_ + max_size_, 0, size - max_size_);
                 max_size_ = size;
             }
         }
@@ -101,7 +104,6 @@ namespace vocaloid{
         }
 
         void Dispose(){
-            max_size_ = size_ = 0;
             DeleteArray(&data_);
         }
 

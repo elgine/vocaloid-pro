@@ -2,6 +2,7 @@
 #include "base_audio_context.h"
 #include "audio_channel.hpp"
 #include "status.h"
+#include "../utility/mem_leak_detect.h"
 namespace vocaloid {
 	namespace node {
 

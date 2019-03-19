@@ -151,6 +151,9 @@ namespace vocaloid {
 #endif
 							can_decode_.wait(lck);
 						}
+						if (!decoding_) {
+							break;
+						}
 						auto ret = av_read_frame(ctx_, packet_);
 						if (ret == AVERROR_EOF) {
 							packet_->data = nullptr;
@@ -387,6 +390,10 @@ namespace vocaloid {
 			void Dispose() override {
 				if (!inited_)return;
 				Stop();
+				if (buffer_) {
+					DeleteArray(&buffer_);
+					buffer_ = nullptr;
+				}
 				if (packet_) {
 					av_packet_free(&packet_);
 					packet_ = nullptr;

@@ -15,7 +15,7 @@ namespace vocaloid {
 
 			explicit BiquadNode(BaseAudioContext *ctx) :AudioNode(ctx) {
 				type_ = dsp::BIQUAD_TYPE::LOW_PASS;
-				filters_ = new dsp::Biquad*[8]{nullptr};
+				filters_ = new dsp::Biquad*[8]{nullptr, nullptr , nullptr , nullptr , nullptr , nullptr , nullptr, nullptr };
 				frequency_ = new AudioParam(ctx);
 				detune_ = new AudioParam(ctx);
 				Q_ = new AudioParam(ctx);

@@ -29,4 +29,11 @@ public:
 			handler(v);
 		}
 	}
+
+	void Clear() {
+		list<function<void(T)>>::iterator iter;
+		for (iter = handlers_.begin(); iter != handlers_.end();){
+			iter = handlers_.erase(iter);
+		}
+	}
 };

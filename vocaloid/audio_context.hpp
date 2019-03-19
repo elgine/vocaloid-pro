@@ -346,7 +346,9 @@ namespace vocaloid {
 
 			void Dispose() override {
 				Stop();
-				Close();
+				//Close();
+				on_tick_->Clear();
+				on_end_->Clear();
 				//// Safe remove
 				//vector<AudioNode*> nodes;
 				//for (auto it = nodes_.begin(); it != nodes_.end(); it++)

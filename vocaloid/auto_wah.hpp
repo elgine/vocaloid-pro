@@ -45,22 +45,27 @@ namespace vocaloid {
 					curve[i + 32768] = ((i > 0)?i:-i) / 32768.0f;
 				}
 				wave_shaper_->SetCurve(curve, 65536);
-				ctx->Connect(wave_shaper_, aw_follower_);
+				
 				delete[] curve;
 				curve = nullptr;
 
 				aw_depth_ = new GainNode(ctx);
 				aw_depth_->gain_->value_ = 11585;
-				ctx->Connect(aw_follower_, aw_depth_);
+				
 
 				aw_filter_ = new BiquadNode(ctx);
 				aw_filter_->Q_->value_ = 15;
 				aw_filter_->frequency_->value_ = 50;
-				ctx->Connect(aw_depth_, aw_filter_->frequency_);
-				ctx->Connect(aw_filter_, wet_);
+				
 
 				ctx->Connect(input_, wave_shaper_);
+				ctx->Connect(wave_shaper_, aw_follower_);
+				ctx->Connect(aw_follower_, aw_depth_);
+				ctx->Connect(aw_depth_, aw_filter_->frequency_);
+
 				ctx->Connect(input_, aw_filter_);
+				ctx->Connect(aw_filter_, wet_);
+				
 
 				SetOptions({
 					10.0f,

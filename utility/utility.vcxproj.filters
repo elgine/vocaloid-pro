@@ -51,5 +51,8 @@
     <ClInclude Include="logger.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="mem_leak_detect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

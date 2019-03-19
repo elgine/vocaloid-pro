@@ -211,6 +211,30 @@ public:
 		ctx_->Stop();
 	}
 
+	void DisposeAll() {
+		Stop();
+		if (source_reader_ != nullptr) {
+			source_reader_->Dispose();
+			delete source_reader_;
+			source_reader_ = nullptr;
+		}
+		if (writer_ != nullptr) {
+			writer_->Dispose();
+			delete writer_;
+			writer_ = nullptr;
+		}
+		if (effect_ != nullptr) {
+			effect_->Dispose();
+			delete effect_;
+			effect_ = nullptr;
+		}
+		if (ctx_ != nullptr) {
+			ctx_->Dispose();
+			delete ctx_;
+			ctx_ = nullptr;
+		}
+	}
+
 	bool IsEnd() {
 		return timestamp_ >= end_timestamp_;
 	}

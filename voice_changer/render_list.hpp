@@ -37,7 +37,7 @@ private:
 
 	map<string, RenderData> data_;
 	map<string, RenderState> state_;
-	
+
 	vector<string> list_;
 	thread *render_thread_;
 	mutex render_thread_mutex_;
@@ -197,7 +197,7 @@ public:
 		SetMaxRenderersRunTogether(2);
 	}
 
-	int SetMaxRenderersRunTogether(int max_count = 1){
+	int SetMaxRenderersRunTogether(int max_count = 1) {
 		if (Rendering())return ACTION_NOT_PERMITTED;
 		max_count = Clamp(0, MAX_RENDERERS, max_count);
 		if (max_count > renderers_.size()) {
@@ -219,8 +219,8 @@ public:
 		on_end_->On(handler);
 	}
 
-	void AddRenderData(const char* source, const char* dest, int effect_id, double* options = nullptr, int option_count = 0, 
-				int* segments = nullptr, int segment_count = 0) {
+	void AddRenderData(const char* source, const char* dest, int effect_id, double* options = nullptr, int option_count = 0,
+		int* segments = nullptr, int segment_count = 0) {
 		unique_lock<mutex> lck(render_thread_mutex_);
 		if (find(list_.begin(), list_.end(), source) != list_.end())return;
 		list_.push_back(source);
@@ -285,5 +285,30 @@ public:
 		list_.clear();
 		state_.clear();
 		data_.clear();
+	}
+
+	void Dispose() {
+		Clear();
+		for (int i = 0; i < renderer_count_; i++) {
+			renderers_[i]->DisposeAll();
+			delete renderers_[i];
+			renderers_[i] = nullptr;
+		}
+		renderers_.clear();
+		renderers_.shrink_to_fit();
+		if (progress_data_ != nullptr) {
+			delete progress_data_;
+			progress_data_ = nullptr;
+		}
+		if (on_tick_ != nullptr) {
+			on_tick_->Clear();
+			delete on_tick_;
+			on_tick_ = nullptr;
+		}
+		if (on_end_ != nullptr) {
+			on_end_->Clear();
+			delete on_end_;
+			on_end_ = nullptr;
+		}
 	}
 };
