@@ -25,11 +25,11 @@ using namespace std;
 template<typename T>
 void AllocArray(int64_t len, T** arr) {
 	//(*arr) = new T[len]{0};
-	/**arr = (T*)malloc(sizeof(T) * len);
+	*arr = (T*)malloc(sizeof(T) * len);
 	if (*arr != nullptr) {
 		memset(*arr, 0, sizeof(T) * len);
-	}*/
-	*arr = (T*)realloc(*arr, sizeof(T) * len);
+	}
+	//*arr = (T*)realloc(*arr, sizeof(T) * len);
 }
 
 template<typename T>

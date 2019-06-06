@@ -9,7 +9,7 @@ using namespace std;
 bool IsPathDirectory(const char* path) {
 	struct stat s;
 	if (stat(path, &s) == 0) {
-		if (s.st_mode & S_IFDIR)return true;
+		if ((s.st_mode & S_IFDIR) == S_IFDIR)return true;
 		else return false;
 	}
 	else {
