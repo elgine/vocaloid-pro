@@ -131,9 +131,6 @@
     <Media Include="..\samples\muffler.wav">
       <Filter>资源文件</Filter>
     </Media>
-    <Media Include="..\samples\parking.wav">
-      <Filter>资源文件</Filter>
-    </Media>
     <Media Include="..\samples\radio.wav">
       <Filter>资源文件</Filter>
     </Media>

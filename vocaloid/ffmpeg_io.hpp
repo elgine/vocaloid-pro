@@ -360,7 +360,8 @@ namespace vocaloid {
 				uint8_t* frame_buf = (uint8_t *)av_malloc(output_frame_size_);
 				avcodec_fill_audio_frame(decode_frame_, decode_frame_->channels, (AVSampleFormat)decode_frame_->format, (const uint8_t*)frame_buf, output_frame_size_, 1);
 
-				memset(buffer_, 0, max_buffer_size_);
+				AllocArray(max_buffer_size_, &buffer_);
+				//memset(buffer_, 0, max_buffer_size_);
 				buffer_size_ = 0;
 				frame_count_ = 0;
 				decoding_ = false;

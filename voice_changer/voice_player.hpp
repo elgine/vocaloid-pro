@@ -86,7 +86,7 @@ private:
 			if (!Playing())break;
 			if (state_ == VoicePlayerState::PLAYER_STOP)break;
 			if (last_timestamp != timestamp_) {
-				on_tick_->Emit({ timestamp_, duration_ });
+				on_tick_->Emit({ int(timestamp_), int(duration_) });
 				last_timestamp = timestamp_;
 			}
 			if (End()) {
