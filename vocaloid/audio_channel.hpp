@@ -1,6 +1,7 @@
 #pragma once
 #include <math.h>
 #include <assert.h>
+#include <vector>
 #include "channel.h"
 #include "maths.hpp"
 #include "../utility/buffer.hpp"
@@ -61,7 +62,7 @@ namespace vocaloid {
 				FromByteArray(bytes->Data(), bytes->Size(), bits, channels);
 			}
 
-			template<typename T = const char* | vector<char>>
+			template<typename T = const char*>
 			void FromByteArray(T byte_array, int64_t byte_length, int16_t bits, int16_t channels, int64_t dst = 0) {
 				int16_t depth = bits / 8;
 				int16_t step = depth * channels;
@@ -81,7 +82,7 @@ namespace vocaloid {
 				}
 			}
 
-			template<typename T = char* | vector<char>&>
+			template<typename T = char>
 			void ToByteArray(int16_t bits, T byte_array, int64_t &byte_length) {
 				int16_t depth = bits / 8;
 				int16_t step = depth * channels_;

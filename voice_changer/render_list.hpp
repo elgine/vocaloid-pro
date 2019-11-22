@@ -237,7 +237,6 @@ public:
 	}
 
 	bool Rendering() {
-		unique_lock<mutex> lck(render_thread_mutex_);
 		return rendering_;
 	}
 

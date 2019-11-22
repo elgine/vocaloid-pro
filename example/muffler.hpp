@@ -11,23 +11,24 @@ using namespace vocaloid::io;
 
 void Run() {
 	auto context = new AudioContext();
-	context->SetOutput(OutputType::PLAYER);
+	context->SetOutput(OutputType::RECORDER);
+	auto dest = (FileWriterNode*)context->Destination();
+	dest->SetPath("C:\\Users\\Admin\\Desktop\\out.mp3");
 	auto source = new FileReaderNode(context);
-	source->Open("G:\\Projects\\VSC++\\vocaloid\\samples\\speech.wav");
+	source->Open("D:\\Projects\\vocaloid\\samples\\example.mp3");
 
-	auto segments = new int64_t*[3]{
-		new int64_t[2]{0, 4000},
-		new int64_t[2]{ 20000, 30000},
-		new int64_t[2]{ 55000, 60000}
+	auto segments = new int[6]{
+		0, 4000,
+		20000, 30000,
+		55000, 60000
 	};
 	source->StartWithSegments(segments, 3);
-	source->loop_ = true;
 	auto convolution = new ConvolutionNode(context);
 	auto channel_data = new AudioChannel();
 	auto buffer = new Buffer<char>();
 	auto format = new AudioFormat();
 
-	ReadFileBuffer("G:\\Projects\\VSC++\\vocaloid\\samples\\muffler.wav", format, buffer);
+	ReadFileBuffer("D:\\Projects\\vocaloid\\samples\\muffler.wav", format, buffer);
 	channel_data->FromBuffer(buffer, format->bits, format->channels);
 	convolution->kernel_ = channel_data;
 
@@ -40,5 +41,6 @@ void Run() {
 	context->Prepare();
 	context->Start();
 	getchar();
+	context->Close();
 	context->Dispose();
 }

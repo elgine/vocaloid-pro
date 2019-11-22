@@ -1,4 +1,5 @@
 #pragma once
+#include <math.h>
 namespace vocaloid {
 	namespace dsp {
 		void FFT(float *x, float *y, long n, short int dir, bool normalize = true){

@@ -177,10 +177,16 @@
     <ClInclude Include="wave_out_player.hpp">
       <Filter>头文件\io</Filter>
     </ClInclude>
+    <ClInclude Include="squeak.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="input_node.hpp">
       <Filter>头文件\node</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\voice_changer_example\voice_changer_example.vcxproj" />
   </ItemGroup>
 </Project>

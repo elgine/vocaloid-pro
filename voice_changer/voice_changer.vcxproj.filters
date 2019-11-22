@@ -117,6 +117,9 @@
     <ClInclude Include="load_kernel.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="portable_radio.hpp">
+      <Filter>头文件\effects\tool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Media Include="..\samples\church.wav">

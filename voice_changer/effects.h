@@ -26,7 +26,8 @@ namespace effect {
 		MUFFLER,
 		TELEPHONE,
 		RADIO,
-		MEGAPHONE
+		MEGAPHONE,
+		PORTABLE_RADIO
 	};
 
 	static const int CHARACTER_COUNT = 12;
@@ -53,11 +54,12 @@ namespace effect {
 		Effects::HALL
 	};
 
-	static const int TOOL_COUNT = 4;
-	Effects *TOOL = new Effects[4]{
+	static const int TOOL_COUNT = 5;
+	Effects *TOOL = new Effects[5]{
 		Effects::MUFFLER,
 		Effects::TELEPHONE,
 		Effects::RADIO,
-		Effects::MEGAPHONE
+		Effects::MEGAPHONE,
+		Effects::PORTABLE_RADIO
 	};
 }

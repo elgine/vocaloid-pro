@@ -165,6 +165,7 @@
     <ClInclude Include="gain_node.hpp" />
     <ClInclude Include="lpc.hpp" />
     <ClInclude Include="convolver.hpp" />
+    <ClInclude Include="squeak.hpp" />
     <ClInclude Include="oscillator_node.hpp" />
     <ClInclude Include="overlap_add.hpp" />
     <ClInclude Include="wave_out_player.hpp" />
@@ -190,6 +191,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="input_node.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\voice_changer_example\voice_changer_example.vcxproj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

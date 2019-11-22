@@ -23,6 +23,7 @@
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="balrog.hpp" />
     <ClInclude Include="load_kernel.hpp" />
+    <ClInclude Include="portable_radio.hpp" />
     <ClInclude Include="render_list.hpp" />
     <ClInclude Include="voice_renderer.hpp" />
     <ClInclude Include="extract_resource.hpp" />

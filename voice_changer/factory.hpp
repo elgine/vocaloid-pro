@@ -21,6 +21,7 @@
 #include "telephone.hpp"
 #include "radio.hpp"
 #include "megaphone.hpp"
+#include "portable_radio.hpp"
 namespace effect {
 
 	Effect* EffectFactory(Effects id, BaseAudioContext *ctx) {
@@ -46,6 +47,7 @@ namespace effect {
 		case Effects::TELEPHONE:effect = new Telephone(ctx); break;
 		case Effects::RADIO:effect = new Radio(ctx); break;
 		case Effects::MEGAPHONE:effect = new Megaphone(ctx); break;
+		case Effects::PORTABLE_RADIO:effect = new PortableRadio(ctx); break;
 		}
 		return effect;
 	}

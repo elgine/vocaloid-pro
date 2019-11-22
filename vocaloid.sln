@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.852
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vocaloid", "vocaloid\vocaloid.vcxproj", "{E2BC80EA-38D1-443F-970A-EE131655F9FE}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -16,7 +16,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirVoiceChanger", "AirVoice
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example", "example\example.vcxproj", "{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vocaloid-cli", "vocaloid-cli\vocaloid-cli.vcxproj", "{D9294714-314E-4903-BFE2-310C81F81574}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voice_changer_example", "voice_changer_example\voice_changer_example.vcxproj", "{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,16 +66,19 @@ Global
 		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Release|x64.Build.0 = Release|x64
 		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Release|x86.ActiveCfg = Release|Win32
 		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Release|x86.Build.0 = Release|Win32
-		{D9294714-314E-4903-BFE2-310C81F81574}.Debug|x64.ActiveCfg = Debug|x64
-		{D9294714-314E-4903-BFE2-310C81F81574}.Debug|x64.Build.0 = Debug|x64
-		{D9294714-314E-4903-BFE2-310C81F81574}.Debug|x86.ActiveCfg = Debug|Win32
-		{D9294714-314E-4903-BFE2-310C81F81574}.Debug|x86.Build.0 = Debug|Win32
-		{D9294714-314E-4903-BFE2-310C81F81574}.Release|x64.ActiveCfg = Release|x64
-		{D9294714-314E-4903-BFE2-310C81F81574}.Release|x64.Build.0 = Release|x64
-		{D9294714-314E-4903-BFE2-310C81F81574}.Release|x86.ActiveCfg = Release|Win32
-		{D9294714-314E-4903-BFE2-310C81F81574}.Release|x86.Build.0 = Release|Win32
+		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x64.ActiveCfg = Debug|x64
+		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x64.Build.0 = Debug|x64
+		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x86.ActiveCfg = Debug|Win32
+		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x86.Build.0 = Debug|Win32
+		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Release|x64.ActiveCfg = Release|x64
+		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Release|x64.Build.0 = Release|x64
+		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Release|x86.ActiveCfg = Release|Win32
+		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5FBBA86C-326B-40CE-9AF7-083C8FDA6F06}
 	EndGlobalSection
 EndGlobal
