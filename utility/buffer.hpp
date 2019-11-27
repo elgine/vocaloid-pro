@@ -105,6 +105,8 @@ namespace vocaloid{
 
         void Dispose(){
             DeleteArray(&data_);
+			max_size_ = 0;
+			size_ = 0;
         }
 
         int64_t Size(){
