@@ -4,6 +4,8 @@
 #include "alien.hpp"
 #include "robot1.hpp"
 #include "robot2.hpp"
+#include "robot3.hpp"
+#include "robot4.hpp"
 #include "astronaut.hpp"
 #include "uncle.hpp"
 #include "female.hpp"
@@ -21,7 +23,7 @@
 #include "telephone.hpp"
 #include "radio.hpp"
 #include "megaphone.hpp"
-#include "portable_radio.hpp"
+#include "old_radio.hpp"
 namespace effect {
 
 	Effect* EffectFactory(Effects id, BaseAudioContext *ctx) {
@@ -30,6 +32,8 @@ namespace effect {
 		case Effects::ALIEN:effect = new Alien(ctx); break;
 		case Effects::ROBOT1:effect = new Robot1(ctx); break;
 		case Effects::ROBOT2:effect = new Robot2(ctx); break;
+		case Effects::ROBOT3: effect = new Robot3(ctx); break;
+		case Effects::ROBOT4: effect = new Robot4(ctx); break;
 		case Effects::ASTRONAUT:effect = new Astronaut(ctx); break;
 		case Effects::UNCLE:effect = new Uncle(ctx); break;
 		case Effects::FEMALE:effect = new Female(ctx); break;
@@ -47,7 +51,7 @@ namespace effect {
 		case Effects::TELEPHONE:effect = new Telephone(ctx); break;
 		case Effects::RADIO:effect = new Radio(ctx); break;
 		case Effects::MEGAPHONE:effect = new Megaphone(ctx); break;
-		case Effects::PORTABLE_RADIO:effect = new PortableRadio(ctx); break;
+		case Effects::OLD_RADIO:effect = new OldRadio(ctx); break;
 		}
 		return effect;
 	}

@@ -14,8 +14,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VoiceChanger", "voice_chang
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirVoiceChanger", "AirVoiceChanger\AirVoiceChanger.vcxproj", "{20B467F0-FA4E-4557-AAE0-AA00CA3BB07F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example", "example\example.vcxproj", "{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "voice_changer_example", "voice_changer_example\voice_changer_example.vcxproj", "{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}"
 EndProject
 Global
@@ -58,14 +56,6 @@ Global
 		{20B467F0-FA4E-4557-AAE0-AA00CA3BB07F}.Release|x64.Build.0 = Release|x64
 		{20B467F0-FA4E-4557-AAE0-AA00CA3BB07F}.Release|x86.ActiveCfg = Release|Win32
 		{20B467F0-FA4E-4557-AAE0-AA00CA3BB07F}.Release|x86.Build.0 = Release|Win32
-		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Debug|x64.ActiveCfg = Debug|x64
-		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Debug|x64.Build.0 = Debug|x64
-		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Debug|x86.ActiveCfg = Debug|Win32
-		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Debug|x86.Build.0 = Debug|Win32
-		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Release|x64.ActiveCfg = Release|x64
-		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Release|x64.Build.0 = Release|x64
-		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Release|x86.ActiveCfg = Release|Win32
-		{67D5F1A6-6D17-41A4-A0AA-4FB8C7FFE303}.Release|x86.Build.0 = Release|Win32
 		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x64.ActiveCfg = Debug|x64
 		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x64.Build.0 = Debug|x64
 		{D4FAF2FA-F2E5-4679-A190-C252AEE8E9FB}.Debug|x86.ActiveCfg = Debug|Win32

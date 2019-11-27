@@ -27,14 +27,18 @@ namespace effect {
 		TELEPHONE,
 		RADIO,
 		MEGAPHONE,
-		PORTABLE_RADIO
+		OLD_RADIO,
+		ROBOT3,
+		ROBOT4
 	};
 
-	static const int CHARACTER_COUNT = 12;
+	static const int CHARACTER_COUNT = 14;
 	Effects *CHARACTER = new Effects[CHARACTER_COUNT]{
 		Effects::ALIEN,
 		Effects::ROBOT1,
 		Effects::ROBOT2,
+		Effects::ROBOT3,
+		Effects::ROBOT4,
 		Effects::ASTRONAUT,
 		Effects::UNCLE,
 		Effects::FEMALE,
@@ -55,11 +59,11 @@ namespace effect {
 	};
 
 	static const int TOOL_COUNT = 5;
-	Effects *TOOL = new Effects[5]{
+	Effects *TOOL = new Effects[TOOL_COUNT]{
 		Effects::MUFFLER,
 		Effects::TELEPHONE,
 		Effects::RADIO,
 		Effects::MEGAPHONE,
-		Effects::PORTABLE_RADIO
+		Effects::OLD_RADIO
 	};
 }

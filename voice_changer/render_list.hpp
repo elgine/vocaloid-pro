@@ -14,6 +14,8 @@ struct RenderData {
 	int effect_id;
 	double* options;
 	int option_count;
+	double* equalizer;
+	double gain;
 };
 
 enum RenderState {
@@ -105,6 +107,10 @@ private:
 			if (data.options != nullptr && data.option_count > 0) {
 				renderer->SetOptions(data.options, data.option_count);
 			}
+			if (data.equalizer != nullptr) {
+				renderer->SetEqualizerOptions(data.equalizer);
+			}
+			renderer->SetGain(data.gain);
 			renderer->SetDest(data.dest.c_str());
 			ret = renderer->Start();
 			if (ret < 0) {
@@ -220,7 +226,7 @@ public:
 	}
 
 	void AddRenderData(const char* source, const char* dest, int effect_id, double* options = nullptr, int option_count = 0,
-		int* segments = nullptr, int segment_count = 0) {
+		int* segments = nullptr, int segment_count = 0, double* equalizer = nullptr, double gain = 1.0) {
 		unique_lock<mutex> lck(render_thread_mutex_);
 		if (find(list_.begin(), list_.end(), source) != list_.end())return;
 		list_.push_back(source);
@@ -232,7 +238,9 @@ public:
 			segment_count,
 			effect_id,
 			options,
-			option_count
+			option_count,
+			equalizer,
+			gain
 		};
 	}
 

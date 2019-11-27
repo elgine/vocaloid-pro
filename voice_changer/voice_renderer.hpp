@@ -2,6 +2,7 @@
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/file_reader_node.hpp"
 #include "../vocaloid/file_writer_node.hpp"
+#include "../vocaloid/equalizer.hpp"
 #include "effects.h"
 #include "effect.hpp"
 #include "factory.hpp"
@@ -22,6 +23,9 @@ private:
 	AudioContext *ctx_;
 	FileWriterNode *writer_;
 	FileReaderNode *source_reader_;
+	Equalizer *equalizer_;
+	GainNode *gain_;
+
 	string path_;
 
 	mutex tick_mutex_;
@@ -60,11 +64,15 @@ public:
 
 	explicit VoiceRenderer(int32_t sample_rate = 44100, int16_t channels = 2) {
 		ctx_ = new AudioContext();
+		equalizer_ = new Equalizer(ctx_);
+		gain_ = new GainNode(ctx_);
 		ctx_->SetOutput(OutputType::RECORDER, sample_rate, channels);
 		writer_ = static_cast<FileWriterNode*>(ctx_->Destination());
 		source_reader_ = new FileReaderNode(ctx_);
 		state_ = VoiceRendererState::RENDERER_FREE;
 		effect_ = nullptr;
+		ctx_->Connect(equalizer_->output_, gain_);
+		ctx_->Connect(gain_, writer_);
 		ctx_->on_tick_->On([&](int) {
 			bool need_update = true;
 			auto processed_player = 0;
@@ -90,7 +98,7 @@ public:
 	int SetEffect(Effects id) {
 		if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
 			Effect* new_effect = EffectFactory(id, ctx_);
-			if (new_effect == nullptr)return NO_SUCH_EFFECT;
+			//if (new_effect == nullptr)return NO_SUCH_EFFECT;
 			if (effect_ != nullptr) {
 				effect_->Dispose();
 				delete effect_;
@@ -126,6 +134,15 @@ public:
 		}
 	}
 
+	void SetEqualizerOptions(double* options) {
+		if (options == nullptr)return;
+		equalizer_->SetOptions(options);
+	}
+
+	void SetGain(double gain) {
+		gain_->gain_->value_ = gain;
+	}
+
 	int RenderAll() {
 		auto ret = SUCCEED;
 		{
@@ -149,10 +166,10 @@ public:
 		auto ret = SUCCEED;
 		if (effect_) {
 			ctx_->Connect(source_reader_, effect_->Input());
-			ctx_->Connect(effect_->Output(), writer_);
+			ctx_->Connect(effect_->Output(), equalizer_->input_);
 		}
 		else {
-			ctx_->Connect(source_reader_, writer_);
+			ctx_->Connect(source_reader_, equalizer_->input_);
 		}
 		if (source_reader_->SegmentCount() == 0)
 			RenderAll();
@@ -217,6 +234,16 @@ public:
 			source_reader_->Dispose();
 			delete source_reader_;
 			source_reader_ = nullptr;
+		}
+		if (equalizer_) {
+			equalizer_->Dispose();
+			delete equalizer_;
+			equalizer_ = nullptr;
+		}
+		if (gain_) {
+			gain_->Dispose();
+			delete gain_;
+			gain_ = nullptr;
 		}
 		if (writer_ != nullptr) {
 			writer_->Dispose();

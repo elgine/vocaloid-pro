@@ -4,7 +4,7 @@
 typedef void(*SetExtractTempPath)(const char*);
 typedef int(*DisposeTempOrPlayOrStopOrForceExitRender)();
 typedef void(*Render)(const char** sources, const char **dest, int *effect_ids,
-	float **options, int *option_count, int64_t*** segmentses, int *segment_counts, int count);
+	float **options, int *option_count, int64_t*** segmentses, int *segment_counts, double*, double*, int count);
 
 
 void main() {
@@ -36,10 +36,10 @@ void main() {
 	};
 	render_fn(input,
 		output,
-		new int[1]{ 21 },
+		new int[1]{ -1 },
 		nullptr,
 		nullptr,
-		nullptr, nullptr, 1);
+		nullptr, nullptr, new double[10]{ 16, 22, 14, -24, 13, -15, 0, 18, -17, -26 }, nullptr, 1);
 	getchar();
 	dispose_temp_fn();
 free:

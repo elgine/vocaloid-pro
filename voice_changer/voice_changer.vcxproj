@@ -23,8 +23,10 @@
     <ClInclude Include="astronaut.hpp" />
     <ClInclude Include="balrog.hpp" />
     <ClInclude Include="load_kernel.hpp" />
-    <ClInclude Include="portable_radio.hpp" />
+    <ClInclude Include="old_radio.hpp" />
     <ClInclude Include="render_list.hpp" />
+    <ClInclude Include="robot3.hpp" />
+    <ClInclude Include="robot4.hpp" />
     <ClInclude Include="voice_renderer.hpp" />
     <ClInclude Include="extract_resource.hpp" />
     <ClInclude Include="resource.h" />
@@ -60,6 +62,7 @@
     <Media Include="..\samples\large-long-echo-hall.wav" />
     <Media Include="..\samples\large-wide-echo-hall.wav" />
     <Media Include="..\samples\muffler.wav" />
+    <Media Include="..\samples\portable-radio.wav" />
     <Media Include="..\samples\radio.wav" />
     <Media Include="..\samples\spring.wav" />
     <Media Include="..\samples\telephone.wav" />
@@ -159,7 +162,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN;WIN32;_DEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -176,7 +179,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN;_DEBUG;_WINDOWS;_USRDLL;VOICE_CHANGER_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

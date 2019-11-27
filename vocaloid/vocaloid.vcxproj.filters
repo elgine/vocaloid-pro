@@ -180,6 +180,9 @@
     <ClInclude Include="squeak.hpp">
       <Filter>头文件\node</Filter>
     </ClInclude>
+    <ClInclude Include="equalizer.hpp">
+      <Filter>头文件\composite</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="input_node.hpp">

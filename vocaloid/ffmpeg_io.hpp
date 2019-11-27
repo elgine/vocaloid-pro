@@ -449,70 +449,74 @@ namespace vocaloid {
 			}
 
 			int64_t Seek(int64_t frame_offset) override {
+				auto ret = frame_offset;
 				{
 					unique_lock<mutex> lck(decode_mutex_);
 					auto pts = FramesToPTS(frame_offset, decode_frame_->sample_rate);
 					if (ctx_ != nullptr) {
-						auto ret = av_seek_frame(ctx_, a_stream_index_, pts, AVSEEK_FLAG_BACKWARD);
+						auto ret = av_seek_frame(ctx_, a_stream_index_, pts, frame_offset == 0 ? AVSEEK_FLAG_FRAME : AVSEEK_FLAG_BACKWARD);
 						avcodec_flush_buffers(ctx_->streams[a_stream_index_]->codec);
 						FlushConvertor();
 						is_end_ = false;
 						buffer_size_ = 0;
-						can_decode_.notify_all();
-
-						// Read frame util it's timestamp reach time or EOF
-						while (true) {
-							ret = av_read_frame(ctx_, packet_);
-							if (ret == AVERROR_EOF) {
-								packet_->data = nullptr;
-								packet_->size = 0;
-								is_end_ = true;
-								break;
-							}
-							else {
-								if (packet_->duration <= 0)break;
-								if (packet_->pts + packet_->duration > pts && pts >= packet_->pts) {
-									auto decoded = 0, got_frame = 0;
-									auto bytes_one_frame = decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format));
-									while (packet_->size > 0) {
-										decoded = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet_);
-										int64_t offset = PTSToFrames(pts - frame_->pts, codec_ctx_->sample_rate);
-										int64_t offset_bytes = offset * bytes_one_frame;
-										if (got_frame > 0) {
-											int samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples, (const uint8_t**)frame_->data, frame_->nb_samples);
-											if (samples > 0) {
-												int size = samples * bytes_one_frame;
-												if (offset_bytes < size) {
-													size -= offset_bytes;
-													memcpy(buffer_ + buffer_size_, decode_frame_->data[0] + offset_bytes, size);
-													buffer_size_ += size;
-													offset_bytes = 0;
-												}
-												else {
-													offset_bytes -= size;
-												}
-											}
-										}
-										if (decoded < 0)break;
-										decoded = FFMIN(decoded, packet_->size);
-										if (packet_->size - decoded >= 0) {
-											packet_->data += decoded;
-											packet_->size -= decoded;
-										}
-										else {
-											break;
-										}
-									}
+						if (frame_offset != 0) {
+							// Read frame util it's timestamp reach time or EOF
+							while (true) {
+								ret = av_read_frame(ctx_, packet_);
+								if (ret == AVERROR_EOF) {
+									packet_->data = nullptr;
+									packet_->size = 0;
+									is_end_ = true;
 									break;
 								}
+								else {
+									if (packet_->duration <= 0)break;
+									if (packet_->pts + packet_->duration > pts && pts >= packet_->pts) {
+										auto decoded = 0, got_frame = 0;
+										auto bytes_one_frame = decode_frame_->channels * av_get_bytes_per_sample(AVSampleFormat(decode_frame_->format));
+										while (packet_->size > 0) {
+											decoded = avcodec_decode_audio4(codec_ctx_, frame_, &got_frame, packet_);
+											int64_t offset = PTSToFrames(pts - frame_->pts, codec_ctx_->sample_rate);
+											int64_t offset_bytes = offset * bytes_one_frame;
+											if (got_frame > 0) {
+												int samples = swr_convert(swr_ctx_, decode_frame_->data, decode_frame_->nb_samples, (const uint8_t**)frame_->data, frame_->nb_samples);
+												if (samples > 0) {
+													int size = samples * bytes_one_frame;
+													if (offset_bytes < size) {
+														size -= offset_bytes;
+														memcpy(buffer_ + buffer_size_, decode_frame_->data[0] + offset_bytes, size);
+														buffer_size_ += size;
+														offset_bytes = 0;
+													}
+													else {
+														offset_bytes -= size;
+													}
+												}
+											}
+											if (decoded < 0)break;
+											decoded = FFMIN(decoded, packet_->size);
+											if (packet_->size - decoded >= 0) {
+												packet_->data += decoded;
+												packet_->size -= decoded;
+											}
+											else {
+												break;
+											}
+										}
+										break;
+									}
+								}
+								av_packet_unref(packet_);
 							}
-							av_packet_unref(packet_);
 						}
 					}
-					else
-						return HAVE_NOT_DEFINED_SOURCE;
+					else {	
+						ret = HAVE_NOT_DEFINED_SOURCE;
+					}
+						
 				}
-				return frame_offset;
+				can_decode_.notify_all();
+				return ret;
 			}
 
 			void GetFormat(AudioFormat *format) override {

@@ -117,7 +117,13 @@
     <ClInclude Include="load_kernel.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="portable_radio.hpp">
+    <ClInclude Include="robot3.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="robot4.hpp">
+      <Filter>头文件\effects\character</Filter>
+    </ClInclude>
+    <ClInclude Include="old_radio.hpp">
       <Filter>头文件\effects\tool</Filter>
     </ClInclude>
   </ItemGroup>
@@ -147,6 +153,9 @@
       <Filter>资源文件</Filter>
     </Media>
     <Media Include="..\samples\underwater.mp3">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="..\samples\portable-radio.wav">
       <Filter>资源文件</Filter>
     </Media>
   </ItemGroup>

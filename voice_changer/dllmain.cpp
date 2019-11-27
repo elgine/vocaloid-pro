@@ -3,13 +3,13 @@
 
 #define DLLEXPORT __declspec(dllexport)
 
-static VoicePlayer *player = nullptr;
+//static VoicePlayer *player = nullptr;
 static RenderList *render_list = nullptr;
 
-VoicePlayer* GetPlayer() {
-	if (player == nullptr)player = new VoicePlayer();
-	return player;
-}
+//VoicePlayer* GetPlayer() {
+//	if (player == nullptr)player = new VoicePlayer();
+//	return player;
+//}
 
 RenderList* GetRenderList() {
 	if (render_list == nullptr)render_list = new RenderList();
@@ -17,7 +17,7 @@ RenderList* GetRenderList() {
 }
 
 extern "C" {
-	DLLEXPORT void SubscribePlayerTick(OnPlayerTick tick) {
+	/*DLLEXPORT void SubscribePlayerTick(OnPlayerTick tick) {
 		GetPlayer()->SubscribeTick(tick);
 	}
 
@@ -27,7 +27,7 @@ extern "C" {
 
 	DLLEXPORT void SubscribePlayerStop(OnPlayerStop stop) {
 		GetPlayer()->SubscribeStop(stop);
-	}
+	}*/
 
 	DLLEXPORT void SubscribeRenderListProgress(OnRenderListProgress p) {
 		GetRenderList()->SubscribeProgress(p);
@@ -45,7 +45,7 @@ extern "C" {
 		return DisposeAllTempResources();
 	}
 
-	DLLEXPORT int Seek(int timestamp) {
+	/*DLLEXPORT int Seek(int timestamp) {
 		return GetPlayer()->Seek(timestamp);
 	}
 
@@ -84,14 +84,14 @@ extern "C" {
 
 	DLLEXPORT int StopPreview() {
 		return GetPlayer()->Stop();
-	}
+	}*/
 
 	DLLEXPORT int SetMaxRenderersRunTogether(int c) {
 		return GetRenderList()->SetMaxRenderersRunTogether(c);
 	}
 
 	DLLEXPORT int Render(const char** sources, const char **dests, int *effect_ids,
-		double *options, int *option_counts, int* segments, int *segment_counts, int count) {
+		double *options, int *option_counts, int* segments, int *segment_counts, double* equalizers, double* gains, int count) {
 		auto option_offset = 0;
 		auto segment_offset = 0;
 		if (options == nullptr)option_counts = 0;
@@ -99,9 +99,11 @@ extern "C" {
 		for (auto i = 0; i < count; i++) {
 			auto segment_count = segment_counts == nullptr ? 0 : segment_counts[i];
 			auto option_count = option_counts == nullptr ? 0 : option_counts[i];
+			auto equalizer = equalizers == nullptr ? nullptr : equalizers + 10 * i;
+			auto gain = gains == nullptr ? 1.0 : gains[i];
 			GetRenderList()->AddRenderData(sources[i], dests[i], effect_ids[i], 
 				options + option_offset, option_count,
-				segments + segment_offset, segment_count);
+				segments + segment_offset, segment_count, equalizer, gain);
 			option_offset += option_count;
 			segment_offset += segment_count;
 		}
@@ -125,11 +127,11 @@ extern "C" {
 	}
 
 	DLLEXPORT void Dispose() {
-		if (player != nullptr) {
+		/*if (player != nullptr) {
 			player->Dispose();
 			delete player;
 			player = nullptr;
-		}
+		}*/
 		if (render_list != nullptr) {
 			render_list->Dispose();
 			delete render_list;
