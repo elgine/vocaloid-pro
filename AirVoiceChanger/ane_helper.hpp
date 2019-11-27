@@ -85,6 +85,7 @@ int* ToIntArray(FREObject obj) {
 fail:
 	delete[] data;
 	data = nullptr;
+	return nullptr;
 }
 
 double* ToDoubleArray(FREObject obj) {
@@ -108,6 +109,7 @@ double* ToDoubleArray(FREObject obj) {
 fail:
 	delete[] data;
 	data = nullptr;
+	return nullptr;
 }
 
 
@@ -132,6 +134,7 @@ const char** ToStringArray(FREObject obj) {
 fail:
 	delete[] data;
 	data = nullptr;
+	return nullptr;
 }
 
 FREObject FromInt(int v) {
