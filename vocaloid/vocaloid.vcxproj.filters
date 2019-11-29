@@ -183,6 +183,15 @@
     <ClInclude Include="equalizer.hpp">
       <Filter>头文件\composite</Filter>
     </ClInclude>
+    <ClInclude Include="tremolo.hpp">
+      <Filter>头文件\composite</Filter>
+    </ClInclude>
+    <ClInclude Include="ring_modulator.hpp">
+      <Filter>头文件\composite</Filter>
+    </ClInclude>
+    <ClInclude Include="diode_node.hpp">
+      <Filter>头文件\node</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="input_node.hpp">

@@ -151,6 +151,7 @@
     <ClInclude Include="delay_node.hpp" />
     <ClInclude Include="destination_node.hpp" />
     <ClInclude Include="dft.hpp" />
+    <ClInclude Include="diode_node.hpp" />
     <ClInclude Include="distortion.hpp" />
     <ClInclude Include="dynamic_compressor_node.hpp" />
     <ClInclude Include="composite.hpp" />
@@ -166,9 +167,11 @@
     <ClInclude Include="gain_node.hpp" />
     <ClInclude Include="lpc.hpp" />
     <ClInclude Include="convolver.hpp" />
+    <ClInclude Include="ring_modulator.hpp" />
     <ClInclude Include="squeak.hpp" />
     <ClInclude Include="oscillator_node.hpp" />
     <ClInclude Include="overlap_add.hpp" />
+    <ClInclude Include="tremolo.hpp" />
     <ClInclude Include="wave_out_player.hpp" />
     <ClInclude Include="jungle.hpp" />
     <ClInclude Include="phase_vocoder_node.hpp" />

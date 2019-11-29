@@ -7,6 +7,10 @@ namespace vocaloid {
 		class Composite {
 		protected:
 			BaseAudioContext *ctx_;
+
+			static float MIX_DEFAULT;
+			static float MIX_MIN;
+			static float MIX_MAX;
 		public:		
 			GainNode *input_;
 			GainNode *dry_;
@@ -46,6 +50,7 @@ namespace vocaloid {
 			virtual void Stop(){}
 
 			void CrossFade(float v) {
+				v = Clamp(MIX_MIN, MIX_MAX, v);
 				auto gain1 = cosf(v * 0.5 * M_PI);
 				auto gain2 = cosf((1.0 - v) * 0.5 * M_PI);
 				dry_->gain_->value_ = gain1;
@@ -56,5 +61,9 @@ namespace vocaloid {
 				return ctx_;
 			}
 		};
+
+		float Composite::MIX_DEFAULT = 0.0;
+		float Composite::MIX_MIN = 0.0;
+		float Composite::MIX_MAX = 1.0;
 	}
 }
