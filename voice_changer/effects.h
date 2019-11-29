@@ -3,67 +3,19 @@
 using namespace std;
 namespace effect {
 	enum Effects {
-		NONE,
-		// Character
-		ALIEN,
-		ROBOT1,
-		ROBOT2,
-		ASTRONAUT,
-		UNCLE,
-		FEMALE,
-		CHILD,
-		MALE,
-		OLD_MALE,
-		OLD_FEMALE,
-		TRANSFORMER,
-		BALROG,
-		// Environment
-		CAVE,
-		BROAD_ROOM,
-		UNDER_WATER,
-		HALL,
-		// Tools
-		MUFFLER,
-		TELEPHONE,
-		RADIO,
+		AUTO_WAH,
+		CHORUS,
+		DISTORTION,
+		EQUALIZER,
+		EQUALIZER_3_BAND,
+		FLANGER,
+		JUNGLE,
 		MEGAPHONE,
-		OLD_RADIO,
-		ROBOT3,
-		ROBOT4
-	};
-
-	static const int CHARACTER_COUNT = 14;
-	Effects *CHARACTER = new Effects[CHARACTER_COUNT]{
-		Effects::ALIEN,
-		Effects::ROBOT1,
-		Effects::ROBOT2,
-		Effects::ROBOT3,
-		Effects::ROBOT4,
-		Effects::ASTRONAUT,
-		Effects::UNCLE,
-		Effects::FEMALE,
-		Effects::CHILD,
-		Effects::MALE,
-		Effects::OLD_MALE,
-		Effects::OLD_FEMALE,
-		Effects::TRANSFORMER,
-		Effects::BALROG
-	};
-
-	static const int ENVIRONMENT_COUNT = 4;
-	Effects *ENVIRONMENT = new Effects[ENVIRONMENT_COUNT]{
-		Effects::CAVE,
-		Effects::BROAD_ROOM,
-		Effects::UNDER_WATER,
-		Effects::HALL
-	};
-
-	static const int TOOL_COUNT = 5;
-	Effects *TOOL = new Effects[TOOL_COUNT]{
-		Effects::MUFFLER,
-		Effects::TELEPHONE,
-		Effects::RADIO,
-		Effects::MEGAPHONE,
-		Effects::OLD_RADIO
+		MUFFLER,
+		RADIO,
+		RING_MODULATOR,
+		TELEPHONE,
+		TREMOLO,
+		VIBRATO
 	};
 }

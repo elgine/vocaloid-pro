@@ -2,13 +2,19 @@
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/file_reader_node.hpp"
 #include "../vocaloid/file_writer_node.hpp"
-#include "../vocaloid/equalizer.hpp"
+#include "equalizer.hpp"
 #include "effects.h"
+#include "role.hpp"
+#include "role_factory.hpp"
 #include "effect.hpp"
-#include "factory.hpp"
+#include "effect_factory.hpp"
+#include "env.hpp"
+#include "env_factory.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
+using namespace role;
 using namespace effect;
+using namespace env;
 
 enum VoiceRendererState {
 	RENDERER_STOP,
@@ -19,7 +25,8 @@ enum VoiceRendererState {
 class VoiceRenderer {
 
 private:
-	Effect *effect_;
+	Role *role_;
+	Env *env_;
 	AudioContext *ctx_;
 	FileWriterNode *writer_;
 	FileReaderNode *source_reader_;
@@ -70,7 +77,7 @@ public:
 		writer_ = static_cast<FileWriterNode*>(ctx_->Destination());
 		source_reader_ = new FileReaderNode(ctx_);
 		state_ = VoiceRendererState::RENDERER_FREE;
-		effect_ = nullptr;
+		role_ = nullptr;
 		ctx_->Connect(equalizer_->output_, gain_);
 		ctx_->Connect(gain_, writer_);
 		ctx_->on_tick_->On([&](int) {
@@ -82,8 +89,8 @@ public:
 				unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
 				processed = source_reader_->Processed();
 				processed_player = writer_->Processed();
-				if (effect_) {
-					processed_player = (processed_player - MsecToFrames(ctx_->SampleRate(), effect_->Delay() * 1000)) / effect_->TimeScale();
+				if (role_) {
+					processed_player = (processed_player - MsecToFrames(ctx_->SampleRate(), role_->Delay() * 1000)) / role_->TimeScale();
 				}
 				if (processed_player < 0) {
 					need_update = false;
@@ -95,18 +102,65 @@ public:
 		});
 	}
 
-	int SetEffect(Effects id) {
-		if (effect_ == nullptr || (effect_ && effect_->Id() != id)) {
-			Effect* new_effect = EffectFactory(id, ctx_);
-			//if (new_effect == nullptr)return NO_SUCH_EFFECT;
-			if (effect_ != nullptr) {
-				effect_->Dispose();
-				delete effect_;
-				effect_ = nullptr;
+	int SetEnv(Envs id) {
+		if (env_ == nullptr || (env_ && env_->Id() != id)) {
+			Env* new_env = EnvFactory(id, ctx_);
+			if (env_ != nullptr) {
+				env_->Dispose();
+				delete env_;
+				env_ = nullptr;
 			}
-			effect_ = new_effect;
+			env_ = new_env;
 		}
 		return SUCCEED;
+	}
+
+	int SetEnvOptions(double* options, int option_count) {
+		static float* options_float = new float[500];
+		for (auto i = 0; i < option_count; i++) {
+			options_float[i] = options[i];
+		}
+		{
+			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
+			if (env_) {
+				env_->SetOptions(options_float, option_count);
+			}
+		}
+	}
+
+	int SetRole(Roles id) {
+		if (role_ == nullptr || (role_ && role_->Id() != id)) {
+			Role* new_role = RoleFactory(id, ctx_);
+			if (role_ != nullptr) {
+				role_->Dispose();
+				delete role_;
+				role_ = nullptr;
+			}
+			role_ = new_role;
+		}
+		return SUCCEED;
+	}
+
+	void SetRoleOptions(double* options, int option_count) {
+		static float* options_float = new float[500];
+		for (auto i = 0; i < option_count; i++) {
+			options_float[i] = options[i];
+		}
+		{
+			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
+			if (role_) {
+				role_->SetOptions(options_float, option_count);
+			}
+		}
+	}
+
+	void SetEqualizerOptions(double* options) {
+		if (options == nullptr)return;
+		equalizer_->SetOptions((float*)(options), 11);
+	}
+
+	void SetGain(double gain) {
+		gain_->gain_->value_ = gain;
 	}
 
 	void SetDest(const char* path) {
@@ -119,28 +173,6 @@ public:
 		if (ret < 0)return ret;
 		path_ = path;
 		return ret;
-	}
-
-	void SetOptions(double* options, int option_count) {
-		static float* options_float = new float[500];
-		for (auto i = 0; i < option_count; i++) {
-			options_float[i] = options[i];
-		}
-		{
-			unique_lock<mutex> lck(ctx_->audio_render_thread_mutex_);
-			if (effect_) {
-				effect_->SetOptions(options_float, option_count);
-			}
-		}
-	}
-
-	void SetEqualizerOptions(double* options) {
-		if (options == nullptr)return;
-		equalizer_->SetOptions(options);
-	}
-
-	void SetGain(double gain) {
-		gain_->gain_->value_ = gain;
 	}
 
 	int RenderAll() {
@@ -164,17 +196,29 @@ public:
 	int Start() {
 		Stop();
 		auto ret = SUCCEED;
-		if (effect_) {
-			ctx_->Connect(source_reader_, effect_->Input());
-			ctx_->Connect(effect_->Output(), equalizer_->input_);
+		AudioNode* from = nullptr;
+		if (role_) {
+			ctx_->Connect(source_reader_, role_->Input());
+			from = role_->Output();
 		}
 		else {
-			ctx_->Connect(source_reader_, equalizer_->input_);
+			from = source_reader_;
 		}
+
+		// Chain effects
+
+		if (env_) {
+			ctx_->Connect(from, env_->Input());
+			ctx_->Connect(env_->Output(), equalizer_->Input());
+		}
+		else {
+			ctx_->Connect(from, equalizer_->Input());
+		}
+
 		if (source_reader_->SegmentCount() == 0)
 			RenderAll();
-		if (effect_) {
-			effect_->Start();
+		if (role_) {
+			role_->Start();
 		}
 		ret = ctx_->Prepare();
 		if (ret < 0)return ret;
@@ -211,10 +255,10 @@ public:
 
 	void Dispose() {
 		Close();
-		if (effect_) {
-			effect_->Dispose();
-			delete effect_;
-			effect_ = nullptr;
+		if (role_) {
+			role_->Dispose();
+			delete role_;
+			role_ = nullptr;
 		}
 	}
 
@@ -250,10 +294,10 @@ public:
 			delete writer_;
 			writer_ = nullptr;
 		}
-		if (effect_ != nullptr) {
-			effect_->Dispose();
-			delete effect_;
-			effect_ = nullptr;
+		if (role_ != nullptr) {
+			role_->Dispose();
+			delete role_;
+			role_ = nullptr;
 		}
 		if (ctx_ != nullptr) {
 			ctx_->Dispose();

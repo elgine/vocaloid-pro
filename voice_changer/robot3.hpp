@@ -4,12 +4,11 @@
 #include "../vocaloid/gain_node.hpp"
 #include "../vocaloid/delay_node.hpp"
 #include "../vocaloid/player_node.hpp"
-#include "effects.h"
-#include "effect.hpp"
+#include "role.hpp"
 
-namespace effect {
+namespace role {
 
-	class Robot3 : public Effect {
+	class Robot3 : public Role {
 
 	private:
 		OscillatorNode *osc1_;
@@ -18,8 +17,8 @@ namespace effect {
 		DelayNode *delay_;
 	public:
 
-		explicit Robot3(BaseAudioContext* ctx) :Effect(ctx) {
-			id_ = Effects::ROBOT2;
+		explicit Robot3(BaseAudioContext* ctx) :Role(ctx) {
+			id_ = Roles::ROBOT3;
 			osc1_ = new OscillatorNode(ctx);
 			osc2_ = new OscillatorNode(ctx);
 			osc_gain_ = new GainNode(ctx);
@@ -57,7 +56,7 @@ namespace effect {
 				delete delay_;
 				delay_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		void Start() override {

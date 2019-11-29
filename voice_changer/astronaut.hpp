@@ -1,13 +1,11 @@
 #pragma once
-#include "effect.hpp"
-#include "effects.h"
+#include "role.hpp"
 #include "../vocaloid/biquad_node.hpp"
-#include "../vocaloid/distortion.hpp"
 #include "../vocaloid/dynamic_compressor_node.hpp"
-
-namespace effect {
-	
-	class Astronaut : public Effect {
+#include "distortion.hpp"
+using namespace effect;
+namespace role {
+	class Astronaut : public Role {
 	private:
 		BiquadNode *b1_;
 		BiquadNode *b2_;
@@ -15,11 +13,11 @@ namespace effect {
 		BiquadNode *b4_;
 		BiquadNode *b5_;
 		DynamicsCompressorNode *compressor_;
-		DistortionNode *distortion_;
+		Distortion *distortion_;
 	public:
-		explicit Astronaut(BaseAudioContext *ctx) :Effect(ctx) {
-			id_ = Effects::ASTRONAUT;
-			distortion_ = new DistortionNode(ctx);
+		explicit Astronaut(BaseAudioContext *ctx) :Role(ctx) {
+			id_ = Roles::ASTRONAUT;
+			distortion_ = new Distortion(ctx);
 			b1_ = new BiquadNode(ctx);
 			b1_->frequency_->value_ = 1300;
 			b2_ = new BiquadNode(ctx);
@@ -34,8 +32,8 @@ namespace effect {
 			b5_->type_ = vocaloid::dsp::BIQUAD_TYPE::HIGH_PASS;
 			compressor_ = new DynamicsCompressorNode(ctx);
 
-			ctx->Connect(b1_, distortion_);
-			ctx->Connect(distortion_, b2_);
+			ctx->Connect(b1_, distortion_->input_);
+			ctx->Connect(distortion_->output_, b2_);
 			ctx->Connect(b2_, b3_);
 			ctx->Connect(b3_, b4_);
 			ctx->Connect(b4_, b5_);
@@ -69,7 +67,7 @@ namespace effect {
 				delete b5_;
 				b5_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		void SetLowpass1Frequency(float v) {

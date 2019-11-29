@@ -1,22 +1,21 @@
 #pragma once
 #include "../vocaloid/dynamic_compressor_node.hpp"
-#include "../vocaloid/auto_wah.hpp"
+#include "auto_wah.hpp"
 #include "../vocaloid/file_reader_node.hpp"
-#include "effect.hpp"
-#include "effects.h"
+#include "env.hpp"
 #include "extract_resource.hpp"
 #include "resource.h"
-using namespace vocaloid::composite;
-namespace effect {
+using namespace vocaloid;
+using namespace effect;
+namespace env {
 	
-	class UnderWater : public Effect {
+	class UnderWater : public Env {
 
 	private:
 		BiquadNode *lowpass_;
 		DynamicsCompressorNode *compressor_;
 		FileReaderNode *underwater_;
-		vocaloid::composite::AutoWah *wahwah_;
-		GainNode *input_gain_;
+		AutoWah *wahwah_;
 		GainNode *underwater_gain_;
 	public:
 		static float LOWPASS_FREQ_DEFAULT;
@@ -35,16 +34,12 @@ namespace effect {
 		static float FILTER_Q_MIN;
 		static float FILTER_Q_MAX;
 
-		static float INPUT_GAIN_DEFAULT;
-		static float INPUT_GAIN_MIN;
-		static float INPUT_GAIN_MAX;
-
 		static float UNDER_WATER_BACKGROUND_GAIN_DEFAULT;
 		static float UNDER_WATER_BACKGROUND_GAIN_MIN;
 		static float UNDER_WATER_BACKGROUND_GAIN_MAX;
 
-		explicit UnderWater(BaseAudioContext *ctx) : Effect(ctx) {
-			id_ = Effects::UNDER_WATER;
+		explicit UnderWater(BaseAudioContext *ctx) : Env(ctx) {
+			id_ = Envs::UNDER_WATER;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;
 			compressor_ = new DynamicsCompressorNode(ctx);
@@ -54,21 +49,20 @@ namespace effect {
 			underwater_->Loop(true);
 			underwater_gain_ = new GainNode(ctx, UNDER_WATER_BACKGROUND_GAIN_DEFAULT);
 
-			wahwah_ = new vocaloid::composite::AutoWah(ctx);
-			wahwah_->SetOptions({
-				ENVELOPE_FOllOWER_FILTER_FREQ_DEFAULT,
-				FILTER_DEPTH_DEFAULT,
-				FILTER_Q_DEFAULT
-			});
+			wahwah_ = new AutoWah(ctx);
 
-			input_gain_ = new GainNode(ctx, INPUT_GAIN_DEFAULT);
-
-			ctx->Connect(input_gain_, wahwah_->input_);
+			ctx->Connect(input_, wahwah_->input_);
 			ctx->Connect(wahwah_->output_, lowpass_);
 			ctx->Connect(lowpass_, compressor_);
-			ctx->Connect(compressor_, gain_);
+			ctx->Connect(compressor_, wet_);
 			ctx->Connect(underwater_, underwater_gain_);
 			ctx->Connect(underwater_gain_, compressor_);
+
+			SetLowpassFrequency(LOWPASS_FREQ_DEFAULT);
+			SetEnvelopeFollowerFilterFrequency(ENVELOPE_FOllOWER_FILTER_FREQ_DEFAULT);
+			SetFilterDepth(FILTER_DEPTH_DEFAULT);
+			SetFilterQ(FILTER_Q_DEFAULT);
+			SetUnderWaterBackgroundGain(UNDER_WATER_BACKGROUND_GAIN_DEFAULT);
 		}
 
 		void Dispose() override {
@@ -88,18 +82,14 @@ namespace effect {
 				wahwah_->Dispose();
 				delete wahwah_; wahwah_ = nullptr;
 			}
-			if (input_gain_) {
-				input_gain_->Dispose();
-				delete input_gain_; input_gain_ = nullptr;
-			}
 			if (underwater_gain_) {
 				underwater_gain_->Dispose();
 				delete underwater_gain_; underwater_gain_ = nullptr;
 			}
-			Effect::Dispose();
+			Env::Dispose();
 		}
 
-		void SetOptions(float *options, int option_count) override {
+		void SetOptions(float *options, int16_t option_count) override {
 			if (option_count > 0) {
 				SetLowpassFrequency(options[0]);
 			}
@@ -113,13 +103,10 @@ namespace effect {
 				SetFilterQ(options[3]);
 			}
 			if (option_count > 4) {
-				SetInputGain(options[4]);
+				SetUnderWaterBackgroundGain(options[4]);
 			}
 			if (option_count > 5) {
-				SetUnderWaterBackgroundGain(options[5]);
-			}
-			if (option_count > 6) {
-				SetGain(options[6]);
+				CrossFade(options[5]);
 			}
 		}
 
@@ -139,16 +126,8 @@ namespace effect {
 			wahwah_->SetFilterQ(Clamp(FILTER_Q_MIN, FILTER_Q_MAX, v));
 		}
 
-		void SetInputGain(float v) {
-			input_gain_->gain_->value_ = Clamp(INPUT_GAIN_MIN, INPUT_GAIN_MAX, v);
-		}
-
 		void SetUnderWaterBackgroundGain(float v) {
 			underwater_gain_->gain_->value_ = Clamp(UNDER_WATER_BACKGROUND_GAIN_MIN, UNDER_WATER_BACKGROUND_GAIN_MAX, v);
-		}
-
-		AudioNode *Input() {
-			return input_gain_;
 		}
 
 		void Start() override {
@@ -177,10 +156,6 @@ namespace effect {
 	float UnderWater::FILTER_Q_DEFAULT = AutoWah::FILTER_Q_DEFAULT;
 	float UnderWater::FILTER_Q_MIN = AutoWah::FILTER_Q_MIN;
 	float UnderWater::FILTER_Q_MAX = AutoWah::FILTER_Q_MAX;
-
-	float UnderWater::INPUT_GAIN_DEFAULT = 0.5f;
-	float UnderWater::INPUT_GAIN_MIN = 0.0f;
-	float UnderWater::INPUT_GAIN_MAX = 4.0f;
 
 	float UnderWater::UNDER_WATER_BACKGROUND_GAIN_DEFAULT = 0.3f;
 	float UnderWater::UNDER_WATER_BACKGROUND_GAIN_MIN = 0.0f;

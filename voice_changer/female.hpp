@@ -1,11 +1,11 @@
 #pragma once
-#include "../vocaloid/jungle.hpp"
+#include "jungle.hpp"
 #include "../vocaloid/dynamic_compressor_node.hpp"
 #include "effects.h"
-#include "effect.hpp"
-using namespace vocaloid::composite;
-namespace effect {
-	class Female: public Effect{
+#include "role.hpp"
+using namespace effect;
+namespace role {
+	class Female: public Role{
 	private:
 		Jungle *jungle_;
 		DynamicsCompressorNode *compressor_;
@@ -15,8 +15,8 @@ namespace effect {
 		static float PITCH_OFFSET_MIN;
 		static float PITCH_OFFSET_MAX;
 
-		explicit Female(BaseAudioContext *ctx):Effect(ctx) {
-			id_ = Effects::FEMALE;
+		explicit Female(BaseAudioContext *ctx):Role(ctx) {
+			id_ = Roles::FEMALE;
 			compressor_ = new DynamicsCompressorNode(ctx);
 			jungle_ = new Jungle(ctx);
 			jungle_->SetPitchOffset(PITCH_OFFSET_DEFAULT);
@@ -35,7 +35,7 @@ namespace effect {
 				delete compressor_;
 				compressor_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		void SetOptions(float *options, int option_count) override {

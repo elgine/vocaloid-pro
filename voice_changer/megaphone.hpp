@@ -1,15 +1,15 @@
 #pragma once
 #include "../vocaloid/biquad_node.hpp"
-#include "../vocaloid/distortion.hpp"
 #include "../vocaloid/dynamic_compressor_node.hpp"
-#include "effect.hpp"
+#include "role.hpp"
 #include "effects.h"
+#include "distortion.hpp"
 namespace effect {
 	
 	class Megaphone : public Effect {
 	private:
 		DynamicsCompressorNode *compressor_;
-		DistortionNode *distortion_;
+		Distortion *distortion_;
 		BiquadNode *lpf1_;
 		BiquadNode *lpf2_;
 		BiquadNode *hpf1_;
@@ -18,7 +18,7 @@ namespace effect {
 		explicit Megaphone(BaseAudioContext *ctx) :Effect(ctx) {
 			id_ = Effects::MEGAPHONE;
 			compressor_ = new DynamicsCompressorNode(ctx);
-			distortion_ = new DistortionNode(ctx);
+			distortion_ = new Distortion(ctx);
 
 			lpf1_ = new BiquadNode(ctx);
 			lpf1_->frequency_->value_ = 2000.0f;
@@ -34,12 +34,13 @@ namespace effect {
 			hpf2_->type_ = vocaloid::dsp::BIQUAD_TYPE::HIGH_PASS;
 			hpf2_->frequency_->value_ = 500;
 
+			ctx->Connect(input_, lpf1_);
 			ctx->Connect(lpf1_, lpf2_);
 			ctx->Connect(lpf2_, hpf1_);
 			ctx->Connect(hpf1_, hpf2_);
-			ctx->Connect(hpf2_, distortion_);
-			ctx->Connect(distortion_, compressor_);
-			ctx->Connect(compressor_, gain_);
+			ctx->Connect(hpf2_, distortion_->input_);
+			ctx->Connect(distortion_->output_, compressor_);
+			ctx->Connect(compressor_, wet_);
 		}
 
 		void Dispose() override {
@@ -72,10 +73,6 @@ namespace effect {
 				hpf2_ = nullptr;
 			}
 			Effect::Dispose();
-		}
-
-		AudioNode *Input() {
-			return lpf1_;
 		}
 	};
 }

@@ -5,12 +5,11 @@
 #include "../vocaloid/dynamic_compressor_node.hpp"
 #include "../vocaloid/biquad_node.hpp"
 #include "../vocaloid/file_reader_node.hpp"
-#include "effects.h"
-#include "effect.hpp"
+#include "role.hpp"
 #include "load_kernel.hpp"
-namespace effect {
+namespace role {
 
-	class Balrog : public Effect {
+	class Balrog : public Role {
 	private:
 		BiquadNode *filter_;
 		DynamicsCompressorNode *compressor_;
@@ -111,8 +110,8 @@ namespace effect {
 			}
 		}
 
-		explicit Balrog(BaseAudioContext *ctx) : Effect(ctx) {
-			id_ = Effects::BALROG;
+		explicit Balrog(BaseAudioContext *ctx) : Role(ctx) {
+			id_ = Roles::BALROG;
 			filter_ = new BiquadNode(ctx);
 			filter_->type_ = BIQUAD_TYPE::HIGH_SHELF;
 			filter_->frequency_->value_ = HIGHSHELF_FREQ_DEFAULT;
@@ -226,7 +225,7 @@ namespace effect {
 				filter2_->Dispose();
 				delete filter2_; filter2_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		void Start() override {

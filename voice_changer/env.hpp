@@ -1,23 +1,26 @@
 #pragma once
 #include "../vocaloid/gain_node.hpp"
-#include "effects.h"
+#include "envs.h"
+#include "../vocaloid/maths.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
-namespace effect {
-	class Effect {
+namespace env {
+	
+	class Env {
 	protected:
+		Envs id_;
 		BaseAudioContext *ctx_;
-		Effects id_;
-		static float MIX_DEFAULT;
-		static float MIX_MIN;
-		static float MIX_MAX;
-	public:
 		GainNode *input_;
 		GainNode *dry_;
 		GainNode *wet_;
 		GainNode *output_;
+	public:
 
-		explicit Effect(BaseAudioContext *ctx) {
+		static float MIX_DEFAULT;
+		static float MIX_MIN;
+		static float MIX_MAX;
+
+		explicit Env(BaseAudioContext *ctx) {
 			ctx_ = ctx;
 			input_ = new GainNode(ctx);
 			dry_ = new GainNode(ctx);
@@ -27,6 +30,12 @@ namespace effect {
 			ctx->Connect(wet_, output_);
 			CrossFade(1.0);
 		}
+
+		virtual void Start() {}
+
+		virtual void Resume() {}
+
+		virtual void Stop() {}
 
 		virtual void Dispose() {
 			input_->Dispose();
@@ -43,17 +52,11 @@ namespace effect {
 			output_ = nullptr;
 		}
 
-		virtual void SetOptions(float* options, int16_t option_count) {
-			if (option_count > 0) {
-				CrossFade(options[0]);
+		virtual void SetOptions(float *opts, int16_t opt_count) {
+			if (opt_count > 0) {
+				CrossFade(Clamp(MIX_MIN, MIX_MAX, opts[0]));
 			}
 		}
-
-		virtual void Start() {}
-
-		virtual void Resume() {}
-
-		virtual void Stop() {}
 
 		void CrossFade(float v) {
 			v = Clamp(MIX_MIN, MIX_MAX, v);
@@ -63,11 +66,7 @@ namespace effect {
 			wet_->gain_->value_ = gain2;
 		}
 
-		BaseAudioContext* Context() {
-			return ctx_;
-		}
-
-		Effects Id() {
+		Envs Id() {
 			return id_;
 		}
 
@@ -80,7 +79,7 @@ namespace effect {
 		}
 	};
 
-	float Effect::MIX_DEFAULT = 0.0;
-	float Effect::MIX_MIN = 0.0;
-	float Effect::MIX_MAX = 1.0;
+	float Env::MIX_DEFAULT = 1.0;
+	float Env::MIX_MIN = 0.0;
+	float Env::MIX_MAX = 1.0;
 }

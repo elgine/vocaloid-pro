@@ -16,82 +16,61 @@
     <Filter Include="头文件\effects">
       <UniqueIdentifier>{c92d55ca-4ac1-4690-a710-ec2f3a950ab8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\effects\environment">
+    <Filter Include="头文件\environment">
       <UniqueIdentifier>{9f348d5a-7ba3-45fb-9e45-c9652400b1b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\effects\character">
+    <Filter Include="头文件\role">
       <UniqueIdentifier>{c9ab1914-305e-47b1-9096-b1e045a02248}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="头文件\effects\tool">
-      <UniqueIdentifier>{3cc626f2-1606-42a5-807d-99e7369e5d45}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="effect.hpp">
-      <Filter>头文件\effects</Filter>
-    </ClInclude>
     <ClInclude Include="effects.h">
       <Filter>头文件\effects</Filter>
     </ClInclude>
-    <ClInclude Include="factory.hpp">
-      <Filter>头文件\effects</Filter>
-    </ClInclude>
     <ClInclude Include="cave.hpp">
-      <Filter>头文件\effects\environment</Filter>
+      <Filter>头文件\environment</Filter>
     </ClInclude>
     <ClInclude Include="alien.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="astronaut.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="balrog.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="child.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="female.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="male.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="old_female.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="old_male.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="robot1.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="robot2.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="transformer.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="broad_room.hpp">
-      <Filter>头文件\effects\environment</Filter>
+      <Filter>头文件\environment</Filter>
     </ClInclude>
     <ClInclude Include="under_water.hpp">
-      <Filter>头文件\effects\environment</Filter>
+      <Filter>头文件\environment</Filter>
     </ClInclude>
     <ClInclude Include="hall.hpp">
-      <Filter>头文件\effects\environment</Filter>
-    </ClInclude>
-    <ClInclude Include="muffler.hpp">
-      <Filter>头文件\effects\tool</Filter>
-    </ClInclude>
-    <ClInclude Include="telephone.hpp">
-      <Filter>头文件\effects\tool</Filter>
-    </ClInclude>
-    <ClInclude Include="radio.hpp">
-      <Filter>头文件\effects\tool</Filter>
-    </ClInclude>
-    <ClInclude Include="megaphone.hpp">
-      <Filter>头文件\effects\tool</Filter>
+      <Filter>头文件\environment</Filter>
     </ClInclude>
     <ClInclude Include="voice_player.hpp">
       <Filter>头文件</Filter>
@@ -100,7 +79,7 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="uncle.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
@@ -118,13 +97,79 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="robot3.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
     <ClInclude Include="robot4.hpp">
-      <Filter>头文件\effects\character</Filter>
+      <Filter>头文件\role</Filter>
     </ClInclude>
-    <ClInclude Include="old_radio.hpp">
-      <Filter>头文件\effects\tool</Filter>
+    <ClInclude Include="role_factory.hpp">
+      <Filter>头文件\role</Filter>
+    </ClInclude>
+    <ClInclude Include="role.hpp">
+      <Filter>头文件\role</Filter>
+    </ClInclude>
+    <ClInclude Include="roles.h">
+      <Filter>头文件\role</Filter>
+    </ClInclude>
+    <ClInclude Include="megaphone.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="muffler.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="radio.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="telephone.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="envs.h">
+      <Filter>头文件\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="env_factory.hpp">
+      <Filter>头文件\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="env.hpp">
+      <Filter>头文件\environment</Filter>
+    </ClInclude>
+    <ClInclude Include="effect.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="effect_factory.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="distortion.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="auto_wah.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="chorus.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="equalizer.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="equalizer_3_band.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="flanger.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="jungle.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="ring_modulator.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="tremolo.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="vibrato.hpp">
+      <Filter>头文件\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="effect_chain.hpp">
+      <Filter>头文件\effects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

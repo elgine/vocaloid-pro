@@ -1,22 +1,22 @@
 #pragma once
 #include "../vocaloid/convolution_node.hpp"
-#include "effect.hpp"
-#include "effects.h"
+#include "env.hpp"
 #include "load_kernel.hpp"
-namespace effect {
+namespace env {
 
-	class Cave : public Effect {
+	class Cave : public Env {
 	private:
 		ConvolutionNode *convolution_;
 		AudioChannel* kernel_;
 	public:
-		explicit Cave(BaseAudioContext *ctx) :Effect(ctx) {
-			id_ = Effects::CAVE;
+		explicit Cave(BaseAudioContext *ctx) :Env(ctx) {
+			id_ = Envs::CAVE;
 			kernel_ = new AudioChannel();
 			convolution_ = new ConvolutionNode(ctx);
 			LoadKernel(IDR_LARGE_LONG_ECHO_HALL, L"wav", kernel_);
 			convolution_->kernel_ = kernel_;
-			ctx->Connect(convolution_, gain_);
+			ctx->Connect(input_, convolution_);
+			ctx->Connect(convolution_, wet_);
 		}
 
 		void Dispose() override {
@@ -30,11 +30,7 @@ namespace effect {
 				delete kernel_;
 				kernel_ = nullptr;
 			}
-			Effect::Dispose();
-		}
-
-		AudioNode *Input() {
-			return convolution_;
+			Env::Dispose();
 		}
 	};
 }

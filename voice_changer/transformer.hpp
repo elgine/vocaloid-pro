@@ -1,12 +1,12 @@
 #pragma once
-#include "../vocaloid/Jungle.hpp"
+#include "Jungle.hpp"
 #include "../vocaloid/dynamic_compressor_node.hpp"
 #include "effects.h"
-#include "effect.hpp"
-using namespace vocaloid::composite;
-namespace effect {
+#include "role.hpp"
+using namespace effect;
+namespace role {
 	
-	class Transformer : public Effect {
+	class Transformer : public Role {
 
 	private:
 		AudioNode *input_;
@@ -16,8 +16,8 @@ namespace effect {
 		Jungle *jungle4_;
 		DynamicsCompressorNode *compressor_;
 	public:
-		explicit Transformer(BaseAudioContext *ctx) : Effect(ctx) {
-			id_ = Effects::TRANSFORMER;
+		explicit Transformer(BaseAudioContext *ctx) : Role(ctx) {
+			id_ = Roles::TRANSFORMER;
 			jungle1_ = new Jungle(ctx);
 			jungle1_->SetPitchOffset(-0.1f);
 			jungle2_ = new Jungle(ctx);
@@ -71,7 +71,7 @@ namespace effect {
 				delete jungle4_;
 				jungle4_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		AudioNode *Input() {

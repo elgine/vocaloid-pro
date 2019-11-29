@@ -28,11 +28,12 @@ namespace effect {
 			b4_->frequency_->value_ = 500;
 			compressor_ = new DynamicsCompressorNode(ctx);
 
+			ctx->Connect(input_, b1_);
 			ctx->Connect(b1_, b2_);
 			ctx->Connect(b2_, b3_);
 			ctx->Connect(b3_, b4_);
 			ctx->Connect(b4_, compressor_);
-			ctx->Connect(compressor_, gain_);
+			ctx->Connect(compressor_, wet_);
 		}
 
 		void Dispose() override {
@@ -57,10 +58,6 @@ namespace effect {
 				delete compressor_; compressor_ = nullptr;
 			}
 			Effect::Dispose();
-		}
-
-		AudioNode* Input() {
-			return b1_;
 		}
 	};
 }

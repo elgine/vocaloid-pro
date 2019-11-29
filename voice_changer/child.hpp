@@ -1,13 +1,13 @@
 #pragma once
 #include "../vocaloid/audio_context.hpp"
 #include "../vocaloid/phase_vocoder_node.hpp"
-#include "../vocaloid/equalizer_3_band.hpp"
-#include "effect.hpp"
+#include "equalizer_3_band.hpp"
+#include "role.hpp"
 #include "effects.h"
-using namespace vocaloid::composite;
-namespace effect {
+using namespace effect;
+namespace role {
 	
-	class Child : public Effect {
+	class Child : public Role {
 	private:
 		PhaseVocoderNode* phase_vocoder_;
 		Equalizer3Band* equalizer_;
@@ -56,8 +56,8 @@ namespace effect {
 			}
 		}
 
-		explicit Child(BaseAudioContext *ctx): Effect(ctx) {
-			id_ = Effects::CHILD;
+		explicit Child(BaseAudioContext *ctx): Role(ctx) {
+			id_ = Roles::CHILD;
 			phase_vocoder_ = new PhaseVocoderNode(ctx);
 			phase_vocoder_->pitch_ = PITCH_DEFAULT;
 			equalizer_ = new Equalizer3Band(ctx);
@@ -86,7 +86,7 @@ namespace effect {
 				delete highpass_;
 				highpass_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		AudioNode* Input() {

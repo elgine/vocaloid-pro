@@ -4,12 +4,11 @@
 #include "../vocaloid/gain_node.hpp"
 #include "../vocaloid/delay_node.hpp"
 #include "../vocaloid/player_node.hpp"
-#include "effects.h"
-#include "effect.hpp"
+#include "role.hpp"
 
-namespace effect {
+namespace role {
 
-	class Robot1 : public Effect {
+	class Robot1 : public Role {
 	private:
 		OscillatorNode *osc_;
 		DelayNode *delay_;
@@ -18,8 +17,8 @@ namespace effect {
 
 	public:
 
-		explicit Robot1(BaseAudioContext *ctx):Effect(ctx) {
-			id_ = Effects::ROBOT1;
+		explicit Robot1(BaseAudioContext *ctx): Role(ctx) {
+			id_ = Roles::ROBOT1;
 			delay_ = new DelayNode(ctx, 0.01);
 			osc_ = new OscillatorNode(ctx);
 			osc_->SetFrequency(700.0f);
@@ -54,7 +53,7 @@ namespace effect {
 				delete biquad_;
 				biquad_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		void Start() override {

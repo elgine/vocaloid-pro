@@ -4,10 +4,9 @@
 #include "../vocaloid/gain_node.hpp"
 #include "../vocaloid/delay_node.hpp"
 #include "../vocaloid/player_node.hpp"
-#include "effects.h"
-#include "effect.hpp"
+#include "role.hpp"
 using namespace vocaloid::node;
-namespace effect {
+namespace role {
 
 	class Robot4Node : public AudioNode {
 
@@ -32,14 +31,14 @@ namespace effect {
 		}
 	};
 
-	class Robot4 : public Effect {
+	class Robot4 : public Role {
 
 	private:
 		Robot4Node *process_;
 	public:
 
-		explicit Robot4(BaseAudioContext* ctx) :Effect(ctx) {
-			id_ = Effects::ROBOT4;
+		explicit Robot4(BaseAudioContext* ctx) :Role(ctx) {
+			id_ = Roles::ROBOT4;
 			process_ = new Robot4Node(ctx);
 			ctx_->Connect(process_, gain_);
 		}
@@ -50,7 +49,7 @@ namespace effect {
 				delete process_;
 				process_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		AudioNode* Input() {

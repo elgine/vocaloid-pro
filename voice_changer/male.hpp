@@ -1,12 +1,12 @@
 #pragma once
 #include "../vocaloid/biquad_node.hpp"
-#include "../vocaloid/jungle.hpp"
-#include "effect.hpp"
+#include "jungle.hpp"
+#include "role.hpp"
 #include "effects.h"
-using namespace vocaloid::composite;
+using namespace effect;
 
-namespace effect {
-	class Male : public Effect {
+namespace role {
+	class Male : public Role {
 	private:
 		BiquadNode *lowpass_;
 		Jungle *jungle_;
@@ -20,8 +20,8 @@ namespace effect {
 		static float PITCH_OFFSET_MIN;
 		static float PITCH_OFFSET_MAX;
 
-		explicit Male(BaseAudioContext* ctx) :Effect(ctx) {
-			id_ = Effects::MALE;
+		explicit Male(BaseAudioContext* ctx) :Role(ctx) {
+			id_ = Roles::MALE;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;
 			jungle_ = new Jungle(ctx);
@@ -42,7 +42,7 @@ namespace effect {
 				delete jungle_;
 				jungle_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		void SetOptions(float *options, int option_count) override {

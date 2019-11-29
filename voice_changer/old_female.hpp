@@ -1,19 +1,19 @@
 #pragma once
-#include "../vocaloid/vibrato.hpp"
-#include "../vocaloid/jungle.hpp"
+#include "vibrato.hpp"
+#include "jungle.hpp"
 #include "../vocaloid/phase_vocoder_node.hpp"
 #include "../vocaloid/biquad_node.hpp"
-#include "effect.hpp"
+#include "role.hpp"
 #include "effects.h"
-using namespace vocaloid::composite;
+using namespace effect;
 using namespace vocaloid::node;
-namespace effect {
+namespace role {
 	
-	class OldFemale : public Effect {
+	class OldFemale : public Role {
 	private:
 		BiquadNode *highpass_;
 		PhaseVocoderNode *jungle_;
-		composite::Vibrato *vibrato_;
+		Vibrato *vibrato_;
 	public:
 
 		static float HIGHPASS_FREQ_DEFAULT;
@@ -40,20 +40,15 @@ namespace effect {
 		static float VIBRATO_SPEED_MIN;
 		static float VIBRATO_SPEED_MAX;
 
-		explicit OldFemale(BaseAudioContext *ctx) : Effect(ctx) {
-			id_ = Effects::OLD_FEMALE;
+		explicit OldFemale(BaseAudioContext *ctx) : Role(ctx) {
+			id_ = Roles::OLD_FEMALE;
 			highpass_ = new BiquadNode(ctx);
 			highpass_->type_ = dsp::BIQUAD_TYPE::HIGH_PASS;
 			highpass_->frequency_->value_ = HIGHPASS_FREQ_DEFAULT;
 			jungle_ = new PhaseVocoderNode(ctx);
 			jungle_->pitch_ = PITCH_DEFAULT;
 			jungle_->tempo_ = TEMPO_DEFAULT;
-			vibrato_ = new composite::Vibrato(ctx);
-			vibrato_->SetOptions({
-				VIBRATO_DELAY_DEFAULT,
-				VIBRATO_DEPTH_DEFAULT,
-				VIBRATO_SPEED_DEFAULT,
-			});
+			vibrato_ = new Vibrato(ctx);
 			ctx->Connect(jungle_, highpass_);
 			ctx->Connect(highpass_, vibrato_->input_);
 			ctx->Connect(vibrato_->output_, gain_);
@@ -78,7 +73,7 @@ namespace effect {
 				delete highpass_;
 				highpass_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 		
 		void SetOptions(float *options, int option_count) override {

@@ -4,14 +4,14 @@
 #include "../vocaloid/file_reader_node.hpp"
 #include "../vocaloid/player_node.hpp"
 #include "../utility/signal.hpp"
-#include "effect.hpp"
+#include "role.hpp"
 #include "factory.hpp"
 #include "status.h"
 #include <sstream>
 using namespace std;
 using namespace vocaloid;
 using namespace vocaloid::node;
-using namespace effect;
+using namespace role;
 
 enum VoicePlayerState {
 	PLAYER_PLAYING,

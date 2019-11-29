@@ -1,13 +1,12 @@
 #pragma once
 #include "../vocaloid/maths.hpp"
 #include "../vocaloid/biquad_node.hpp"
-#include "../vocaloid/jungle.hpp"
-#include "effects.h"
-#include "effect.hpp"
+#include "jungle.hpp"
+#include "role.hpp"
 using namespace vocaloid;
-using namespace vocaloid::composite;
-namespace effect {
-	class Uncle : public Effect {
+using namespace effect;
+namespace role {
+	class Uncle : public Role {
 	private:
 		BiquadNode *lowpass_;
 		Jungle *jungle_;
@@ -34,8 +33,8 @@ namespace effect {
 			}
 		}
 
-		explicit Uncle(BaseAudioContext *ctx): Effect(ctx) {
-			id_ = Effects::UNCLE;
+		explicit Uncle(BaseAudioContext *ctx): Role(ctx) {
+			id_ = Roles::UNCLE;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;
 			jungle_ = new Jungle(ctx);
@@ -56,7 +55,7 @@ namespace effect {
 				delete jungle_;
 				jungle_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		void Start() override {

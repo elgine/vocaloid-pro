@@ -1,15 +1,15 @@
 #pragma once
-#include "../vocaloid/Jungle.hpp"
-#include "../vocaloid/equalizer_3_band.hpp"
-#include "../vocaloid/vibrato.hpp"
+#include "Jungle.hpp"
+#include "equalizer_3_band.hpp"
+#include "vibrato.hpp"
 #include "../vocaloid/phase_vocoder_node.hpp"
-#include "effect.hpp"
+#include "role.hpp"
 #include "effects.h"
-using namespace vocaloid::composite;
+using namespace effect;
 using namespace vocaloid::node;
-namespace effect {
+namespace role {
 	
-	class OldMale : public Effect {
+	class OldMale : public Role {
 
 	private:
 		BiquadNode *lowpass_;
@@ -42,19 +42,14 @@ namespace effect {
 		static float VIBRATO_SPEED_MAX;
 
 
-		explicit OldMale(BaseAudioContext *ctx) : Effect(ctx) {
-			id_ = Effects::OLD_MALE;
+		explicit OldMale(BaseAudioContext *ctx) : Role(ctx) {
+			id_ = Roles::OLD_MALE;
 			lowpass_ = new BiquadNode(ctx);
 			lowpass_->frequency_->value_ = LOWPASS_FREQ_DEFAULT;
 			jungle_ = new PhaseVocoderNode(ctx);
 			jungle_->pitch_ = PITCH_DEFAULT;
 			jungle_->tempo_ = TEMPO_DEFAULT;
 			vibrato_ = new Vibrato(ctx);
-			vibrato_->SetOptions({
-				VIBRATO_DELAY_DEFAULT,
-				VIBRATO_DEPTH_DEFAULT,
-				VIBRATO_SPEED_DEFAULT,
-			});
 			ctx->Connect(lowpass_, jungle_);
 			ctx->Connect(jungle_, vibrato_->input_);
 			ctx->Connect(vibrato_->output_, gain_);
@@ -76,7 +71,7 @@ namespace effect {
 				delete vibrato_;
 				vibrato_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		void SetOptions(float *options, int option_count) override {

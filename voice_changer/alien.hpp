@@ -1,12 +1,10 @@
 #pragma once
-#include "effect.hpp"
+#include "role.hpp"
 #include "../vocaloid/delay_node.hpp"
 #include "../vocaloid/oscillator_node.hpp"
-#include "effects.h"
 using namespace vocaloid;
-namespace effect {
-
-	class Alien : public Effect {
+namespace role {
+	class Alien : public Role {
 	private:
 		DelayNode *delay_;
 		OscillatorNode *osc_;
@@ -21,8 +19,8 @@ namespace effect {
 		static float LFO_GAIN_MIN;
 		static float LFO_GAIN_MAX;
 
-		explicit Alien(BaseAudioContext *ctx) :Effect(ctx) {
-			id_ = Effects::ALIEN;
+		explicit Alien(BaseAudioContext *ctx) :Role(ctx) {
+			id_ = Roles::ALIEN;
 			delay_ = new DelayNode(ctx);
 			osc_ = new OscillatorNode(ctx);
 			osc_gain_ = new GainNode(ctx);
@@ -51,7 +49,7 @@ namespace effect {
 				delete osc_;
 				osc_gain_ = nullptr;
 			}
-			Effect::Dispose();
+			Role::Dispose();
 		}
 
 		// [lfo_freq, lfo_gain, gain]
