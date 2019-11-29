@@ -10,6 +10,7 @@
 #include "effect_factory.hpp"
 #include "env.hpp"
 #include "env_factory.hpp"
+#include "effect_chain.hpp"
 using namespace vocaloid;
 using namespace vocaloid::node;
 using namespace role;
@@ -27,6 +28,7 @@ class VoiceRenderer {
 private:
 	Role *role_;
 	Env *env_;
+	EffectChain *effect_chain_;
 	AudioContext *ctx_;
 	FileWriterNode *writer_;
 	FileReaderNode *source_reader_;
@@ -71,6 +73,7 @@ public:
 
 	explicit VoiceRenderer(int32_t sample_rate = 44100, int16_t channels = 2) {
 		ctx_ = new AudioContext();
+		effect_chain_ = new EffectChain(ctx_);
 		equalizer_ = new Equalizer(ctx_);
 		gain_ = new GainNode(ctx_);
 		ctx_->SetOutput(OutputType::RECORDER, sample_rate, channels);
@@ -126,6 +129,7 @@ public:
 				env_->SetOptions(options_float, option_count);
 			}
 		}
+		return SUCCEED;
 	}
 
 	int SetRole(Roles id) {
@@ -152,6 +156,14 @@ public:
 				role_->SetOptions(options_float, option_count);
 			}
 		}
+	}
+
+	void SetEffects(Effects* ids, int count) {
+		effect_chain_->SetChain(ids, count);
+	}
+
+	void SetEffectsOptions(float *options, int *options_counts, int count) {
+		effect_chain_->SetOptions(options, options_counts, count);
 	}
 
 	void SetEqualizerOptions(double* options) {
@@ -206,6 +218,10 @@ public:
 		}
 
 		// Chain effects
+		if (effect_chain_->Input() && effect_chain_->Output()) {
+			ctx_->Connect(from, effect_chain_->Input());
+			from = effect_chain_->Output();
+		}
 
 		if (env_) {
 			ctx_->Connect(from, env_->Input());
@@ -260,6 +276,16 @@ public:
 			delete role_;
 			role_ = nullptr;
 		}
+		if (env_) {
+			env_->Dispose();
+			delete env_;
+			env_ = nullptr;
+		}
+		if (effect_chain_) {
+			effect_chain_->Dispose();
+			delete effect_chain_;
+			effect_chain_ = nullptr;
+		}
 	}
 
 	void Clear() {
@@ -303,6 +329,16 @@ public:
 			ctx_->Dispose();
 			delete ctx_;
 			ctx_ = nullptr;
+		}
+		if (env_) {
+			env_->Dispose();
+			delete env_;
+			env_ = nullptr;
+		}
+		if (effect_chain_) {
+			effect_chain_->Dispose();
+			delete effect_chain_;
+			effect_chain_ = nullptr;
 		}
 	}
 

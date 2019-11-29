@@ -1,4 +1,4 @@
-#include "voice_player.hpp"
+//#include "voice_player.hpp"
 #include "render_list.hpp"
 
 #define DLLEXPORT __declspec(dllexport)
@@ -90,22 +90,39 @@ extern "C" {
 		return GetRenderList()->SetMaxRenderersRunTogether(c);
 	}
 
-	DLLEXPORT int Render(const char** sources, const char **dests, int *effect_ids,
-		double *options, int *option_counts, int* segments, int *segment_counts, double* equalizers, double* gains, int count) {
-		auto option_offset = 0;
+	DLLEXPORT int Render(const char** sources, const char **dests, 
+		int *role_ids, double *roles_options, int *role_options_counts, 
+		int *env_ids, double *envs_options, int *env_options_counts,
+		int *effects, double *effects_options, int *effect_options_counts, int* effect_counts,
+		int* segments, int *segment_counts, double* equalizers, double* gains, int count) {
+		auto role_option_offset = 0;
+		auto env_option_offset = 0;
 		auto segment_offset = 0;
-		if (options == nullptr)option_counts = 0;
+		auto effect_id_offset = 0;
+		auto effect_option_offset = 0;
 		if (segments == nullptr)segment_counts = 0;
 		for (auto i = 0; i < count; i++) {
 			auto segment_count = segment_counts == nullptr ? 0 : segment_counts[i];
-			auto option_count = option_counts == nullptr ? 0 : option_counts[i];
+			auto role_option_count = roles_options == nullptr ? 0 : roles_options[i];
+			auto env_option_count = envs_options == nullptr ? 0 : envs_options[i];
 			auto equalizer = equalizers == nullptr ? nullptr : equalizers + 10 * i;
 			auto gain = gains == nullptr ? 1.0 : gains[i];
-			GetRenderList()->AddRenderData(sources[i], dests[i], effect_ids[i], 
-				options + option_offset, option_count,
+			auto effect_count = effect_counts == nullptr ? 0 : effect_counts[i];
+			auto effect_ids = effects == nullptr ? 0 : effects + effect_id_offset;
+			auto effect_option_counts = effect_options_counts == nullptr ? 0 : effect_options_counts + effect_id_offset;
+			auto effect_options_count = 0;
+			for (auto j = 0; j < effect_count; j++) {
+				effect_options_count += effect_options_counts == nullptr ? 0 : effect_options_counts[j + effect_id_offset];
+			}
+			GetRenderList()->AddRenderData(sources[i], dests[i], 
+				role_ids[i], roles_options + role_option_offset, role_option_count,
+				env_ids[i], envs_options + env_option_offset, env_option_count,
+				effect_ids, effect_count, effects_options + effect_option_offset, effect_option_counts,
 				segments + segment_offset, segment_count, equalizer, gain);
-			option_offset += option_count;
+			role_option_offset += role_option_count;
 			segment_offset += segment_count;
+			effect_id_offset += effect_count;
+			effect_option_offset += effect_options_count;
 		}
 		GetRenderList()->Start();
 		return SUCCEED;

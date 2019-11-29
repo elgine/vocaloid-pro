@@ -67,7 +67,6 @@
     <ClInclude Include="telephone.hpp" />
     <ClInclude Include="transformer.hpp" />
     <ClInclude Include="under_water.hpp" />
-    <ClInclude Include="voice_player.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />

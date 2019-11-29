@@ -72,9 +72,6 @@
     <ClInclude Include="hall.hpp">
       <Filter>头文件\environment</Filter>
     </ClInclude>
-    <ClInclude Include="voice_player.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="status.h">
       <Filter>头文件</Filter>
     </ClInclude>

@@ -16,7 +16,6 @@ namespace effect {
 		GainNode* v_in_inverter2_;
 		DiodeNode* v_in_diode1_;
 		DiodeNode* v_in_diode2_;
-		GainNode* v_in_inverter2_;
 		GainNode* v_in_inverter3_;
 		GainNode* vc_inverter1_;
 		DiodeNode* vc_diode3_;

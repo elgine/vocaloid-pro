@@ -5,15 +5,23 @@
 #include <thread>
 #include "../utility/signal.hpp"
 #include "voice_renderer.hpp"
+#include "status.h"
 using namespace std;
 struct RenderData {
 	string source;
 	string dest;
 	int* segments;
 	int segment_count;
-	int effect_id;
-	double* options;
-	int option_count;
+	int role_id;
+	double* role_options;
+	int role_option_count;
+	int env_id;
+	double* env_options;
+	int env_option_count;
+	int *effect_ids;
+	int effect_id_count;
+	double* effects_options;
+	int* effect_options_counts;
 	double* equalizer;
 	double gain;
 };
@@ -99,14 +107,27 @@ private:
 			else {
 				renderer->RenderAll();
 			}
-			ret = renderer->SetEffect(Effects(data.effect_id));
+			ret = renderer->SetRole(Roles(data.role_id));
 			if (ret < 0) {
 				state_[data.source] = RenderState::FAILED;
 				continue;
 			}
-			if (data.options != nullptr && data.option_count > 0) {
-				renderer->SetOptions(data.options, data.option_count);
+			if (data.role_options != nullptr && data.role_option_count > 0) {
+				renderer->SetRoleOptions(data.role_options, data.role_option_count);
 			}
+
+			renderer->SetEnv(Envs(data.env_id));
+			if (data.env_options != nullptr && data.env_option_count > 0) {
+				renderer->SetEnvOptions(data.env_options, data.env_option_count);
+			}
+
+			if (data.effect_ids && data.effect_id_count > 0) {
+				renderer->SetEffects((Effects*)data.effect_ids, data.effect_id_count);
+				if (data.effects_options && data.effect_options_counts) {
+					renderer->SetEffectsOptions((float*)data.effects_options, data.effect_options_counts, data.effect_id_count);
+				}
+			}
+
 			if (data.equalizer != nullptr) {
 				renderer->SetEqualizerOptions(data.equalizer);
 			}
@@ -225,8 +246,15 @@ public:
 		on_end_->On(handler);
 	}
 
-	void AddRenderData(const char* source, const char* dest, int effect_id, double* options = nullptr, int option_count = 0,
-		int* segments = nullptr, int segment_count = 0, double* equalizer = nullptr, double gain = 1.0) {
+	void AddRenderData(
+		const char* source, const char* dest, 
+		int role_id = -1, double* role_options = nullptr, int role_option_count = 0, 
+		int env_id = -1, double* env_options = nullptr, int env_option_count = 0,
+		int* effect_ids = nullptr, int effect_id_count = 0, double* effects_options = nullptr, int* effects_options_counts = nullptr,
+		int* segments = nullptr, int segment_count = 0, 
+		double* equalizer = nullptr, 
+		double gain = 1.0
+	) {
 		unique_lock<mutex> lck(render_thread_mutex_);
 		if (find(list_.begin(), list_.end(), source) != list_.end())return;
 		list_.push_back(source);
@@ -236,9 +264,16 @@ public:
 			dest,
 			segments,
 			segment_count,
-			effect_id,
-			options,
-			option_count,
+			role_id,
+			role_options,
+			role_option_count,
+			env_id,
+			env_options,
+			env_option_count,
+			effect_ids,
+			effect_id_count,
+			effects_options,
+			effects_options_counts,
 			equalizer,
 			gain
 		};
